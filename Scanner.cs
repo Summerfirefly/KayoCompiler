@@ -93,17 +93,27 @@ namespace KayoCompiler
                         case '<':
                         case '=':
                         case '!':
+                            ch = NextChar();
+                            if (ch == '=')
+                            {
+                                value += ch;
+                                ch = NextChar();
+                            }
+                            break;
                         case '&':
+                            ch = NextChar();
+                            if (ch == '&')
+                            {
+                                value += ch;
+                                ch = NextChar();
+                            }
+                            break;
                         case '|':
                             ch = NextChar();
-                            switch (ch)
+                            if (ch == '|')
                             {
-                                case '=':
-                                case '&':
-                                case '|':
-                                    value += ch;
-                                    ch = NextChar();
-                                    break;
+                                value += ch;
+                                ch = NextChar();
                             }
                             break;
                         case '/':
