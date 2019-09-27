@@ -17,7 +17,9 @@ namespace KayoCompiler
             { "int", Tag.KW_INT },
             { "read", Tag.KW_READ },
             { "while", Tag.KW_WHILE },
-            { "write", Tag.KW_WRITE }
+            { "write", Tag.KW_WRITE },
+            { "true", Tag.KW_TRUE },
+            { "false", Tag.KW_FALSE }
         };
 
         private Dictionary<string, Tag> delimiter = new Dictionary<string, Tag>

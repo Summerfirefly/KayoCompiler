@@ -4,7 +4,7 @@
     {
         // Keywords:
         // bool, else, if, int, read,
-        // while, write
+        // while, write, true, false
         KW_BOOL,
         KW_ELSE,
         KW_IF,
@@ -12,6 +12,8 @@
         KW_READ,
         KW_WHILE,
         KW_WRITE,
+        KW_TRUE,
+        KW_FALSE,
 
         // Delimiter
         DL_PLUS,        // +
