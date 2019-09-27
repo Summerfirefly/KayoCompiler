@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
 
 namespace KayoCompiler
 {
     class Scanner
     {
         private StreamReader stream;
+        private int next;
 
         private Dictionary<string, Tag> keywords = new Dictionary<string, Tag>
         {
@@ -44,96 +44,93 @@ namespace KayoCompiler
         public Scanner(string path)
         {
             stream = new StreamReader(new FileStream(path, FileMode.Open));
+            NextChar();
         }
 
-        public List<Token> Scan()
+        public Token NextToken()
         {
-            List<Token> token = new List<Token>();
-            char ch = NextChar();
+            Token token = null;
 
-            while (!stream.EndOfStream)
+            if (next > -1)
             {
                 string value = string.Empty;
 
-                while (IsSpace(ch))
+                // 跳过空白符
+                while (IsSpace(next))
                 {
-                    ch = NextChar();
+                    NextChar();
                 }
 
-                if (IsDigit(ch))
+                // 自动机入口分支
+                if (IsDigit(next)) // 数字
                 {
-                    while (IsDigit(ch))
+                    while (IsDigit(next))
                     {
-                        value += ch;
-                        ch = NextChar();
+                        value += (char)next;
+                        NextChar();
                     }
 
-                    token.Add(new Token { Tag = Tag.NUM, Value = value });
+                    token = new Token { Tag = Tag.NUM, Value = value };
                 }
-                else if (IsLetter(ch))
+                else if (IsLetter(next)) // 关键字或标识符
                 {
-                    value += ch;
-                    ch = NextChar();
-
-                    while (IsLetter(ch) || IsDigit(ch))
+                    while (IsLetter(next) || IsDigit(next))
                     {
-                        value += ch;
-                        ch = NextChar();
+                        value += (char)next;
+                        NextChar();
                     }
 
-                    token.Add(GetIdToken(value));
+                    token = GetIdToken(value);
                 }
-                else if (IsDelimiter(ch))
+                else if (IsDelimiter(next)) // 操作符与注释
                 {
-                    value += ch;
+                    value += (char)next;
+                    char tmp = (char)next;
+                    NextChar();
 
-                    switch (ch)
+                    switch (tmp)
                     {
                         case '>':
                         case '<':
                         case '=':
                         case '!':
-                            ch = NextChar();
-                            if (ch == '=')
+                            if (next == '=')
                             {
-                                value += ch;
-                                ch = NextChar();
+                                value += (char)next;
+                                NextChar();
                             }
                             break;
                         case '&':
-                            ch = NextChar();
-                            if (ch == '&')
+                            if (next == '&')
                             {
-                                value += ch;
-                                ch = NextChar();
+                                value += (char)next;
+                                NextChar();
                             }
                             break;
                         case '|':
-                            ch = NextChar();
-                            if (ch == '|')
+                            if (next == '|')
                             {
-                                value += ch;
-                                ch = NextChar();
+                                value += (char)next;
+                                NextChar();
                             }
                             break;
                         case '/':
-                            ch = NextChar();
-                            if (ch == '*')
+                            if (next == '*')
                             {
-                                while (!stream.EndOfStream)
+                                while (next > -1)
                                 {
-                                    ch = NextChar();
-                                    if (ch == '*')
+                                    NextChar();
+                                    if (next == '*')
                                     {
-                                        while (ch == '*')
+                                        while (next == '*')
                                         {
-                                            ch = NextChar();
+                                            NextChar();
                                         }
 
-                                        if (ch == '/')
+                                        if (next == '/')
                                         {
                                             value = "/**/";
-                                            ch = NextChar();
+                                            NextChar();
                                             break;
                                         }
                                     }
@@ -143,17 +140,16 @@ namespace KayoCompiler
                             }
                             break;
                         default:
-                            ch = NextChar();
                             break;
                     }
 
-                    token.Add(GetDelimiterToken(value));
+                    token = GetDelimiterToken(value);
                 }
                 else
                 {
-                    value += ch;
-                    ch = NextChar();
-                    token.Add(new Token { Tag = Tag.ERROR, Value = value });
+                    value += (char)next;
+                    NextChar();
+                    token = new Token { Tag = Tag.ERROR, Value = value };
                 }
             }
 
@@ -178,7 +174,7 @@ namespace KayoCompiler
             };
         }
 
-        private bool IsDelimiter(char ch)
+        private bool IsDelimiter(int ch)
         {
             foreach (char c in delimiterFirst)
             {
@@ -191,24 +187,24 @@ namespace KayoCompiler
             return false;
         }
 
-        private bool IsDigit(char ch)
+        private bool IsDigit(int ch)
         {
             return ch >= '0' && ch <= '9';
         }
 
-        private bool IsLetter(char ch)
+        private bool IsLetter(int ch)
         {
             return (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z');
         }
 
-        private bool IsSpace(char ch)
+        private bool IsSpace(int ch)
         {
             return ch == ' ' || ch == '\t' || ch == '\n';
         }
 
-        private char NextChar()
+        private void NextChar()
         {
-            return Convert.ToChar(stream.Read());
+            next = stream.EndOfStream ? -1 : stream.Read();
         }
     }
 }

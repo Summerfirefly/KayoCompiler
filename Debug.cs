@@ -7,13 +7,11 @@ namespace KayoCompiler
         internal static void ScannerDebug(string testFilePath, string outFilePath)
         {
             Scanner scanner = new Scanner(testFilePath);
-            var tokens = scanner.Scan();
-
             StreamWriter sw = new StreamWriter(new FileStream(outFilePath, FileMode.OpenOrCreate));
 
-            foreach (var item in tokens)
+            for (Token token = scanner.NextToken(); token != null; token = scanner.NextToken())
             {
-                sw.Write(item.ToString());
+                sw.Write(token.ToString());
             }
 
             sw.Flush();
