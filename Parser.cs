@@ -8,7 +8,7 @@ namespace KayoCompiler
     class Parser
     {
         readonly Scanner scanner = null;
-        readonly ExprNode p = new ExprNode();
+        readonly ProgramNode p = new ProgramNode();
         Token next = null;
 
         public Parser(Scanner scanner)
@@ -21,13 +21,71 @@ namespace KayoCompiler
         {
             if (next == null) return;
 
-            Expr(p);
+            Program(p);
             p.Gen();
         }
 
-        private void Program()
+        private void Program(ProgramNode node)
         {
-            // TODO
+            if (next.Tag == Tag.DL_LBRACE)
+            {
+                BlockNode block = new BlockNode();
+                node.AddChild(block);
+
+                Block(block);
+            }
+            else
+            {
+                new Error(scanner.LineNum).PrintErrMsg();
+            }
+        }
+
+        private void Block(BlockNode node)
+        {
+            if (next.Tag == Tag.DL_LBRACE)
+            {
+                Move();
+
+                StmtsNode stmts = new StmtsNode();
+                node.AddChild(stmts);
+                Stmts(stmts);
+
+                if (next.Tag == Tag.DL_RBRACE)
+                {
+                    Move();
+                }
+                else
+                {
+                    new Error(scanner.LineNum).PrintErrMsg();
+                }
+            }
+            else
+            {
+                new Error(scanner.LineNum).PrintErrMsg();
+            }
+        }
+
+        private void Stmts(StmtsNode node)
+        {
+            if (next.Tag == Tag.KW_WRITE)
+            {
+                WriteStmtNode stmt = new WriteStmtNode();
+                node.AddChild(stmt);
+                WriteStmt(stmt);
+                Stmts(node);
+            }
+        }
+
+        private void WriteStmt(WriteStmtNode node)
+        {
+            node.expr = new ExprNode();
+            Move();
+            Expr(node.expr);
+
+            if (next.Tag == Tag.DL_SEM)
+                Move();
+            else
+                new Error(scanner.LineNum).PrintErrMsg();
         }
 
         private void Expr(ExprNode node)
@@ -37,10 +95,10 @@ namespace KayoCompiler
             node.expr = new ExprTail();
 
             Term(node.term);
-            Expr2(node.expr);
+            ExprTail(node.expr);
         }
 
-        private void Expr2(ExprTail node)
+        private void ExprTail(ExprTail node)
         {
             if (next == null) return;
             node.term = new TermNode();
@@ -51,14 +109,14 @@ namespace KayoCompiler
                 Move();
                 node.op = "+";
                 Term(node.term);
-                Expr2(node.expr);
+                ExprTail(node.expr);
             }
             else if (next.Tag == Tag.DL_MINUS)
             {
                 Move();
                 node.op = "-";
                 Term(node.term);
-                Expr2(node.expr);
+                ExprTail(node.expr);
             }
         }
 
@@ -70,10 +128,10 @@ namespace KayoCompiler
             node.term = new TermTail();
 
             Factor(node.factor);
-            Term2(node.term);
+            TermTail(node.term);
         }
 
-        private void Term2(TermTail node)
+        private void TermTail(TermTail node)
         {
             if (next == null) return;
 
@@ -85,14 +143,14 @@ namespace KayoCompiler
                 Move();
                 node.op = "*";
                 Factor(node.factor);
-                Term2(node.term);
+                TermTail(node.term);
             }
             else if (next.Tag == Tag.DL_OBELUS)
             {
                 Move();
                 node.op = "/";
                 Factor(node.factor);
-                Term2(node.term);
+                TermTail(node.term);
             }
         }
 
@@ -102,7 +160,12 @@ namespace KayoCompiler
 
             if (next.Tag == Tag.NUM)
             {
-                node.value = next.Value;
+                node.value = new IntNode(int.Parse(next.Value));
+                Move();
+            }
+            else if (next.Tag == Tag.ID)
+            {
+                node.value = new IdNode(next.Value);
                 Move();
             }
         }

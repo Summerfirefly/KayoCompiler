@@ -6,8 +6,10 @@ namespace KayoCompiler
 {
     class Scanner
     {
-        private StreamReader stream;
+        private readonly StreamReader stream;
         private int next;
+
+        public int LineNum { get; private set; } = 1;
 
         private Dictionary<string, Tag> keywords = new Dictionary<string, Tag>
         {
@@ -206,6 +208,8 @@ namespace KayoCompiler
 
         private void NextChar()
         {
+            if (next == '\n')
+                LineNum++;
             next = stream.EndOfStream ? -1 : stream.Read();
         }
     }
