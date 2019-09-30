@@ -4,18 +4,10 @@ namespace KayoCompiler
 {
     class Debug
     {
-        internal static void ScannerDebug(string testFilePath, string outFilePath)
+        internal static void ParserDebug(string testFilePath)
         {
-            Scanner scanner = new Scanner(testFilePath);
-            StreamWriter sw = new StreamWriter(new FileStream(outFilePath, FileMode.OpenOrCreate));
-
-            for (Token token = scanner.NextToken(); token != null; token = scanner.NextToken())
-            {
-                sw.Write(token.ToString());
-            }
-
-            sw.Flush();
-            sw.Close();
+            Parser parser = new Parser(new Scanner(testFilePath));
+            parser.StartParse();
         }
     }
 }
