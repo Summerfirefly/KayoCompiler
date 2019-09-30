@@ -67,13 +67,100 @@ namespace KayoCompiler
 
         private void Stmts(StmtsNode node)
         {
-            if (next.Tag == Tag.KW_WRITE)
+            switch (next.Tag)
             {
-                WriteStmtNode stmt = new WriteStmtNode();
-                node.AddChild(stmt);
-                WriteStmt(stmt);
-                Stmts(node);
+                case Tag.ID:
+                case Tag.KW_IF:
+                case Tag.KW_WHILE:
+                case Tag.KW_WRITE:
+                case Tag.KW_READ:
+                case Tag.DL_LBRACE:
+                    StmtNode child = new StmtNode();
+                    node.AddChild(child);
+
+                    Stmt(child);
+                    Stmts(node);
+                    break;
+                default:
+                    break;
             }
+        }
+
+        private void Stmt(StmtNode node)
+        {
+            node.stmt = new EmptyNode();
+            switch (next.Tag)
+            {
+                case Tag.ID:
+                    SetStmtNode setStmt = new SetStmtNode();
+                    node.stmt = setStmt;
+                    SetStmt(setStmt);
+                    break;
+                case Tag.KW_WHILE:
+                    WhileStmtNode whileStmt = new WhileStmtNode();
+                    node.stmt = whileStmt;
+                    WhileStmt(whileStmt);
+                    break;
+                case Tag.KW_WRITE:
+                    WriteStmtNode stmt = new WriteStmtNode();
+                    node.stmt = stmt;
+                    WriteStmt(stmt);
+                    break;
+                case Tag.KW_READ:
+                    ReadStmtNode readStmt = new ReadStmtNode();
+                    node.stmt = readStmt;
+                    ReadStmt(readStmt);
+                    break;
+                case Tag.DL_LBRACE:
+                    BlockNode block = new BlockNode();
+                    node.stmt = block;
+                    Block(block);
+                    break;
+                default:
+                    new Error(scanner.LineNum).PrintErrMsg();
+                    Move();
+                    break;
+            }
+        }
+
+        private void SetStmt(SetStmtNode node)
+        {
+            node.id = next.Value;
+            node.expr = new ExprNode();
+            Move();
+
+            if (next.Tag == Tag.DL_SET)
+                Move();
+            else
+                new Error(scanner.LineNum).PrintErrMsg();
+
+            Expr(node.expr);
+
+            if (next.Tag == Tag.DL_SEM)
+                Move();
+            else
+                new Error(scanner.LineNum).PrintErrMsg();
+        }
+
+        private void WhileStmt(WhileStmtNode node)
+        {
+            node.condition = new ExprNode();
+            node.body = new StmtNode();
+            Move();
+
+            if (next.Tag == Tag.DL_LPAR)
+                Move();
+            else
+                new Error(scanner.LineNum).PrintErrMsg();
+
+            Expr(node.condition);
+
+            if (next.Tag == Tag.DL_RPAR)
+                Move();
+            else
+                new Error(scanner.LineNum).PrintErrMsg();
+
+            Stmt(node.body);
         }
 
         private void WriteStmt(WriteStmtNode node)
@@ -81,6 +168,24 @@ namespace KayoCompiler
             node.expr = new ExprNode();
             Move();
             Expr(node.expr);
+
+            if (next.Tag == Tag.DL_SEM)
+                Move();
+            else
+                new Error(scanner.LineNum).PrintErrMsg();
+        }
+
+        private void ReadStmt(ReadStmtNode node)
+        {
+            Move();
+
+            if (next.Tag == Tag.ID)
+            {
+                node.id = next.Value;
+                Move();
+            }
+            else
+                new Error(scanner.LineNum).PrintErrMsg();
 
             if (next.Tag == Tag.DL_SEM)
                 Move();
@@ -167,6 +272,16 @@ namespace KayoCompiler
             {
                 node.value = new IdNode(next.Value);
                 Move();
+            }
+            else if (next.Tag == Tag.DL_LPAR)
+            {
+                node.value = new ExprNode();
+                Move();
+                Expr(node.value as ExprNode);
+                if (next.Tag == Tag.DL_RPAR)
+                    Move();
+                else
+                    new Error(scanner.LineNum).PrintErrMsg();
             }
         }
 

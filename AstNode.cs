@@ -8,6 +8,13 @@ namespace KayoCompiler.Ast
         public abstract void Gen();
     }
 
+    class EmptyNode : AstNode
+    {
+        public override void Gen()
+        {
+        }
+    }
+
     class ProgramNode : AstNode
     {
         List<BlockNode> children;
@@ -15,6 +22,7 @@ namespace KayoCompiler.Ast
         public override void Gen()
         {
             if (children == null) return;
+
             foreach (var child in children)
             {
                 child.Gen();
@@ -37,6 +45,7 @@ namespace KayoCompiler.Ast
         public override void Gen()
         {
             if (children == null) return;
+
             foreach (var child in children)
             {
                 child.Gen();
@@ -59,6 +68,7 @@ namespace KayoCompiler.Ast
         public override void Gen()
         {
             if (decls == null) return;
+
             foreach (var decl in decls)
             {
                 decl.Gen();
@@ -86,21 +96,22 @@ namespace KayoCompiler.Ast
 
     class StmtsNode : AstNode
     {
-        List<StmtNode> children;
+        List<AstNode> children;
 
         public override void Gen()
         {
             if (children == null) return;
+
             foreach (var child in children)
             {
                 child.Gen();
             }
         }
 
-        public void AddChild(StmtNode child)
+        public void AddChild(AstNode child)
         {
             if (children == null)
-                children = new List<StmtNode>();
+                children = new List<AstNode>();
 
             children.Add(child);
         }
@@ -109,21 +120,58 @@ namespace KayoCompiler.Ast
     class StmtNode : AstNode
     {
         public AstNode stmt;
-
         public override void Gen()
         {
-            stmt?.Gen();
+            stmt.Gen();
         }
     }
 
-    class WriteStmtNode : StmtNode
+    class SetStmtNode : AstNode
+    {
+        public string id;
+        public ExprNode expr;
+
+        public override void Gen()
+        {
+            expr.Gen();
+            Console.WriteLine($"pop [{id}]");
+        }
+    }
+
+    class WhileStmtNode : AstNode
+    {
+        public ExprNode condition;
+        public StmtNode body;
+
+        public override void Gen()
+        {
+            Console.WriteLine("1:");
+            condition.Gen();
+            Console.WriteLine("jz 2f");
+            body.Gen();
+            Console.WriteLine("jmp 1b");
+            Console.WriteLine("2:");
+        }
+    }
+
+    class WriteStmtNode : AstNode
     {
         public ExprNode expr;
 
         public override void Gen()
         {
             expr?.Gen();
-            Console.WriteLine($"put");
+            Console.WriteLine("put");
+        }
+    }
+
+    class ReadStmtNode : AstNode
+    {
+        public string id;
+
+        public override void Gen()
+        {
+            Console.WriteLine($"get [{id}]");
         }
     }
 
@@ -221,7 +269,7 @@ namespace KayoCompiler.Ast
 
         public override void Gen()
         {
-            value.Gen();
+            value?.Gen();
             if (value is FactorNode)
             {
                 Console.WriteLine("not");
