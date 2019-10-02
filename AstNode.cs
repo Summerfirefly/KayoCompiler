@@ -183,17 +183,7 @@ namespace KayoCompiler.Ast
         public override void Gen()
         {
             term?.Gen();
-            if (expr?.op != null)
-            {
-                expr?.term?.Gen();
-
-                if (expr.op == "+")
-                    Console.WriteLine("add");
-                else if (expr.op == "-")
-                    Console.WriteLine("sub");
-
-                expr?.Gen();
-            }
+            expr?.Gen();
         }
     }
     
@@ -205,13 +195,13 @@ namespace KayoCompiler.Ast
 
         public override void Gen()
         {
-            if (expr?.op != null)
+            if (op != null)
             {
-                expr?.term?.Gen();
+                term?.Gen();
 
-                if (expr.op == "+")
+                if (op == "+")
                     Console.WriteLine("add");
-                else if (expr.op == "-")
+                else if (op == "-")
                     Console.WriteLine("sub");
 
                 expr?.Gen();
@@ -227,17 +217,7 @@ namespace KayoCompiler.Ast
         public override void Gen()
         {
             factor?.Gen();
-            if (term?.op != null)
-            {
-                term?.factor?.Gen();
-
-                if (term.op == "*")
-                    Console.WriteLine("mul");
-                else if (term.op == "/")
-                    Console.WriteLine("div");
-
-                term?.Gen();
-            }
+            term?.Gen();
         }
     }
 
@@ -249,13 +229,13 @@ namespace KayoCompiler.Ast
 
         public override void Gen()
         {
-            if (term?.op != null)
+            if (op != null)
             {
-                term?.factor?.Gen();
+                factor?.Gen();
 
-                if (term.op == "*")
+                if (op == "*")
                     Console.WriteLine("mul");
-                else if (term.op == "/")
+                else if (op == "/")
                     Console.WriteLine("div");
 
                 term?.Gen();
