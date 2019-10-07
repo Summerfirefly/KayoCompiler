@@ -8,6 +8,11 @@ namespace KayoCompiler.Ast
         public abstract void Gen();
     }
 
+    internal static class CodeGenData
+    {
+        internal static int labelNum = 1;
+    }
+
     class EmptyNode : AstNode
     {
         public override void Gen()
@@ -91,6 +96,7 @@ namespace KayoCompiler.Ast
 
         public override void Gen()
         {
+            Console.WriteLine($".{type} {name}");
         }
     }
 
@@ -145,12 +151,15 @@ namespace KayoCompiler.Ast
 
         public override void Gen()
         {
-            Console.WriteLine("1:");
+            int label = CodeGenData.labelNum;
+            CodeGenData.labelNum++;
+
+            Console.WriteLine($"{label}:");
             condition.Gen();
-            Console.WriteLine("jz 2f");
+            Console.WriteLine($"jz {label}f");
             body.Gen();
-            Console.WriteLine("jmp 1b");
-            Console.WriteLine("2:");
+            Console.WriteLine($"jmp {label}b");
+            Console.WriteLine($"{label}:");
         }
     }
 

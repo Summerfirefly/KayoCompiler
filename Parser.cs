@@ -46,6 +46,10 @@ namespace KayoCompiler
             {
                 Move();
 
+                DeclsNode decls = new DeclsNode();
+                node.AddChild(decls);
+                Decls(decls);
+
                 StmtsNode stmts = new StmtsNode();
                 node.AddChild(stmts);
                 Stmts(stmts);
@@ -63,6 +67,43 @@ namespace KayoCompiler
             {
                 new Error(scanner.LineNum).PrintErrMsg();
             }
+        }
+
+        private void Decls(DeclsNode node)
+        {
+            switch (next.Tag)
+            {
+                case Tag.KW_INT:
+                case Tag.KW_BOOL:
+                    DeclNode decl = new DeclNode();
+                    node.AddChild(decl);
+                    Decl(decl);
+                    Decls(node);
+                    break;
+            }
+        }
+
+        private void Decl(DeclNode node)
+        {
+            switch (next.Tag)
+            {
+                case Tag.KW_INT:
+                    node.type = "int";
+                    Move();
+                    break;
+                case Tag.KW_BOOL:
+                    node.type = "bool";
+                    Move();
+                    break;
+            }
+
+            node.name = next.Value;
+            Move();
+
+            if (next.Tag == Tag.DL_SEM)
+                Move();
+            else
+                new Error(scanner.LineNum).PrintErrMsg();
         }
 
         private void Stmts(StmtsNode node)
@@ -115,6 +156,9 @@ namespace KayoCompiler
                     BlockNode block = new BlockNode();
                     node.stmt = block;
                     Block(block);
+                    break;
+                case Tag.DL_SEM:
+                    Move();
                     break;
                 default:
                     new Error(scanner.LineNum).PrintErrMsg();
