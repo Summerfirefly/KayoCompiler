@@ -84,7 +84,7 @@ namespace KayoCompiler.Ast
 
     class DeclNode : AstNode
     {
-        public string type;
+        public Tag type;
         public string name;
 
         public override void Gen()
