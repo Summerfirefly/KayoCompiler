@@ -173,6 +173,11 @@ namespace KayoCompiler
         private void Move()
         {
             next = scanner.NextToken();
+
+            while (next?.Tag == Tag.COMMENT)
+            {
+                next = scanner.NextToken();
+            }
         }
     }
 }
