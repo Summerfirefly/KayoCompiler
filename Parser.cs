@@ -27,6 +27,8 @@ namespace KayoCompiler
 
         private void Program(ProgramNode node)
         {
+            if (next == null) return;
+
             if (next.Tag == Tag.DL_LBRACE)
             {
                 BlockNode block = new BlockNode();
@@ -42,6 +44,8 @@ namespace KayoCompiler
 
         private void Block(BlockNode node)
         {
+            if (next == null) return;
+
             if (next.Tag == Tag.DL_LBRACE)
             {
                 Move();
@@ -71,6 +75,8 @@ namespace KayoCompiler
 
         private void Decls(DeclsNode node)
         {
+            if (next == null) return;
+
             switch (next.Tag)
             {
                 case Tag.KW_INT:
@@ -85,6 +91,8 @@ namespace KayoCompiler
 
         private void Decl(DeclNode node)
         {
+            if (next == null) return;
+
             switch (next.Tag)
             {
                 case Tag.KW_INT:
@@ -108,6 +116,8 @@ namespace KayoCompiler
 
         private void Stmts(StmtsNode node)
         {
+            if (next == null) return;
+
             switch (next.Tag)
             {
                 case Tag.ID:
@@ -129,38 +139,31 @@ namespace KayoCompiler
 
         private void Stmt(StmtNode node)
         {
-            node.stmt = new EmptyNode();
-            switch (next.Tag)
+            switch (next?.Tag)
             {
                 case Tag.ID:
-                    SetStmtNode setStmt = new SetStmtNode();
-                    node.stmt = setStmt;
-                    SetStmt(setStmt);
+                    node.stmt = new SetStmtNode();
+                    SetStmt(node.stmt as SetStmtNode);
                     break;
                 case Tag.KW_IF:
-                    IfStmtNode ifStmt = new IfStmtNode();
-                    node.stmt = ifStmt;
-                    IfStmt(ifStmt);
+                    node.stmt = new IfStmtNode();
+                    IfStmt(node.stmt as IfStmtNode);
                     break;
                 case Tag.KW_WHILE:
-                    WhileStmtNode whileStmt = new WhileStmtNode();
-                    node.stmt = whileStmt;
-                    WhileStmt(whileStmt);
+                    node.stmt = new WhileStmtNode();
+                    WhileStmt(node.stmt as WhileStmtNode);
                     break;
                 case Tag.KW_WRITE:
-                    WriteStmtNode stmt = new WriteStmtNode();
-                    node.stmt = stmt;
-                    WriteStmt(stmt);
+                    node.stmt = new WriteStmtNode();
+                    WriteStmt(node.stmt as WriteStmtNode);
                     break;
                 case Tag.KW_READ:
-                    ReadStmtNode readStmt = new ReadStmtNode();
-                    node.stmt = readStmt;
-                    ReadStmt(readStmt);
+                    node.stmt = new ReadStmtNode();
+                    ReadStmt(node.stmt as ReadStmtNode);
                     break;
                 case Tag.DL_LBRACE:
-                    BlockNode block = new BlockNode();
-                    node.stmt = block;
-                    Block(block);
+                    node.stmt = new BlockNode();
+                    Block(node.stmt as BlockNode);
                     break;
                 case Tag.DL_SEM:
                     Move();
@@ -174,7 +177,7 @@ namespace KayoCompiler
 
         private void IfStmt(IfStmtNode node)
         {
-            node.condition = new ExprNode();
+            if (next == null) return;
             node.body = new StmtNode();
             Move();
 
@@ -183,7 +186,7 @@ namespace KayoCompiler
             else
                 new Error(scanner.LineNum).PrintErrMsg();
 
-            Expr(node.condition);
+            Expr(ref node.condition);
 
             if (next.Tag == Tag.DL_RPAR)
                 Move();
@@ -209,8 +212,8 @@ namespace KayoCompiler
 
         private void SetStmt(SetStmtNode node)
         {
+            if (next == null) return;
             node.id = next.Value;
-            node.expr = new ExprNode();
             Move();
 
             if (next.Tag == Tag.DL_SET)
@@ -218,7 +221,7 @@ namespace KayoCompiler
             else
                 new Error(scanner.LineNum).PrintErrMsg();
 
-            Expr(node.expr);
+            Expr(ref node.expr);
 
             if (next.Tag == Tag.DL_SEM)
                 Move();
@@ -228,7 +231,7 @@ namespace KayoCompiler
 
         private void WhileStmt(WhileStmtNode node)
         {
-            node.condition = new ExprNode();
+            if (next == null) return;
             node.body = new StmtNode();
             Move();
 
@@ -237,7 +240,7 @@ namespace KayoCompiler
             else
                 new Error(scanner.LineNum).PrintErrMsg();
 
-            Expr(node.condition);
+            Expr(ref node.condition);
 
             if (next.Tag == Tag.DL_RPAR)
                 Move();
@@ -249,9 +252,9 @@ namespace KayoCompiler
 
         private void WriteStmt(WriteStmtNode node)
         {
-            node.expr = new ExprNode();
+            if (next == null) return;
             Move();
-            Expr(node.expr);
+            Expr(ref node.expr);
 
             if (next.Tag == Tag.DL_SEM)
                 Move();
@@ -261,6 +264,7 @@ namespace KayoCompiler
 
         private void ReadStmt(ReadStmtNode node)
         {
+            if (next == null) return;
             Move();
 
             if (next.Tag == Tag.ID)
@@ -277,95 +281,254 @@ namespace KayoCompiler
                 new Error(scanner.LineNum).PrintErrMsg();
         }
 
-        private void Expr(ExprNode node)
+        private void Expr(ref ExprNode node)
         {
-            if (next == null) return;
-            node.term = new TermNode();
-            node.expr = new ExprTail();
-
-            Term(node.term);
-            ExprTail(node.expr);
-        }
-
-        private void ExprTail(ExprTail node)
-        {
-            if (next == null) return;
-            node.term = new TermNode();
-            node.expr = new ExprTail();
-
-            if (next.Tag == Tag.DL_PLUS)
+            switch (next?.Tag)
             {
-                Move();
-                node.op = "+";
-                Term(node.term);
-                ExprTail(node.expr);
-            }
-            else if (next.Tag == Tag.DL_MINUS)
-            {
-                Move();
-                node.op = "-";
-                Term(node.term);
-                ExprTail(node.expr);
+                case Tag.ID:
+                case Tag.NUM:
+                case Tag.DL_LPAR:
+                case Tag.KW_TRUE:
+                case Tag.KW_FALSE:
+                case Tag.DL_NOT:
+                    node = new ExprNode();
+                    LogicExpr(ref node.expr);
+                    break;
             }
         }
 
-        private void Term(TermNode node)
+        private void LogicExpr(ref LogicExprNode node)
         {
-            if (next == null) return;
-
-            node.factor = new FactorNode();
-            node.term = new TermTail();
-
-            Factor(node.factor);
-            TermTail(node.term);
-        }
-
-        private void TermTail(TermTail node)
-        {
-            if (next == null) return;
-
-            node.factor = new FactorNode();
-            node.term = new TermTail();
-
-            if (next.Tag == Tag.DL_MULTI)
+            switch (next?.Tag)
             {
-                Move();
-                node.op = "*";
-                Factor(node.factor);
-                TermTail(node.term);
-            }
-            else if (next.Tag == Tag.DL_OBELUS)
-            {
-                Move();
-                node.op = "/";
-                Factor(node.factor);
-                TermTail(node.term);
+                case Tag.ID:
+                case Tag.NUM:
+                case Tag.DL_LPAR:
+                case Tag.KW_TRUE:
+                case Tag.KW_FALSE:
+                case Tag.DL_NOT:
+                    node = new LogicExprNode();
+                    LogicTerm(ref node.term);
+                    LogicExprTail(ref node.tail);
+                    break;
             }
         }
 
-        private void Factor(FactorNode node)
+        private void LogicExprTail(ref LogicExprTailNode node)
         {
-            if (next == null) return;
-
-            if (next.Tag == Tag.NUM)
+            switch (next?.Tag)
             {
-                node.value = new IntNode(int.Parse(next.Value));
-                Move();
-            }
-            else if (next.Tag == Tag.ID)
-            {
-                node.value = new IdNode(next.Value);
-                Move();
-            }
-            else if (next.Tag == Tag.DL_LPAR)
-            {
-                node.value = new ExprNode();
-                Move();
-                Expr(node.value as ExprNode);
-                if (next.Tag == Tag.DL_RPAR)
+                case Tag.DL_OR:
+                    node = new LogicExprTailNode();
                     Move();
-                else
-                    new Error(scanner.LineNum).PrintErrMsg();
+                    LogicTerm(ref node.term);
+                    LogicExprTail(ref node.tail);
+                    break;
+            }
+        }
+
+        private void LogicTerm(ref LogicTermNode node)
+        {
+            switch (next?.Tag)
+            {
+                case Tag.ID:
+                case Tag.NUM:
+                case Tag.DL_LPAR:
+                case Tag.KW_TRUE:
+                case Tag.KW_FALSE:
+                case Tag.DL_NOT:
+                    node = new LogicTermNode();
+                    LogicFactor(ref node.factor);
+                    LogicTermTail(ref node.tail);
+                    break;
+            }
+        }
+
+        private void LogicTermTail(ref LogicTermTailNode node)
+        {
+            switch (next?.Tag)
+            {
+                case Tag.DL_AND:
+                    node = new LogicTermTailNode();
+                    Move();
+                    LogicFactor(ref node.factor);
+                    LogicTermTail(ref node.tail);
+                    break;
+            }
+        }
+
+        private void LogicFactor(ref LogicFactorNode node)
+        {
+            switch (next?.Tag)
+            {
+                case Tag.ID:
+                case Tag.NUM:
+                case Tag.DL_LPAR:
+                case Tag.KW_TRUE:
+                case Tag.KW_FALSE:
+                case Tag.DL_NOT:
+                    node = new LogicFactorNode();
+                    LogicRel(ref node.rel);
+                    LogicFactorTail(ref node.tail);
+                    break;
+            }
+        }
+
+        private void LogicFactorTail(ref LogicFactorTailNode node)
+        {
+            switch (next?.Tag)
+            {
+                case Tag.DL_EQ:
+                case Tag.DL_NEQ:
+                    node = new LogicFactorTailNode
+                    {
+                        op = next.Tag
+                    };
+                    Move();
+                    LogicRel(ref node.rel);
+                    LogicFactorTail(ref node.tail);
+                    break;
+            }
+        }
+
+        private void LogicRel(ref LogicRelNode node)
+        {
+            switch (next?.Tag)
+            {
+                case Tag.ID:
+                case Tag.NUM:
+                case Tag.DL_LPAR:
+                case Tag.KW_TRUE:
+                case Tag.KW_FALSE:
+                case Tag.DL_NOT:
+                    node = new LogicRelNode();
+                    MathExpr(ref node.expr);
+                    LogicRelTail(ref node.tail);
+                    break;
+            }
+        }
+
+        private void LogicRelTail(ref LogicRelTailNode node)
+        {
+            switch (next?.Tag)
+            {
+                case Tag.DL_LT:
+                case Tag.DL_NLT:
+                case Tag.DL_GT:
+                case Tag.DL_NGT:
+                    node = new LogicRelTailNode
+                    {
+                        op = next.Tag
+                    };
+                    Move();
+                    MathExpr(ref node.expr);
+                    LogicRelTail(ref node.tail);
+                    break;
+            }
+        }
+
+        private void MathExpr(ref MathExprNode node)
+        {
+            switch (next?.Tag)
+            {
+                case Tag.ID:
+                case Tag.NUM:
+                case Tag.DL_LPAR:
+                case Tag.KW_TRUE:
+                case Tag.KW_FALSE:
+                case Tag.DL_NOT:
+                    node = new MathExprNode();
+                    MathTerm(ref node.term);
+                    MathExprTail(ref node.tail);
+                    break;
+            }
+        }
+
+        private void MathExprTail(ref MathExprTailNode node)
+        {
+            switch (next?.Tag)
+            {
+                case Tag.DL_PLUS:
+                case Tag.DL_MINUS:
+                    node = new MathExprTailNode
+                    {
+                        op = next.Tag
+                    };
+                    Move();
+                    MathTerm(ref node.term);
+                    MathExprTail(ref node.tail);
+                    break;
+            }
+        }
+
+        private void MathTerm(ref MathTermNode node)
+        {
+            switch (next?.Tag)
+            {
+                case Tag.ID:
+                case Tag.NUM:
+                case Tag.DL_LPAR:
+                case Tag.KW_TRUE:
+                case Tag.KW_FALSE:
+                case Tag.DL_NOT:
+                    node = new MathTermNode();
+                    MathFactor(ref node.factor);
+                    MathTermTail(ref node.tail);
+                    break;
+            }
+        }
+
+        private void MathTermTail(ref MathTermTailNode node)
+        {
+            switch (next?.Tag)
+            {
+                case Tag.DL_MULTI:
+                case Tag.DL_OBELUS:
+                    node = new MathTermTailNode
+                    {
+                        op = next.Tag
+                    };
+                    Move();
+                    MathFactor(ref node.factor);
+                    MathTermTail(ref node.tail);
+                    break;
+            }
+        }
+
+        private void MathFactor(ref MathFactorNode node)
+        {
+            node = new MathFactorNode();
+
+            switch (next?.Tag)
+            {
+                case Tag.ID:
+                    node.value = new IdNode(next.Value);
+                    Move();
+                    break;
+                case Tag.NUM:
+                    node.value = new IntNode(int.Parse(next.Value));
+                    Move();
+                    break;
+                case Tag.DL_LPAR:
+                    Move();
+                    Expr(ref node.expr);
+                    if (next.Tag == Tag.DL_RPAR)
+                        Move();
+                    else
+                        new Error(scanner.LineNum).PrintErrMsg();
+                    break;
+                case Tag.KW_TRUE:
+                case Tag.KW_FALSE:
+                    node.value = new BoolNode(bool.Parse(next.Value));
+                    Move();
+                    break;
+                case Tag.DL_NOT:
+                    Move();
+                    MathFactor(ref node.factor);
+                    break;
+                default:
+                    node = null;
+                    break;
             }
         }
 

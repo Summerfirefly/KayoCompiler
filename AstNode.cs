@@ -13,13 +13,6 @@ namespace KayoCompiler.Ast
         internal static int labelNum = 1;
     }
 
-    class EmptyNode : AstNode
-    {
-        public override void Gen()
-        {
-        }
-    }
-
     class ProgramNode : AstNode
     {
         List<BlockNode> children;
@@ -30,7 +23,7 @@ namespace KayoCompiler.Ast
 
             foreach (var child in children)
             {
-                child.Gen();
+                child?.Gen();
             }
         }
 
@@ -53,7 +46,7 @@ namespace KayoCompiler.Ast
 
             foreach (var child in children)
             {
-                child.Gen();
+                child?.Gen();
             }
         }
 
@@ -76,7 +69,7 @@ namespace KayoCompiler.Ast
 
             foreach (var decl in decls)
             {
-                decl.Gen();
+                decl?.Gen();
             }
         }
 
@@ -110,7 +103,7 @@ namespace KayoCompiler.Ast
 
             foreach (var child in children)
             {
-                child.Gen();
+                child?.Gen();
             }
         }
 
@@ -128,7 +121,7 @@ namespace KayoCompiler.Ast
         public AstNode stmt;
         public override void Gen()
         {
-            stmt.Gen();
+            stmt?.Gen();
         }
     }
 
@@ -143,14 +136,13 @@ namespace KayoCompiler.Ast
             int label = CodeGenData.labelNum++;
             int endIf = CodeGenData.labelNum++;
 
-            condition.Gen();
+            condition?.Gen();
             Console.WriteLine($"jz {label}f");
-            body.Gen();
+            body?.Gen();
             Console.WriteLine($"jmp {endIf}f");
             Console.WriteLine($"{label}:");
 
-            if (elseStmt != null)
-                elseStmt.Gen();
+            elseStmt?.Gen();
 
             Console.WriteLine($"{endIf}:");
         }
@@ -162,7 +154,7 @@ namespace KayoCompiler.Ast
 
         public override void Gen()
         {
-            body.Gen();
+            body?.Gen();
         }
     }
 
@@ -173,7 +165,7 @@ namespace KayoCompiler.Ast
 
         public override void Gen()
         {
-            expr.Gen();
+            expr?.Gen();
             Console.WriteLine($"pop [{id}]");
         }
     }
@@ -188,9 +180,9 @@ namespace KayoCompiler.Ast
             int label = CodeGenData.labelNum++;
 
             Console.WriteLine($"{label}:");
-            condition.Gen();
+            condition?.Gen();
             Console.WriteLine($"jz {label}f");
-            body.Gen();
+            body?.Gen();
             Console.WriteLine($"jmp {label}b");
             Console.WriteLine($"{label}:");
         }
@@ -219,83 +211,182 @@ namespace KayoCompiler.Ast
 
     class ExprNode : AstNode
     {
-        public TermNode term;
-        public ExprTail expr;
+        public LogicExprNode expr;
+
+        public override void Gen()
+        {
+            expr?.Gen();
+        }
+    }
+
+    class LogicExprNode : AstNode
+    {
+        public LogicTermNode term;
+        public LogicExprTailNode tail;
 
         public override void Gen()
         {
             term?.Gen();
-            expr?.Gen();
+            tail?.Gen();
         }
     }
-    
-    class ExprTail : AstNode
+
+    class LogicExprTailNode : AstNode
     {
-        public string op;
-        public TermNode term;
-        public ExprTail expr;
+        public LogicTermNode term;
+        public LogicExprTailNode tail;
 
         public override void Gen()
         {
-            if (op != null)
-            {
-                term?.Gen();
-
-                if (op == "+")
-                    Console.WriteLine("add");
-                else if (op == "-")
-                    Console.WriteLine("sub");
-
-                expr?.Gen();
-            }
+            term?.Gen();
+            Console.WriteLine("or");
+            tail?.Gen();
         }
     }
 
-    class TermNode : AstNode
+    class LogicTermNode : AstNode
     {
-        public FactorNode factor;
-        public TermTail term;
+        public LogicFactorNode factor;
+        public LogicTermTailNode tail;
 
         public override void Gen()
         {
             factor?.Gen();
-            term?.Gen();
+            tail?.Gen();
         }
     }
 
-    class TermTail : AstNode
+    class LogicTermTailNode : AstNode
     {
-        public string op;
-        public FactorNode factor;
-        public TermTail term;
+        public LogicFactorNode factor;
+        public LogicTermTailNode tail;
 
         public override void Gen()
         {
-            if (op != null)
-            {
-                factor?.Gen();
-
-                if (op == "*")
-                    Console.WriteLine("mul");
-                else if (op == "/")
-                    Console.WriteLine("div");
-
-                term?.Gen();
-            }
+            factor?.Gen();
+            Console.WriteLine("and");
+            tail?.Gen();
         }
     }
 
-    class FactorNode : AstNode
+    class LogicFactorNode : AstNode
     {
-        public AstNode value;
+        public LogicRelNode rel;
+        public LogicFactorTailNode tail;
+
+        public override void Gen()
+        {
+            rel?.Gen();
+            tail?.Gen();
+        }
+    }
+
+    class LogicFactorTailNode : AstNode
+    {
+        public Tag op;
+        public LogicRelNode rel;
+        public LogicFactorTailNode tail;
+
+        public override void Gen()
+        {
+            rel?.Gen();
+            Console.WriteLine(op);
+            tail?.Gen();
+        }
+    }
+
+    class LogicRelNode : AstNode
+    {
+        public MathExprNode expr;
+        public LogicRelTailNode tail;
+
+        public override void Gen()
+        {
+            expr?.Gen();
+            tail?.Gen();
+        }
+    }
+
+    class LogicRelTailNode : AstNode
+    {
+        public Tag op;
+        public MathExprNode expr;
+        public LogicRelTailNode tail;
+
+        public override void Gen()
+        {
+            expr?.Gen();
+            Console.WriteLine(op);
+            tail?.Gen();
+        }
+    }
+
+    class MathExprNode : AstNode
+    {
+        public MathTermNode term;
+        public MathExprTailNode tail;
+
+        public override void Gen()
+        {
+            term?.Gen();
+            tail?.Gen();
+        }
+    }
+
+    class MathExprTailNode : AstNode
+    {
+        public Tag op;
+        public MathTermNode term;
+        public MathExprTailNode tail;
+
+        public override void Gen()
+        {
+            term?.Gen();
+            Console.WriteLine(op);
+            tail?.Gen();
+        }
+    }
+
+    class MathTermNode : AstNode
+    {
+        public MathFactorNode factor;
+        public MathTermTailNode tail;
+
+        public override void Gen()
+        {
+            factor?.Gen();
+            tail?.Gen();
+        }
+    }
+
+    class MathTermTailNode : AstNode
+    {
+        public Tag op;
+        public MathFactorNode factor;
+        public MathTermTailNode tail;
+
+        public override void Gen()
+        {
+            factor?.Gen();
+            Console.WriteLine(op);
+            tail?.Gen();
+        }
+    }
+
+    class MathFactorNode : AstNode
+    {
+        public TerminalNode value;
+        public ExprNode expr;
+        public MathFactorNode factor;
 
         public override void Gen()
         {
             value?.Gen();
-            if (value is FactorNode)
-            {
+            expr?.Gen();
+            factor?.Gen();
+
+            if (factor != null)
                 Console.WriteLine("not");
-            }
         }
     }
 
@@ -311,6 +402,21 @@ namespace KayoCompiler.Ast
         public IntNode(int num)
         {
             value = num;
+        }
+
+        public override void Gen()
+        {
+            Console.WriteLine($"push {value}");
+        }
+    }
+
+    class BoolNode : TerminalNode
+    {
+        public int value;
+
+        public BoolNode(bool value)
+        {
+            this.value = value ? 1 : 0;
         }
 
         public override void Gen()

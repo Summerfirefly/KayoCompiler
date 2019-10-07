@@ -2,6 +2,8 @@
 {
     enum Tag
     {
+        NULL,
+
         // Keywords:
         // bool, else, if, int, read,
         // while, write, true, false
