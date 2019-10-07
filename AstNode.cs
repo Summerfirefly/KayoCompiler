@@ -132,6 +132,40 @@ namespace KayoCompiler.Ast
         }
     }
 
+    class IfStmtNode : AstNode
+    {
+        public ExprNode condition;
+        public StmtNode body;
+        public ElseStmtNode elseStmt;
+
+        public override void Gen()
+        {
+            int label = CodeGenData.labelNum++;
+            int endIf = CodeGenData.labelNum++;
+
+            condition.Gen();
+            Console.WriteLine($"jz {label}f");
+            body.Gen();
+            Console.WriteLine($"jmp {endIf}f");
+            Console.WriteLine($"{label}:");
+
+            if (elseStmt != null)
+                elseStmt.Gen();
+
+            Console.WriteLine($"{endIf}:");
+        }
+    }
+
+    class ElseStmtNode : AstNode
+    {
+        public StmtNode body;
+
+        public override void Gen()
+        {
+            body.Gen();
+        }
+    }
+
     class SetStmtNode : AstNode
     {
         public string id;
@@ -151,8 +185,7 @@ namespace KayoCompiler.Ast
 
         public override void Gen()
         {
-            int label = CodeGenData.labelNum;
-            CodeGenData.labelNum++;
+            int label = CodeGenData.labelNum++;
 
             Console.WriteLine($"{label}:");
             condition.Gen();

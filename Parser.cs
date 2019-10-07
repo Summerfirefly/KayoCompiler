@@ -137,6 +137,11 @@ namespace KayoCompiler
                     node.stmt = setStmt;
                     SetStmt(setStmt);
                     break;
+                case Tag.KW_IF:
+                    IfStmtNode ifStmt = new IfStmtNode();
+                    node.stmt = ifStmt;
+                    IfStmt(ifStmt);
+                    break;
                 case Tag.KW_WHILE:
                     WhileStmtNode whileStmt = new WhileStmtNode();
                     node.stmt = whileStmt;
@@ -165,6 +170,41 @@ namespace KayoCompiler
                     Move();
                     break;
             }
+        }
+
+        private void IfStmt(IfStmtNode node)
+        {
+            node.condition = new ExprNode();
+            node.body = new StmtNode();
+            Move();
+
+            if (next.Tag == Tag.DL_LPAR)
+                Move();
+            else
+                new Error(scanner.LineNum).PrintErrMsg();
+
+            Expr(node.condition);
+
+            if (next.Tag == Tag.DL_RPAR)
+                Move();
+            else
+                new Error(scanner.LineNum).PrintErrMsg();
+
+            Stmt(node.body);
+
+            if (next.Tag == Tag.KW_ELSE)
+            {
+                node.elseStmt = new ElseStmtNode();
+                ElseStmt(node.elseStmt);
+            }
+        }
+
+        private void ElseStmt(ElseStmtNode node)
+        {
+            node.body = new StmtNode();
+            Move();
+
+            Stmt(node.body);
         }
 
         private void SetStmt(SetStmtNode node)
