@@ -1,4 +1,4 @@
-﻿using System.IO;
+﻿using KayoCompiler.Ast;
 
 namespace KayoCompiler
 {
@@ -7,7 +7,8 @@ namespace KayoCompiler
         internal static void ParserDebug(string testFilePath)
         {
             Parser parser = new Parser(new Scanner(testFilePath));
-            parser.StartParse();
+            ProgramNode program = parser.StartParse();
+            program.Gen();
         }
     }
 }

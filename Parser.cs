@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using KayoCompiler.Ast;
+﻿using KayoCompiler.Ast;
 using KayoCompiler.Errors;
 
 namespace KayoCompiler
@@ -9,7 +6,6 @@ namespace KayoCompiler
     partial class Parser
     {
         readonly Scanner scanner = null;
-        readonly ProgramNode p = new ProgramNode();
         Token next = null;
 
         public Parser(Scanner scanner)
@@ -18,12 +14,11 @@ namespace KayoCompiler
             Move();
         }
 
-        public void StartParse()
+        public ProgramNode StartParse()
         {
-            if (next == null) return;
-
+            ProgramNode p = new ProgramNode();
             Program(p);
-            p.Gen();
+            return p;
         }
 
         private void Program(ProgramNode node)
