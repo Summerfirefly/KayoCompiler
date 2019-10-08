@@ -1,4 +1,5 @@
 ﻿using KayoCompiler.Ast;
+using KayoCompiler.Errors;
 
 namespace KayoCompiler
 {
@@ -238,7 +239,7 @@ namespace KayoCompiler
                     if (next.Tag == Tag.DL_RPAR)
                         Move();
                     else
-                        new Error(scanner.LineNum).PrintErrMsg();
+                        new TokenMissingError(Tag.DL_RPAR).PrintErrMsg();
                     break;
                 case Tag.KW_TRUE:
                 case Tag.KW_FALSE:

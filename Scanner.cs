@@ -9,9 +9,9 @@ namespace KayoCompiler
         private readonly StreamReader stream;
         private int next;
 
-        public int LineNum { get; private set; } = 1;
+        public static int LineNum { get; private set; } = 1;
 
-        private Dictionary<string, Tag> keywords = new Dictionary<string, Tag>
+        private readonly Dictionary<string, Tag> keywords = new Dictionary<string, Tag>
         {
             { "bool", Tag.KW_BOOL },
             { "else", Tag.KW_ELSE },
@@ -24,7 +24,7 @@ namespace KayoCompiler
             { "false", Tag.KW_FALSE }
         };
 
-        private Dictionary<string, Tag> delimiter = new Dictionary<string, Tag>
+        private readonly Dictionary<string, Tag> delimiter = new Dictionary<string, Tag>
         {
             { "+", Tag.DL_PLUS },   { "-", Tag.DL_MINUS },
             { "*", Tag.DL_MULTI },  { "/", Tag.DL_OBELUS },
@@ -38,7 +38,7 @@ namespace KayoCompiler
             { "}", Tag.DL_RBRACE }, { "/**/", Tag.COMMENT }
         };
 
-        private char[] delimiterFirst = new char[]
+        private readonly char[] delimiterFirst = new char[]
         {
             '+', '-', '*', '/', '>',
             '<', '=', '!', '|', '&',

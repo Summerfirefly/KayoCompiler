@@ -2,25 +2,66 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace KayoCompiler
+namespace KayoCompiler.Errors
 {
     class Error
     {
-        private readonly int lineNum = 0;
+        protected readonly int lineNum = 0;
 
-        public Error(int lineNum)
+        public Error()
         {
-            this.lineNum = lineNum;
+            lineNum = Scanner.LineNum;
         }
 
-        public void PrintErrMsg()
+        public virtual void PrintErrMsg()
         {
-            Console.WriteLine(this);
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine($"error: An error occurred at line {lineNum}");
+            Console.ResetColor();
+        }
+    }
+
+    class TokenMissingError : Error
+    {
+        readonly Tag missingTokenTag;
+
+        public TokenMissingError(Tag missingTokenTag = Tag.NULL)
+        {
+            this.missingTokenTag = missingTokenTag;
         }
 
-        public override string ToString()
+        public override void PrintErrMsg()
         {
-            return $"[ERROR] An error occurred at line {lineNum}";
+            string missingToken = "token";
+
+            switch (missingTokenTag)
+            {
+                case Tag.DL_SET:
+                    missingToken = "=";
+                    break;
+                case Tag.DL_SEM:
+                    missingToken = ";";
+                    break;
+                case Tag.DL_RPAR:
+                    missingToken = ")";
+                    break;
+                case Tag.DL_RBRACE:
+                    missingToken = "}";
+                    break;
+                case Tag.DL_LPAR:
+                    missingToken = "(";
+                    break;
+                case Tag.DL_LBRACE:
+                    missingToken = "{";
+                    break;
+                case Tag.ID:
+                    missingToken = "identifier";
+                    break;
+            }
+
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine($"error: missing {missingToken} at line {lineNum}");
+            Console.ResetColor();
         }
     }
 }

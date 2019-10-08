@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using KayoCompiler.Ast;
+using KayoCompiler.Errors;
 
 namespace KayoCompiler
 {
@@ -27,18 +28,14 @@ namespace KayoCompiler
 
         private void Program(ProgramNode node)
         {
-            if (next == null) return;
+            BlockNode block = new BlockNode();
+            node.AddChild(block);
 
-            if (next.Tag == Tag.DL_LBRACE)
-            {
-                BlockNode block = new BlockNode();
-                node.AddChild(block);
+            Block(block);
 
-                Block(block);
-            }
-            else
+            if (next != null)
             {
-                new Error(scanner.LineNum).PrintErrMsg();
+                new Error().PrintErrMsg();
             }
         }
 
@@ -49,35 +46,33 @@ namespace KayoCompiler
             if (next.Tag == Tag.DL_LBRACE)
             {
                 Move();
-
-                DeclsNode decls = new DeclsNode();
-                node.AddChild(decls);
-                Decls(decls);
-
-                StmtsNode stmts = new StmtsNode();
-                node.AddChild(stmts);
-                Stmts(stmts);
-
-                if (next.Tag == Tag.DL_RBRACE)
-                {
-                    Move();
-                }
-                else
-                {
-                    new Error(scanner.LineNum).PrintErrMsg();
-                }
             }
             else
             {
-                new Error(scanner.LineNum).PrintErrMsg();
+                new TokenMissingError(Tag.DL_LBRACE).PrintErrMsg();
+            }
+
+            DeclsNode decls = new DeclsNode();
+            node.AddChild(decls);
+            Decls(decls);
+
+            StmtsNode stmts = new StmtsNode();
+            node.AddChild(stmts);
+            Stmts(stmts);
+
+            if (next.Tag == Tag.DL_RBRACE)
+            {
+                Move();
+            }
+            else
+            {
+                new TokenMissingError(Tag.DL_RBRACE).PrintErrMsg();
             }
         }
 
         private void Decls(DeclsNode node)
         {
-            if (next == null) return;
-
-            switch (next.Tag)
+            switch (next?.Tag)
             {
                 case Tag.KW_INT:
                 case Tag.KW_BOOL:
@@ -91,24 +86,35 @@ namespace KayoCompiler
 
         private void Decl(DeclNode node)
         {
-            if (next == null) return;
-
-            switch (next.Tag)
+            switch (next?.Tag)
             {
                 case Tag.KW_INT:
                 case Tag.KW_BOOL:
                     node.type = next.Tag;
                     Move();
+
+                    if (next?.Tag == Tag.ID)
+                    {
+                        node.name = next.Value;
+                        Move();
+                    }
+                    else
+                    {
+                        new TokenMissingError(Tag.ID).PrintErrMsg();
+                        break;
+                    }
+
+                    if (next.Tag == Tag.DL_SEM)
+                    {
+                        Move();
+                    }
+                    else
+                    {
+                        new TokenMissingError(Tag.DL_SEM).PrintErrMsg();
+                    }
+
                     break;
             }
-
-            node.name = next.Value;
-            Move();
-
-            if (next.Tag == Tag.DL_SEM)
-                Move();
-            else
-                new Error(scanner.LineNum).PrintErrMsg();
         }
 
         private void Stmts(StmtsNode node)
@@ -126,8 +132,6 @@ namespace KayoCompiler
 
                     Stmt(child);
                     Stmts(node);
-                    break;
-                default:
                     break;
             }
         }
@@ -164,7 +168,7 @@ namespace KayoCompiler
                     Move();
                     break;
                 default:
-                    new Error(scanner.LineNum).PrintErrMsg();
+                    new Error().PrintErrMsg();
                     Move();
                     break;
             }
