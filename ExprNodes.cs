@@ -11,9 +11,9 @@ namespace KayoCompiler.Ast
     {
         public LogicExprNode expr;
 
-        public override void Gen()
+        public override string Gen()
         {
-            expr?.Gen();
+            return expr?.Gen() ?? string.Empty;
         }
 
         public override Type Type()
@@ -27,10 +27,13 @@ namespace KayoCompiler.Ast
         public LogicTermNode term;
         public LogicExprTailNode tail;
 
-        public override void Gen()
+        public override string Gen()
         {
-            term?.Gen();
-            tail?.Gen();
+            string code = string.Empty;
+            code += term?.Gen() ?? string.Empty;
+            code += tail?.Gen() ?? string.Empty;
+
+            return code;
         }
 
         public override Type Type()
@@ -54,11 +57,14 @@ namespace KayoCompiler.Ast
         public LogicTermNode term;
         public LogicExprTailNode tail;
 
-        public override void Gen()
+        public override string Gen()
         {
-            term?.Gen();
-            Console.WriteLine("or");
-            tail?.Gen();
+            string code = string.Empty;
+            code += term?.Gen() ?? string.Empty;
+            code += "or\n";
+            code += tail?.Gen() ?? string.Empty;
+
+            return code;
         }
 
         public override Type Type()
@@ -82,10 +88,13 @@ namespace KayoCompiler.Ast
         public LogicFactorNode factor;
         public LogicTermTailNode tail;
 
-        public override void Gen()
+        public override string Gen()
         {
-            factor?.Gen();
-            tail?.Gen();
+            string code = string.Empty;
+            code += factor?.Gen() ?? string.Empty;
+            code += tail?.Gen() ?? string.Empty;
+
+            return code;
         }
 
         public override Type Type()
@@ -109,11 +118,14 @@ namespace KayoCompiler.Ast
         public LogicFactorNode factor;
         public LogicTermTailNode tail;
 
-        public override void Gen()
+        public override string Gen()
         {
-            factor?.Gen();
-            Console.WriteLine("and");
-            tail?.Gen();
+            string code = string.Empty;
+            code += factor?.Gen() ?? string.Empty;
+            code += "and\n";
+            code += tail?.Gen() ?? string.Empty;
+
+            return code;
         }
 
         public override Type Type()
@@ -137,10 +149,13 @@ namespace KayoCompiler.Ast
         public LogicRelNode rel;
         public LogicFactorTailNode tail;
 
-        public override void Gen()
+        public override string Gen()
         {
-            rel?.Gen();
-            tail?.Gen();
+            string code = string.Empty;
+            code += rel?.Gen() ?? string.Empty;
+            code += tail?.Gen() ?? string.Empty;
+
+            return code;
         }
 
         public override Type Type()
@@ -167,11 +182,14 @@ namespace KayoCompiler.Ast
         public LogicRelNode rel;
         public LogicFactorTailNode tail;
 
-        public override void Gen()
+        public override string Gen()
         {
-            rel?.Gen();
-            Console.WriteLine(op);
-            tail?.Gen();
+            string code = string.Empty;
+            code += rel?.Gen() ?? string.Empty;
+            code += $"{op}\n";
+            code += tail?.Gen() ?? string.Empty;
+
+            return code;
         }
 
         public override Type Type()
@@ -197,10 +215,13 @@ namespace KayoCompiler.Ast
         public MathExprNode expr;
         public LogicRelTailNode tail;
 
-        public override void Gen()
+        public override string Gen()
         {
-            expr?.Gen();
-            tail?.Gen();
+            string code = string.Empty;
+            code += expr?.Gen() ?? string.Empty;
+            code += tail?.Gen() ?? string.Empty;
+
+            return code;
         }
 
         public override Type Type()
@@ -227,11 +248,14 @@ namespace KayoCompiler.Ast
         public MathExprNode expr;
         public LogicRelTailNode tail;
 
-        public override void Gen()
+        public override string Gen()
         {
-            expr?.Gen();
-            Console.WriteLine(op);
-            tail?.Gen();
+            string code = string.Empty;
+            code += expr?.Gen() ?? string.Empty;
+            code += $"{op}\n";
+            code += tail?.Gen() ?? string.Empty;
+
+            return code;
         }
 
         public override Type Type()
@@ -257,10 +281,13 @@ namespace KayoCompiler.Ast
         public MathTermNode term;
         public MathExprTailNode tail;
 
-        public override void Gen()
+        public override string Gen()
         {
-            term?.Gen();
-            tail?.Gen();
+            string code = string.Empty;
+            code += term?.Gen() ?? string.Empty;
+            code += tail?.Gen() ?? string.Empty;
+
+            return code;
         }
 
         public override Type Type()
@@ -285,11 +312,14 @@ namespace KayoCompiler.Ast
         public MathTermNode term;
         public MathExprTailNode tail;
 
-        public override void Gen()
+        public override string Gen()
         {
-            term?.Gen();
-            Console.WriteLine(op);
-            tail?.Gen();
+            string code = string.Empty;
+            code += term?.Gen() ?? string.Empty;
+            code += $"{op}\n";
+            code += tail?.Gen() ?? string.Empty;
+
+            return code;
         }
 
         public override Type Type()
@@ -313,10 +343,13 @@ namespace KayoCompiler.Ast
         public MathFactorNode factor;
         public MathTermTailNode tail;
 
-        public override void Gen()
+        public override string Gen()
         {
-            factor?.Gen();
-            tail?.Gen();
+            string code = string.Empty;
+            code += factor?.Gen() ?? string.Empty;
+            code += tail?.Gen() ?? string.Empty;
+
+            return code;
         }
 
         public override Type Type()
@@ -341,11 +374,14 @@ namespace KayoCompiler.Ast
         public MathFactorNode factor;
         public MathTermTailNode tail;
 
-        public override void Gen()
+        public override string Gen()
         {
-            factor?.Gen();
-            Console.WriteLine(op);
-            tail?.Gen();
+            string code = string.Empty;
+            code += factor?.Gen() ?? string.Empty;
+            code += $"{op}\n";
+            code += tail?.Gen() ?? string.Empty;
+
+            return code;
         }
 
         public override Type Type()
@@ -370,14 +406,17 @@ namespace KayoCompiler.Ast
         public ExprNode expr;
         public MathFactorNode factor;
 
-        public override void Gen()
+        public override string Gen()
         {
-            value?.Gen();
-            expr?.Gen();
-            factor?.Gen();
+            string code = string.Empty;
+            code += value?.Gen() ?? string.Empty;
+            code += expr?.Gen() ?? string.Empty;
+            code += factor?.Gen() ?? string.Empty;
 
             if (factor != null)
-                Console.WriteLine("not");
+                code += "not\n";
+
+            return code;
         }
 
         public override Type Type()

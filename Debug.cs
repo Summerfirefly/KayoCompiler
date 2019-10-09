@@ -1,4 +1,5 @@
-﻿using KayoCompiler.Ast;
+﻿using System;
+using KayoCompiler.Ast;
 
 namespace KayoCompiler
 {
@@ -8,7 +9,7 @@ namespace KayoCompiler
         {
             Parser parser = new Parser(new Scanner(testFilePath));
             ProgramNode program = parser.Parse();
-            program.Gen();
+            Console.WriteLine(program.Gen());
         }
     }
 }

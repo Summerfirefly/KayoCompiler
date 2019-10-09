@@ -8,20 +8,23 @@ namespace KayoCompiler.Ast
         public StmtNode body;
         public ElseStmtNode elseStmt;
 
-        public override void Gen()
+        public override string Gen()
         {
             int label = CodeGenData.labelNum++;
             int endIf = CodeGenData.labelNum++;
+            string code = string.Empty;
 
-            condition?.Gen();
-            Console.WriteLine($"jz {label}f");
-            body?.Gen();
-            Console.WriteLine($"jmp {endIf}f");
-            Console.WriteLine($"{label}:");
+            code += condition?.Gen() ?? string.Empty;
+            code += $"jz {label}f\n";
+            code += body?.Gen() ?? string.Empty;
+            code += $"jmp {endIf}f\n";
+            code += $"{label}:\n";
 
-            elseStmt?.Gen();
+            code += elseStmt?.Gen() ?? string.Empty;
 
-            Console.WriteLine($"{endIf}:");
+            code += $"{endIf}:\n";
+
+            return code;
         }
     }
 
@@ -29,21 +32,24 @@ namespace KayoCompiler.Ast
     {
         public StmtNode body;
 
-        public override void Gen()
+        public override string Gen()
         {
-            body?.Gen();
+            return body?.Gen() ?? string.Empty;
         }
     }
 
     class SetStmtNode : AstNode
     {
-        public string id;
+        public IdNode id;
         public ExprNode expr;
 
-        public override void Gen()
+        public override string Gen()
         {
-            expr?.Gen();
-            Console.WriteLine($"pop [{id}]");
+            string code = string.Empty;
+            code += expr?.Gen() ?? string.Empty;
+            code += $"pop [{id.name}]\n";
+
+            return code;
         }
     }
 
@@ -52,16 +58,19 @@ namespace KayoCompiler.Ast
         public ExprNode condition;
         public StmtNode body;
 
-        public override void Gen()
+        public override string Gen()
         {
             int label = CodeGenData.labelNum++;
+            string code = string.Empty;
 
-            Console.WriteLine($"{label}:");
-            condition?.Gen();
-            Console.WriteLine($"jz {label}f");
-            body?.Gen();
-            Console.WriteLine($"jmp {label}b");
-            Console.WriteLine($"{label}:");
+            code += $"{label}:\n";
+            code += condition?.Gen() ?? string.Empty;
+            code += $"jz {label}f\n";
+            code += body?.Gen() ?? string.Empty;
+            code += $"jmp {label}b\n";
+            code += $"{label}:\n";
+
+            return code;
         }
     }
 
@@ -69,20 +78,23 @@ namespace KayoCompiler.Ast
     {
         public ExprNode expr;
 
-        public override void Gen()
+        public override string Gen()
         {
-            expr?.Gen();
-            Console.WriteLine("put");
+            string code = string.Empty;
+            code += expr?.Gen() ?? string.Empty;
+            code += "put\n";
+
+            return code;
         }
     }
 
     class ReadStmtNode : AstNode
     {
-        public string id;
+        public IdNode id;
 
-        public override void Gen()
+        public override string Gen()
         {
-            Console.WriteLine($"get [{id}]");
+            return $"get [{id.name}]\n";
         }
     }
 }

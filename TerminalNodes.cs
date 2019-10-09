@@ -16,9 +16,9 @@ namespace KayoCompiler.Ast
             value = num;
         }
 
-        public override void Gen()
+        public override string Gen()
         {
-            Console.WriteLine($"push {value}");
+            return $"push {value}\n";
         }
 
         public override Type Type()
@@ -36,9 +36,9 @@ namespace KayoCompiler.Ast
             this.value = value ? 1 : 0;
         }
 
-        public override void Gen()
+        public override string Gen()
         {
-            Console.WriteLine($"push {value}");
+            return $"push {value}\n";
         }
 
         public override Type Type()
@@ -56,9 +56,9 @@ namespace KayoCompiler.Ast
             this.name = name;
         }
 
-        public override void Gen()
+        public override string Gen()
         {
-            Console.WriteLine($"push [{name}]");
+            return $"push [{name}]\n";
         }
 
         public override Type Type()

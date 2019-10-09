@@ -5,7 +5,7 @@ namespace KayoCompiler.Ast
 {
     abstract class AstNode
     {
-        public abstract void Gen();
+        public abstract string Gen();
     }
 
     internal struct CodeGenData
@@ -15,16 +15,20 @@ namespace KayoCompiler.Ast
 
     class ProgramNode : AstNode
     {
-        List<BlockNode> children;
+        internal List<BlockNode> children;
 
-        public override void Gen()
+        public override string Gen()
         {
-            if (children == null) return;
+            if (children == null) return string.Empty;
+
+            string code = string.Empty;
 
             foreach (var child in children)
             {
-                child?.Gen();
+                code += child?.Gen() ?? string.Empty;
             }
+
+            return code;
         }
 
         public void AddChild(BlockNode child)
@@ -38,16 +42,20 @@ namespace KayoCompiler.Ast
 
     class BlockNode : AstNode
     {
-        List<AstNode> children;
+        internal List<AstNode> children;
 
-        public override void Gen()
+        public override string Gen()
         {
-            if (children == null) return;
+            if (children == null) return string.Empty;
+
+            string code = string.Empty;
 
             foreach (var child in children)
             {
-                child?.Gen();
+                code += child?.Gen() ?? string.Empty;
             }
+
+            return code;
         }
 
         public void AddChild(AstNode child)
@@ -61,16 +69,20 @@ namespace KayoCompiler.Ast
 
     class DeclsNode : AstNode
     {
-        List<DeclNode> decls;
+        internal List<DeclNode> decls;
 
-        public override void Gen()
+        public override string Gen()
         {
-            if (decls == null) return;
+            if (decls == null) return string.Empty;
 
-            foreach (var decl in decls)
+            string code = string.Empty;
+
+            foreach (var child in decls)
             {
-                decl?.Gen();
+                code += child?.Gen() ?? string.Empty;
             }
+
+            return code;
         }
 
         public void AddChild(DeclNode decl)
@@ -87,24 +99,28 @@ namespace KayoCompiler.Ast
         public Tag type;
         public string name;
 
-        public override void Gen()
+        public override string Gen()
         {
-            Console.WriteLine($".{type} {name}");
+            return $".{type} {name}\n";
         }
     }
 
     class StmtsNode : AstNode
     {
-        List<AstNode> children;
+        internal List<AstNode> children;
 
-        public override void Gen()
+        public override string Gen()
         {
-            if (children == null) return;
+            if (children == null) return string.Empty;
+
+            string code = string.Empty;
 
             foreach (var child in children)
             {
-                child?.Gen();
+                code += child?.Gen() ?? string.Empty;
             }
+
+            return code;
         }
 
         public void AddChild(AstNode child)
@@ -120,9 +136,9 @@ namespace KayoCompiler.Ast
     {
         public AstNode stmt;
 
-        public override void Gen()
+        public override string Gen()
         {
-            stmt?.Gen();
+            return stmt?.Gen() ?? string.Empty;
         }
     }
 }

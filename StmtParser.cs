@@ -49,7 +49,7 @@ namespace KayoCompiler
 
         private void SetStmt(SetStmtNode node)
         {
-            node.id = next.Value;
+            node.id = new IdNode(next.Value);
             Move();
 
             if (next?.Tag == Tag.DL_SET)
@@ -122,7 +122,7 @@ namespace KayoCompiler
 
             if (next?.Tag == Tag.ID)
             {
-                node.id = next.Value;
+                node.id = new IdNode(next.Value);
                 Move();
             }
             else
