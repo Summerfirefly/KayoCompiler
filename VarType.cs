@@ -1,6 +1,6 @@
 ﻿namespace KayoCompiler.Ast
 {
-    enum Type
+    enum VarType
     {
         TYPE_ERROR,
 

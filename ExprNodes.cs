@@ -4,7 +4,7 @@ namespace KayoCompiler.Ast
 {
     abstract class ExprBaseNode : AstNode
     {
-        public abstract Type Type();
+        public abstract VarType Type();
     }
 
     class ExprNode : ExprBaseNode
@@ -16,9 +16,9 @@ namespace KayoCompiler.Ast
             return expr?.Gen() ?? string.Empty;
         }
 
-        public override Type Type()
+        public override VarType Type()
         {
-            return expr?.Type() ?? Ast.Type.TYPE_ERROR;
+            return expr?.Type() ?? VarType.TYPE_ERROR;
         }
     }
 
@@ -36,19 +36,19 @@ namespace KayoCompiler.Ast
             return code;
         }
 
-        public override Type Type()
+        public override VarType Type()
         {
             if (tail == null)
             {
                 return term.Type();
             }
 
-            if (tail.Type() != Ast.Type.TYPE_BOOL || term.Type() != Ast.Type.TYPE_BOOL)
+            if (tail.Type() != VarType.TYPE_BOOL || term.Type() != VarType.TYPE_BOOL)
             {
-                return Ast.Type.TYPE_ERROR;
+                return VarType.TYPE_ERROR;
             }
 
-            return Ast.Type.TYPE_BOOL;
+            return VarType.TYPE_BOOL;
         }
     }
 
@@ -67,19 +67,19 @@ namespace KayoCompiler.Ast
             return code;
         }
 
-        public override Type Type()
+        public override VarType Type()
         {
             if (tail == null)
             {
                 return term.Type();
             }
 
-            if (tail.Type() != Ast.Type.TYPE_BOOL || term.Type() != Ast.Type.TYPE_BOOL)
+            if (tail.Type() != VarType.TYPE_BOOL || term.Type() != VarType.TYPE_BOOL)
             {
-                return Ast.Type.TYPE_ERROR;
+                return VarType.TYPE_ERROR;
             }
 
-            return Ast.Type.TYPE_BOOL;
+            return VarType.TYPE_BOOL;
         }
     }
 
@@ -97,19 +97,19 @@ namespace KayoCompiler.Ast
             return code;
         }
 
-        public override Type Type()
+        public override VarType Type()
         {
             if (tail == null)
             {
                 return factor.Type();
             }
 
-            if (tail.Type() != Ast.Type.TYPE_BOOL || factor.Type() != Ast.Type.TYPE_BOOL)
+            if (tail.Type() != VarType.TYPE_BOOL || factor.Type() != VarType.TYPE_BOOL)
             {
-                return Ast.Type.TYPE_ERROR;
+                return VarType.TYPE_ERROR;
             }
 
-            return Ast.Type.TYPE_BOOL;
+            return VarType.TYPE_BOOL;
         }
     }
 
@@ -128,19 +128,19 @@ namespace KayoCompiler.Ast
             return code;
         }
 
-        public override Type Type()
+        public override VarType Type()
         {
             if (tail == null)
             {
                 return factor.Type();
             }
 
-            if (tail.Type() != Ast.Type.TYPE_BOOL || factor.Type() != Ast.Type.TYPE_BOOL)
+            if (tail.Type() != VarType.TYPE_BOOL || factor.Type() != VarType.TYPE_BOOL)
             {
-                return Ast.Type.TYPE_ERROR;
+                return VarType.TYPE_ERROR;
             }
 
-            return Ast.Type.TYPE_BOOL;
+            return VarType.TYPE_BOOL;
         }
     }
 
@@ -158,7 +158,7 @@ namespace KayoCompiler.Ast
             return code;
         }
 
-        public override Type Type()
+        public override VarType Type()
         {
             if (tail == null)
             {
@@ -166,13 +166,13 @@ namespace KayoCompiler.Ast
             }
 
             if (tail.Type() != rel.Type() ||
-                tail.Type() == Ast.Type.TYPE_ERROR ||
-                rel.Type() == Ast.Type.TYPE_ERROR)
+                tail.Type() == VarType.TYPE_ERROR ||
+                rel.Type() == VarType.TYPE_ERROR)
             {
-                return Ast.Type.TYPE_ERROR;
+                return VarType.TYPE_ERROR;
             }
 
-            return Ast.Type.TYPE_BOOL;
+            return VarType.TYPE_BOOL;
         }
     }
 
@@ -192,7 +192,7 @@ namespace KayoCompiler.Ast
             return code;
         }
 
-        public override Type Type()
+        public override VarType Type()
         {
             if (tail == null)
             {
@@ -200,13 +200,13 @@ namespace KayoCompiler.Ast
             }
 
             if (tail.Type() != rel.Type() ||
-                tail.Type() == Ast.Type.TYPE_ERROR ||
-                rel.Type() == Ast.Type.TYPE_ERROR)
+                tail.Type() == VarType.TYPE_ERROR ||
+                rel.Type() == VarType.TYPE_ERROR)
             {
-                return Ast.Type.TYPE_ERROR;
+                return VarType.TYPE_ERROR;
             }
 
-            return Ast.Type.TYPE_BOOL;
+            return VarType.TYPE_BOOL;
         }
     }
 
@@ -224,7 +224,7 @@ namespace KayoCompiler.Ast
             return code;
         }
 
-        public override Type Type()
+        public override VarType Type()
         {
             if (tail == null)
             {
@@ -232,13 +232,13 @@ namespace KayoCompiler.Ast
             }
 
             if (tail.Type() != expr.Type() ||
-                tail.Type() == Ast.Type.TYPE_ERROR ||
-                expr.Type() == Ast.Type.TYPE_ERROR)
+                tail.Type() == VarType.TYPE_ERROR ||
+                expr.Type() == VarType.TYPE_ERROR)
             {
-                return Ast.Type.TYPE_ERROR;
+                return VarType.TYPE_ERROR;
             }
 
-            return Ast.Type.TYPE_BOOL;
+            return VarType.TYPE_BOOL;
         }
     }
 
@@ -258,7 +258,7 @@ namespace KayoCompiler.Ast
             return code;
         }
 
-        public override Type Type()
+        public override VarType Type()
         {
             if (tail == null)
             {
@@ -266,13 +266,13 @@ namespace KayoCompiler.Ast
             }
 
             if (tail.Type() != expr.Type() ||
-                tail.Type() == Ast.Type.TYPE_ERROR ||
-                expr.Type() == Ast.Type.TYPE_ERROR)
+                tail.Type() == VarType.TYPE_ERROR ||
+                expr.Type() == VarType.TYPE_ERROR)
             {
-                return Ast.Type.TYPE_ERROR;
+                return VarType.TYPE_ERROR;
             }
 
-            return Ast.Type.TYPE_BOOL;
+            return VarType.TYPE_BOOL;
         }
     }
 
@@ -290,19 +290,19 @@ namespace KayoCompiler.Ast
             return code;
         }
 
-        public override Type Type()
+        public override VarType Type()
         {
             if (tail == null)
             {
                 return term.Type();
             }
 
-            if (tail.Type() != Ast.Type.TYPE_INT || term.Type() != Ast.Type.TYPE_INT)
+            if (tail.Type() != VarType.TYPE_INT || term.Type() != VarType.TYPE_INT)
             {
-                return Ast.Type.TYPE_ERROR;
+                return VarType.TYPE_ERROR;
             }
 
-            return Ast.Type.TYPE_INT;
+            return VarType.TYPE_INT;
         }
     }
 
@@ -322,19 +322,19 @@ namespace KayoCompiler.Ast
             return code;
         }
 
-        public override Type Type()
+        public override VarType Type()
         {
             if (tail == null)
             {
                 return term.Type();
             }
 
-            if (tail.Type() != Ast.Type.TYPE_INT || term.Type() != Ast.Type.TYPE_INT)
+            if (tail.Type() != VarType.TYPE_INT || term.Type() != VarType.TYPE_INT)
             {
-                return Ast.Type.TYPE_ERROR;
+                return VarType.TYPE_ERROR;
             }
 
-            return Ast.Type.TYPE_INT;
+            return VarType.TYPE_INT;
         }
     }
 
@@ -352,19 +352,19 @@ namespace KayoCompiler.Ast
             return code;
         }
 
-        public override Type Type()
+        public override VarType Type()
         {
             if (tail == null)
             {
                 return factor.Type();
             }
 
-            if (tail.Type() != Ast.Type.TYPE_INT || factor.Type() != Ast.Type.TYPE_INT)
+            if (tail.Type() != VarType.TYPE_INT || factor.Type() != VarType.TYPE_INT)
             {
-                return Ast.Type.TYPE_ERROR;
+                return VarType.TYPE_ERROR;
             }
 
-            return Ast.Type.TYPE_INT;
+            return VarType.TYPE_INT;
         }
     }
 
@@ -384,19 +384,19 @@ namespace KayoCompiler.Ast
             return code;
         }
 
-        public override Type Type()
+        public override VarType Type()
         {
             if (tail == null)
             {
                 return factor.Type();
             }
 
-            if (tail.Type() != Ast.Type.TYPE_INT || factor.Type() != Ast.Type.TYPE_INT)
+            if (tail.Type() != VarType.TYPE_INT || factor.Type() != VarType.TYPE_INT)
             {
-                return Ast.Type.TYPE_ERROR;
+                return VarType.TYPE_ERROR;
             }
 
-            return Ast.Type.TYPE_INT;
+            return VarType.TYPE_INT;
         }
     }
 
@@ -419,9 +419,9 @@ namespace KayoCompiler.Ast
             return code;
         }
 
-        public override Type Type()
+        public override VarType Type()
         {
-            return value?.Type() ?? expr?.Type() ?? factor?.Type() ?? Ast.Type.TYPE_ERROR;
+            return value?.Type() ?? expr?.Type() ?? factor?.Type() ?? VarType.TYPE_ERROR;
         }
     }
 }

@@ -4,7 +4,7 @@ namespace KayoCompiler.Ast
 {
     abstract class TerminalNode : AstNode
     {
-        public abstract Type Type();
+        public abstract VarType Type();
     }
 
     class IntNode : TerminalNode
@@ -21,9 +21,9 @@ namespace KayoCompiler.Ast
             return $"push {value}\n";
         }
 
-        public override Type Type()
+        public override VarType Type()
         {
-            return Ast.Type.TYPE_INT;
+            return VarType.TYPE_INT;
         }
     }
 
@@ -41,9 +41,9 @@ namespace KayoCompiler.Ast
             return $"push {value}\n";
         }
 
-        public override Type Type()
+        public override VarType Type()
         {
-            return Ast.Type.TYPE_BOOL;
+            return VarType.TYPE_BOOL;
         }
     }
 
@@ -61,7 +61,7 @@ namespace KayoCompiler.Ast
             return $"push [{name}]\n";
         }
 
-        public override Type Type()
+        public override VarType Type()
         {
             throw new NotImplementedException();
         }
