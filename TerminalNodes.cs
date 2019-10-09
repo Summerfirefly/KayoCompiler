@@ -4,7 +4,7 @@ namespace KayoCompiler.Ast
 {
     abstract class TerminalNode : AstNode
     {
-        public abstract override void Gen();
+        public abstract Type Type();
     }
 
     class IntNode : TerminalNode
@@ -19,6 +19,11 @@ namespace KayoCompiler.Ast
         public override void Gen()
         {
             Console.WriteLine($"push {value}");
+        }
+
+        public override Type Type()
+        {
+            return Ast.Type.TYPE_INT;
         }
     }
 
@@ -35,6 +40,11 @@ namespace KayoCompiler.Ast
         {
             Console.WriteLine($"push {value}");
         }
+
+        public override Type Type()
+        {
+            return Ast.Type.TYPE_BOOL;
+        }
     }
 
     class IdNode : TerminalNode
@@ -49,6 +59,11 @@ namespace KayoCompiler.Ast
         public override void Gen()
         {
             Console.WriteLine($"push [{name}]");
+        }
+
+        public override Type Type()
+        {
+            throw new NotImplementedException();
         }
     }
 }

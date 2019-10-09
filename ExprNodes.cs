@@ -2,7 +2,12 @@
 
 namespace KayoCompiler.Ast
 {
-    class ExprNode : AstNode
+    abstract class ExprBaseNode : AstNode
+    {
+        public abstract Type Type();
+    }
+
+    class ExprNode : ExprBaseNode
     {
         public LogicExprNode expr;
 
@@ -10,9 +15,14 @@ namespace KayoCompiler.Ast
         {
             expr?.Gen();
         }
+
+        public override Type Type()
+        {
+            return expr?.Type() ?? Ast.Type.TYPE_ERROR;
+        }
     }
 
-    class LogicExprNode : AstNode
+    class LogicExprNode : ExprBaseNode
     {
         public LogicTermNode term;
         public LogicExprTailNode tail;
@@ -22,9 +32,24 @@ namespace KayoCompiler.Ast
             term?.Gen();
             tail?.Gen();
         }
+
+        public override Type Type()
+        {
+            if (tail == null)
+            {
+                return term.Type();
+            }
+
+            if (tail.Type() != Ast.Type.TYPE_BOOL || term.Type() != Ast.Type.TYPE_BOOL)
+            {
+                return Ast.Type.TYPE_ERROR;
+            }
+
+            return Ast.Type.TYPE_BOOL;
+        }
     }
 
-    class LogicExprTailNode : AstNode
+    class LogicExprTailNode : ExprBaseNode
     {
         public LogicTermNode term;
         public LogicExprTailNode tail;
@@ -35,9 +60,24 @@ namespace KayoCompiler.Ast
             Console.WriteLine("or");
             tail?.Gen();
         }
+
+        public override Type Type()
+        {
+            if (tail == null)
+            {
+                return term.Type();
+            }
+
+            if (tail.Type() != Ast.Type.TYPE_BOOL || term.Type() != Ast.Type.TYPE_BOOL)
+            {
+                return Ast.Type.TYPE_ERROR;
+            }
+
+            return Ast.Type.TYPE_BOOL;
+        }
     }
 
-    class LogicTermNode : AstNode
+    class LogicTermNode : ExprBaseNode
     {
         public LogicFactorNode factor;
         public LogicTermTailNode tail;
@@ -47,9 +87,24 @@ namespace KayoCompiler.Ast
             factor?.Gen();
             tail?.Gen();
         }
+
+        public override Type Type()
+        {
+            if (tail == null)
+            {
+                return factor.Type();
+            }
+
+            if (tail.Type() != Ast.Type.TYPE_BOOL || factor.Type() != Ast.Type.TYPE_BOOL)
+            {
+                return Ast.Type.TYPE_ERROR;
+            }
+
+            return Ast.Type.TYPE_BOOL;
+        }
     }
 
-    class LogicTermTailNode : AstNode
+    class LogicTermTailNode : ExprBaseNode
     {
         public LogicFactorNode factor;
         public LogicTermTailNode tail;
@@ -60,9 +115,24 @@ namespace KayoCompiler.Ast
             Console.WriteLine("and");
             tail?.Gen();
         }
+
+        public override Type Type()
+        {
+            if (tail == null)
+            {
+                return factor.Type();
+            }
+
+            if (tail.Type() != Ast.Type.TYPE_BOOL || factor.Type() != Ast.Type.TYPE_BOOL)
+            {
+                return Ast.Type.TYPE_ERROR;
+            }
+
+            return Ast.Type.TYPE_BOOL;
+        }
     }
 
-    class LogicFactorNode : AstNode
+    class LogicFactorNode : ExprBaseNode
     {
         public LogicRelNode rel;
         public LogicFactorTailNode tail;
@@ -72,9 +142,26 @@ namespace KayoCompiler.Ast
             rel?.Gen();
             tail?.Gen();
         }
+
+        public override Type Type()
+        {
+            if (tail == null)
+            {
+                return rel.Type();
+            }
+
+            if (tail.Type() != rel.Type() ||
+                tail.Type() == Ast.Type.TYPE_ERROR ||
+                rel.Type() == Ast.Type.TYPE_ERROR)
+            {
+                return Ast.Type.TYPE_ERROR;
+            }
+
+            return Ast.Type.TYPE_BOOL;
+        }
     }
 
-    class LogicFactorTailNode : AstNode
+    class LogicFactorTailNode : ExprBaseNode
     {
         public Tag op;
         public LogicRelNode rel;
@@ -86,9 +173,26 @@ namespace KayoCompiler.Ast
             Console.WriteLine(op);
             tail?.Gen();
         }
+
+        public override Type Type()
+        {
+            if (tail == null)
+            {
+                return rel.Type();
+            }
+
+            if (tail.Type() != rel.Type() ||
+                tail.Type() == Ast.Type.TYPE_ERROR ||
+                rel.Type() == Ast.Type.TYPE_ERROR)
+            {
+                return Ast.Type.TYPE_ERROR;
+            }
+
+            return Ast.Type.TYPE_BOOL;
+        }
     }
 
-    class LogicRelNode : AstNode
+    class LogicRelNode : ExprBaseNode
     {
         public MathExprNode expr;
         public LogicRelTailNode tail;
@@ -98,9 +202,26 @@ namespace KayoCompiler.Ast
             expr?.Gen();
             tail?.Gen();
         }
+
+        public override Type Type()
+        {
+            if (tail == null)
+            {
+                return expr.Type();
+            }
+
+            if (tail.Type() != expr.Type() ||
+                tail.Type() == Ast.Type.TYPE_ERROR ||
+                expr.Type() == Ast.Type.TYPE_ERROR)
+            {
+                return Ast.Type.TYPE_ERROR;
+            }
+
+            return Ast.Type.TYPE_BOOL;
+        }
     }
 
-    class LogicRelTailNode : AstNode
+    class LogicRelTailNode : ExprBaseNode
     {
         public Tag op;
         public MathExprNode expr;
@@ -112,9 +233,26 @@ namespace KayoCompiler.Ast
             Console.WriteLine(op);
             tail?.Gen();
         }
+
+        public override Type Type()
+        {
+            if (tail == null)
+            {
+                return expr.Type();
+            }
+
+            if (tail.Type() != expr.Type() ||
+                tail.Type() == Ast.Type.TYPE_ERROR ||
+                expr.Type() == Ast.Type.TYPE_ERROR)
+            {
+                return Ast.Type.TYPE_ERROR;
+            }
+
+            return Ast.Type.TYPE_BOOL;
+        }
     }
 
-    class MathExprNode : AstNode
+    class MathExprNode : ExprBaseNode
     {
         public MathTermNode term;
         public MathExprTailNode tail;
@@ -124,9 +262,24 @@ namespace KayoCompiler.Ast
             term?.Gen();
             tail?.Gen();
         }
+
+        public override Type Type()
+        {
+            if (tail == null)
+            {
+                return term.Type();
+            }
+
+            if (tail.Type() != Ast.Type.TYPE_INT || term.Type() != Ast.Type.TYPE_INT)
+            {
+                return Ast.Type.TYPE_ERROR;
+            }
+
+            return Ast.Type.TYPE_INT;
+        }
     }
 
-    class MathExprTailNode : AstNode
+    class MathExprTailNode : ExprBaseNode
     {
         public Tag op;
         public MathTermNode term;
@@ -138,9 +291,24 @@ namespace KayoCompiler.Ast
             Console.WriteLine(op);
             tail?.Gen();
         }
+
+        public override Type Type()
+        {
+            if (tail == null)
+            {
+                return term.Type();
+            }
+
+            if (tail.Type() != Ast.Type.TYPE_INT || term.Type() != Ast.Type.TYPE_INT)
+            {
+                return Ast.Type.TYPE_ERROR;
+            }
+
+            return Ast.Type.TYPE_INT;
+        }
     }
 
-    class MathTermNode : AstNode
+    class MathTermNode : ExprBaseNode
     {
         public MathFactorNode factor;
         public MathTermTailNode tail;
@@ -150,9 +318,24 @@ namespace KayoCompiler.Ast
             factor?.Gen();
             tail?.Gen();
         }
+
+        public override Type Type()
+        {
+            if (tail == null)
+            {
+                return factor.Type();
+            }
+
+            if (tail.Type() != Ast.Type.TYPE_INT || factor.Type() != Ast.Type.TYPE_INT)
+            {
+                return Ast.Type.TYPE_ERROR;
+            }
+
+            return Ast.Type.TYPE_INT;
+        }
     }
 
-    class MathTermTailNode : AstNode
+    class MathTermTailNode : ExprBaseNode
     {
         public Tag op;
         public MathFactorNode factor;
@@ -164,9 +347,24 @@ namespace KayoCompiler.Ast
             Console.WriteLine(op);
             tail?.Gen();
         }
+
+        public override Type Type()
+        {
+            if (tail == null)
+            {
+                return factor.Type();
+            }
+
+            if (tail.Type() != Ast.Type.TYPE_INT || factor.Type() != Ast.Type.TYPE_INT)
+            {
+                return Ast.Type.TYPE_ERROR;
+            }
+
+            return Ast.Type.TYPE_INT;
+        }
     }
 
-    class MathFactorNode : AstNode
+    class MathFactorNode : ExprBaseNode
     {
         public TerminalNode value;
         public ExprNode expr;
@@ -180,6 +378,11 @@ namespace KayoCompiler.Ast
 
             if (factor != null)
                 Console.WriteLine("not");
+        }
+
+        public override Type Type()
+        {
+            return value?.Type() ?? expr?.Type() ?? factor?.Type() ?? Ast.Type.TYPE_ERROR;
         }
     }
 }
