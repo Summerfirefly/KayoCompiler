@@ -3,7 +3,7 @@ using KayoCompiler.Errors;
 
 namespace KayoCompiler
 {
-    partial class Parser
+    internal partial class Parser
     {
         private void IfStmt(IfStmtNode node)
         {

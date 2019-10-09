@@ -8,7 +8,7 @@ namespace KayoCompiler.Ast
         public abstract void Gen();
     }
 
-    internal static class CodeGenData
+    internal struct CodeGenData
     {
         internal static int labelNum = 1;
     }

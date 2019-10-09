@@ -7,7 +7,7 @@ namespace KayoCompiler
         internal static void ParserDebug(string testFilePath)
         {
             Parser parser = new Parser(new Scanner(testFilePath));
-            ProgramNode program = parser.StartParse();
+            ProgramNode program = parser.Parse();
             program.Gen();
         }
     }

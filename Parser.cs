@@ -3,18 +3,18 @@ using KayoCompiler.Errors;
 
 namespace KayoCompiler
 {
-    partial class Parser
+    internal partial class Parser
     {
-        readonly Scanner scanner = null;
-        Token next = null;
+        private readonly Scanner scanner = null;
+        private Token next = null;
 
-        public Parser(Scanner scanner)
+        internal Parser(Scanner scanner)
         {
             this.scanner = scanner;
             Move();
         }
 
-        public ProgramNode StartParse()
+        internal ProgramNode Parse()
         {
             ProgramNode p = new ProgramNode();
             Program(p);
@@ -122,6 +122,7 @@ namespace KayoCompiler
                 case Tag.KW_WRITE:
                 case Tag.KW_READ:
                 case Tag.DL_LBRACE:
+                case Tag.DL_SEM:
                     StmtNode child = new StmtNode();
                     node.AddChild(child);
 
