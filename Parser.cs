@@ -8,6 +8,8 @@ namespace KayoCompiler
         private readonly Scanner scanner = null;
         private Token next = null;
 
+        internal static int CurrentField { get; set; } = 0;
+
         internal Parser(Scanner scanner)
         {
             this.scanner = scanner;
@@ -37,6 +39,7 @@ namespace KayoCompiler
         private void Block(BlockNode node)
         {
             if (next == null) return;
+            CurrentField++;
 
             if (next.Tag == Tag.DL_LBRACE)
             {
@@ -63,6 +66,8 @@ namespace KayoCompiler
             {
                 new TokenMissingError(Tag.DL_RBRACE).PrintErrMsg();
             }
+
+            CurrentField--;
         }
 
         private void Decls(DeclsNode node)
@@ -97,6 +102,25 @@ namespace KayoCompiler
                     {
                         new TokenMissingError(Tag.ID).PrintErrMsg();
                         break;
+                    }
+
+                    if (node.name != null)
+                    {
+                        TableVarItem variable = new TableVarItem { name = node.name, field = CurrentField };
+                        switch (node.type)
+                        {
+                            case Tag.KW_INT:
+                                variable.type = VarType.TYPE_INT;
+                                break;
+                            case Tag.KW_BOOL:
+                                variable.type = VarType.TYPE_BOOL;
+                                break;
+                        }
+
+                        if (SymbolTable.AddVar(variable) == TableAddStatus.SYMBOL_EXIST)
+                        {
+                            new Error().PrintErrMsg();
+                        }
                     }
 
                     if (next.Tag == Tag.DL_SEM)

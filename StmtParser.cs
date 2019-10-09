@@ -21,6 +21,15 @@ namespace KayoCompiler
 
             Expr(ref node.condition);
 
+            if (node.condition == null)
+            {
+                new Error().PrintErrMsg();
+            }
+            else if (node.condition.Type() != VarType.TYPE_BOOL)
+            {
+                new Error().PrintErrMsg();
+            }
+
             if (next?.Tag == Tag.DL_RPAR)
             {
                 Move();
@@ -63,6 +72,15 @@ namespace KayoCompiler
             
             Expr(ref node.expr);
 
+            if (node.expr == null)
+            {
+                new Error().PrintErrMsg();
+            }
+            else if (node.id.Type() != node.expr.Type())
+            {
+                new TypeMismatchError().PrintErrMsg();
+            }
+
             if (next?.Tag == Tag.DL_SEM)
             {
                 Move();
@@ -88,6 +106,15 @@ namespace KayoCompiler
             }
 
             Expr(ref node.condition);
+
+            if (node.condition == null)
+            {
+                new Error().PrintErrMsg();
+            }
+            else if (node.condition.Type() != VarType.TYPE_BOOL)
+            {
+                new Error().PrintErrMsg();
+            }
 
             if (next?.Tag == Tag.DL_RPAR)
             {

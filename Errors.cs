@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace KayoCompiler.Errors
 {
@@ -15,8 +13,13 @@ namespace KayoCompiler.Errors
 
         public virtual void PrintErrMsg()
         {
+            PrintErrMsg($"error: An error occurred at line {lineNum}");
+        }
+
+        protected void PrintErrMsg(string msg)
+        {
             Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine($"error: An error occurred at line {lineNum}");
+            Console.WriteLine(msg);
             Console.ResetColor();
         }
     }
@@ -59,9 +62,15 @@ namespace KayoCompiler.Errors
                     break;
             }
 
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine($"error: missing {missingToken} at line {lineNum}");
-            Console.ResetColor();
+            PrintErrMsg($"error: missing {missingToken} at line {lineNum}");
+        }
+    }
+
+    class TypeMismatchError : Error
+    {
+        public override void PrintErrMsg()
+        {
+            PrintErrMsg($"error: type mismatch at line {lineNum}");
         }
     }
 }

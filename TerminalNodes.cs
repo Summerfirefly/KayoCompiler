@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace KayoCompiler.Ast
+﻿namespace KayoCompiler.Ast
 {
     abstract class TerminalNode : AstNode
     {
@@ -63,7 +61,8 @@ namespace KayoCompiler.Ast
 
         public override VarType Type()
         {
-            throw new NotImplementedException();
+            TableVarItem? item = SymbolTable.FindVar(name, Parser.CurrentField);
+            return item?.type ?? VarType.TYPE_ERROR;
         }
     }
 }
