@@ -119,7 +119,7 @@ namespace KayoCompiler
 
                         if (SymbolTable.AddVar(variable) == TableAddStatus.SYMBOL_EXIST)
                         {
-                            new Error().PrintErrMsg();
+                            new ConflictingDeclarationError().PrintErrMsg();
                         }
                     }
 

@@ -78,7 +78,7 @@ namespace KayoCompiler
             }
             else if (node.id.Type() != node.expr.Type())
             {
-                new TypeMismatchError().PrintErrMsg();
+                new TypeMismatchError(node.id.Type(), node.expr.Type()).PrintErrMsg();
             }
 
             if (next?.Tag == Tag.DL_SEM)

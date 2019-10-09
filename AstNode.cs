@@ -11,6 +11,7 @@ namespace KayoCompiler.Ast
     internal struct CodeGenData
     {
         internal static int labelNum = 1;
+        internal static int currentField = 0;
     }
 
     class ProgramNode : AstNode
@@ -49,12 +50,14 @@ namespace KayoCompiler.Ast
             if (children == null) return string.Empty;
 
             string code = string.Empty;
+            CodeGenData.currentField++;
 
             foreach (var child in children)
             {
                 code += child?.Gen() ?? string.Empty;
             }
 
+            CodeGenData.currentField--;
             return code;
         }
 

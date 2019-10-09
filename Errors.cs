@@ -1,4 +1,5 @@
 ﻿using System;
+using KayoCompiler.Ast;
 
 namespace KayoCompiler.Errors
 {
@@ -21,6 +22,14 @@ namespace KayoCompiler.Errors
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine(msg);
             Console.ResetColor();
+        }
+    }
+
+    class ConflictingDeclarationError : Error
+    {
+        public override void PrintErrMsg()
+        {
+            PrintErrMsg($"error: conflicting declaration at line {lineNum}");
         }
     }
 
@@ -68,9 +77,29 @@ namespace KayoCompiler.Errors
 
     class TypeMismatchError : Error
     {
+        readonly VarType typeA;
+        readonly VarType typeB;
+
+        public TypeMismatchError(VarType typeA, VarType typeB)
+        {
+            this.typeA = typeA;
+            this.typeB = typeB;
+        }
+
         public override void PrintErrMsg()
         {
-            PrintErrMsg($"error: type mismatch at line {lineNum}");
+            PrintErrMsg($"error: type mismatch between {GetTypeStr(typeA)} and {GetTypeStr(typeB)} at line {lineNum}");
+        }
+
+        private string GetTypeStr(VarType type)
+        {
+            if (type == VarType.TYPE_INT)
+                return "int";
+
+            if (type == VarType.TYPE_BOOL)
+                return "bool";
+
+            return "unknown";
         }
     }
 }
