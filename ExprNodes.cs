@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace KayoCompiler.Ast
+﻿namespace KayoCompiler.Ast
 {
     abstract class ExprBaseNode : AstNode
     {
@@ -61,7 +59,24 @@ namespace KayoCompiler.Ast
         {
             string code = string.Empty;
             code += term?.Gen() ?? string.Empty;
-            code += "or\n";
+            switch (CodeGenData.stackDepth)
+            {
+                case 2:
+                    code += "orq\t%rax, %rdx\n";
+                    break;
+                case 3:
+                    code += "orq\t%rdx, %rcx\n";
+                    break;
+                case 4:
+                    code += "popq\t%rbx";
+                    code += "orq\t%rcx, %rbx\n";
+                    break;
+                default:
+                    code += "popq\t%rbx\n";
+                    code += "orq\t(%rsp), %rbx\n";
+                    break;
+            }
+            CodeGenData.stackDepth--;
             code += tail?.Gen() ?? string.Empty;
 
             return code;
@@ -122,7 +137,24 @@ namespace KayoCompiler.Ast
         {
             string code = string.Empty;
             code += factor?.Gen() ?? string.Empty;
-            code += "and\n";
+            switch (CodeGenData.stackDepth)
+            {
+                case 2:
+                    code += "andq\t%rax, %rdx\n";
+                    break;
+                case 3:
+                    code += "andq\t%rdx, %rcx\n";
+                    break;
+                case 4:
+                    code += "popq\t%rbx";
+                    code += "andq\t%rcx,%rbx\n";
+                    break;
+                default:
+                    code += "popq\t%rbx\n";
+                    code += "andq\t(%rsp), %rbx\n";
+                    break;
+            }
+            CodeGenData.stackDepth--;
             code += tail?.Gen() ?? string.Empty;
 
             return code;
@@ -186,7 +218,73 @@ namespace KayoCompiler.Ast
         {
             string code = string.Empty;
             code += rel?.Gen() ?? string.Empty;
-            code += $"{op}\n";
+
+            switch (CodeGenData.stackDepth)
+            {
+                case 2:
+                    code += "cmpq\t%rax, %rdx\n";
+                    break;
+                case 3:
+                    code += "cmpq\t%rdx, %rcx\n";
+                    break;
+                case 4:
+                    code += "popq\t%rbx";
+                    code += "cmpq\t%rcx, %rbx\n";
+                    break;
+                default:
+                    code += "popq\t%rbx\n";
+                    code += "cmpq\t(%rsp), %rbx\n";
+                    break;
+            }
+            CodeGenData.stackDepth -= 2;
+
+            int trueLabel = CodeGenData.labelNum++;
+            int endLabel = CodeGenData.labelNum++;
+            switch (op)
+            {
+                case Tag.DL_EQ:
+                    code += $"je\t{trueLabel}\n";
+                    break;
+                case Tag.DL_NEQ:
+                    code += $"jne\t{trueLabel}\n";
+                    break;
+            }
+
+            switch (CodeGenData.stackDepth)
+            {
+                case 0:
+                    code += "movq\t$0, %rax\n";
+                    break;
+                case 1:
+                    code += "movq\t$0, %rdx\n";
+                    break;
+                case 2:
+                    code += "movq\t$0, %rcx\n";
+                    break;
+                default:
+                    code += "pushq\t$0\n";
+                    break;
+            }
+            code += $"jmp\t{endLabel}\n";
+            code += $"{trueLabel}:\n";
+            switch (CodeGenData.stackDepth)
+            {
+                case 0:
+                    code += "movq\t$1, %rax\n";
+                    break;
+                case 1:
+                    code += "movq\t$1, %rdx\n";
+                    break;
+                case 2:
+                    code += "movq\t$1, %rcx\n";
+                    break;
+                default:
+                    code += "pushq\t$1\n";
+                    break;
+            }
+            code += $"{endLabel}:\n";
+            CodeGenData.stackDepth++;
+
             code += tail?.Gen() ?? string.Empty;
 
             return code;
@@ -252,7 +350,79 @@ namespace KayoCompiler.Ast
         {
             string code = string.Empty;
             code += expr?.Gen() ?? string.Empty;
-            code += $"{op}\n";
+
+            switch (CodeGenData.stackDepth)
+            {
+                case 2:
+                    code += "cmpq\t%rax, %rdx\n";
+                    break;
+                case 3:
+                    code += "cmpq\t%rdx, %rcx\n";
+                    break;
+                case 4:
+                    code += "popq\t%rbx";
+                    code += "cmpq\t%rcx, %rbx\n";
+                    break;
+                default:
+                    code += "popq\t%rbx\n";
+                    code += "cmpq\t(%rsp), %rbx\n";
+                    break;
+            }
+            CodeGenData.stackDepth -= 2;
+
+            int trueLabel = CodeGenData.labelNum++;
+            int endLabel = CodeGenData.labelNum++;
+            switch (op)
+            {
+                case Tag.DL_GT:
+                    code += $"jg\t{trueLabel}\n";
+                    break;
+                case Tag.DL_NGT:
+                    code += $"jle\t{trueLabel}\n";
+                    break;
+                case Tag.DL_LT:
+                    code += $"jl\t{trueLabel}\n";
+                    break;
+                case Tag.DL_NLT:
+                    code += $"jge\t{trueLabel}\n";
+                    break;
+            }
+
+            switch (CodeGenData.stackDepth)
+            {
+                case 0:
+                    code += "movq\t$0, %rax\n";
+                    break;
+                case 1:
+                    code += "movq\t$0, %rdx\n";
+                    break;
+                case 2:
+                    code += "movq\t$0, %rcx\n";
+                    break;
+                default:
+                    code += "pushq\t$0\n";
+                    break;
+            }
+            code += $"jmp\t{endLabel}\n";
+            code += $"{trueLabel}:\n";
+            switch (CodeGenData.stackDepth)
+            {
+                case 0:
+                    code += "movq\t$1, %rax\n";
+                    break;
+                case 1:
+                    code += "movq\t$1, %rdx\n";
+                    break;
+                case 2:
+                    code += "movq\t$1, %rcx\n";
+                    break;
+                default:
+                    code += "pushq\t$1\n";
+                    break;
+            }
+            code += $"{endLabel}:\n";
+            CodeGenData.stackDepth++;
+
             code += tail?.Gen() ?? string.Empty;
 
             return code;
@@ -316,7 +486,50 @@ namespace KayoCompiler.Ast
         {
             string code = string.Empty;
             code += term?.Gen() ?? string.Empty;
-            code += $"{op}\n";
+
+            if (op == Tag.DL_PLUS)
+            {
+                switch (CodeGenData.stackDepth)
+                {
+                    case 2:
+                        code += "addq\t%rax, %rdx\n";
+                        break;
+                    case 3:
+                        code += "addq\t%rdx, %rcx\n";
+                        break;
+                    case 4:
+                        code += "popq\t%rbx\n";
+                        code += "addq\t%rcx, %rbx\n";
+                        break;
+                    default:
+                        code += "popq\t%rbx\n";
+                        code += "addq\t(%rsp), %rbx\n";
+                        break;
+                }
+            }
+            else
+            {
+                switch (CodeGenData.stackDepth)
+                {
+                    case 2:
+                        code += "subq\t%rax, %rdx\n";
+                        break;
+                    case 3:
+                        code += "subq\t%rdx, %rcx\n";
+                        break;
+                    case 4:
+                        code += "popq\t%rbx\n";
+                        code += "subq\t%rcx, %rbx\n";
+                        break;
+                    default:
+                        code += "popq\t%rbx\n";
+                        code += "subq\t(%rsp), %rbx\n";
+                        break;
+                }
+            }
+
+            CodeGenData.stackDepth--;
+
             code += tail?.Gen() ?? string.Empty;
 
             return code;
@@ -378,7 +591,73 @@ namespace KayoCompiler.Ast
         {
             string code = string.Empty;
             code += factor?.Gen() ?? string.Empty;
-            code += $"{op}\n";
+
+            if (op == Tag.DL_MULTI)
+            {
+                switch (CodeGenData.stackDepth)
+                {
+                    case 2:
+                        code += "imulq\t%rax, %rdx\n";
+                        break;
+                    case 3:
+                        code += "imulq\t%rdx, %rcx\n";
+                        break;
+                    case 4:
+                        code += "popq\t%rbx\n";
+                        code += "imulq\t%rcx, %rbx\n";
+                        break;
+                    default:
+                        code += "popq\t%rbx\n";
+                        code += "imulq\t%rbx, (%rsp)\n";
+                        code += "movq\t%rbx, (%rsp)\n";
+                        break;
+                }
+            }
+            else
+            {
+                switch (CodeGenData.stackDepth)
+                {
+                    case 2:
+                        code += "movq\t%rdx, %rbx\n";
+                        code += "cqto\n";
+                        code += "idivq\t%rbx\n";
+                        break;
+                    case 3:
+                        code += "pushq\t%rax\n";
+                        code += "movq\t%rdx, %rax\n";
+                        code += "cqto\n";
+                        code += "idivq\t%rcx\n";
+                        code += "movq\t%rax, %rdx\n";
+                        code += "popq\t%rax\n";
+                        break;
+                    case 4:
+                        code += "popq\t%rbx\n";
+                        code += "pushq\t%rax\n";
+                        code += "pushq\t%rdx\n";
+                        code += "movq\t%rcx, %rax\n";
+                        code += "cqto\n";
+                        code += "idivq\t%rbx";
+                        code += "movq\t%rax, %rcx\n";
+                        code += "popq\t%rdx\n";
+                        code += "popq\t%rax\n";
+                        break;
+                    default:
+                        code += "popq\t%rbx\n";
+                        code += "pushq\t%rax\n";
+                        code += "pushq\t%rdx\n";
+                        code += "movq\t16(%rsp), %rax\n";
+                        code += "cqto\n";
+                        code += "idivq\t%rbx\n";
+                        code += "movq\t%rax, %rbx\n";
+                        code += "popq\t%rdx\n";
+                        code += "popq\t%rax\n";
+                        code += "movq\t%rbx, (%rsp)\n";
+                        break;
+                }
+            }
+
+            CodeGenData.stackDepth--;
+
             code += tail?.Gen() ?? string.Empty;
 
             return code;
@@ -414,7 +693,23 @@ namespace KayoCompiler.Ast
             code += factor?.Gen() ?? string.Empty;
 
             if (factor != null)
-                code += "not\n";
+            {
+                switch (CodeGenData.stackDepth)
+                {
+                    case 1:
+                        code += "not\t%rax\n";
+                        break;
+                    case 2:
+                        code += "not\t%rdx\n";
+                        break;
+                    case 3:
+                        code += "not\t%rcx\n";
+                        break;
+                    default:
+                        code += "not\t(%rsp)\n";
+                        break;
+                }
+            }
 
             return code;
         }

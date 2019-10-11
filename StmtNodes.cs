@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace KayoCompiler.Ast
+﻿namespace KayoCompiler.Ast
 {
     class IfStmtNode : AstNode
     {
@@ -15,9 +13,12 @@ namespace KayoCompiler.Ast
             string code = string.Empty;
 
             code += condition?.Gen() ?? string.Empty;
-            code += $"jz {label}f\n";
+            code += $"jz {label}\n";
+
+            CodeGenData.stackDepth--;
+
             code += body?.Gen() ?? string.Empty;
-            code += $"jmp {endIf}f\n";
+            code += $"jmp {endIf}\n";
             code += $"{label}:\n";
 
             code += elseStmt?.Gen() ?? string.Empty;
@@ -46,8 +47,27 @@ namespace KayoCompiler.Ast
         public override string Gen()
         {
             string code = string.Empty;
+            int index = SymbolTable.GetVarIndex(id.name, CodeGenData.currentField);
+            int offset = (index + 1) * 8;
             code += expr?.Gen() ?? string.Empty;
-            code += $"pop [{id.name}]\n";
+
+            switch (CodeGenData.stackDepth)
+            {
+                case 1:
+                    code += $"movq\t%rax, -{offset}(%rbp)\n";
+                    break;
+                case 2:
+                    code += $"movq\t%rdx, -{offset}(%rbp)\n";
+                    break;
+                case 3:
+                    code += $"movq\t%rcx, -{offset}(%rbp)\n";
+                    break;
+                default:
+                    code += $"popq\t-{offset}(%rbp)\n";
+                    break;
+            }
+
+            CodeGenData.stackDepth--;
 
             return code;
         }
@@ -60,15 +80,19 @@ namespace KayoCompiler.Ast
 
         public override string Gen()
         {
-            int label = CodeGenData.labelNum++;
+            int startLabel = CodeGenData.labelNum++;
+            int endLabel = CodeGenData.labelNum++;
             string code = string.Empty;
 
-            code += $"{label}:\n";
+            code += $"{startLabel}:\n";
             code += condition?.Gen() ?? string.Empty;
-            code += $"jz {label}f\n";
+
+            CodeGenData.stackDepth--;
+
+            code += $"jz {endLabel}\n";
             code += body?.Gen() ?? string.Empty;
-            code += $"jmp {label}b\n";
-            code += $"{label}:\n";
+            code += $"jmp {startLabel}\n";
+            code += $"{endLabel}:\n";
 
             return code;
         }

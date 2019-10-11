@@ -12,6 +12,7 @@ namespace KayoCompiler.Ast
     {
         internal static int labelNum = 1;
         internal static int currentField = 0;
+        internal static int stackDepth = 0;
     }
 
     class ProgramNode : AstNode
@@ -24,10 +25,19 @@ namespace KayoCompiler.Ast
 
             string code = string.Empty;
 
+            code += "entry:\n";
+            code += "pushq\t%rbp\n";
+            code += "movq\t%rsp, %rbp\n";
+            code += $"addq\t${SymbolTable.VarCount * 8}, %rsp\n";
+
             foreach (var child in children)
             {
                 code += child?.Gen() ?? string.Empty;
             }
+
+            code += "movq\t%rbp, %rsp\n";
+            code += "popq\t%rbp\n";
+            code += "ret\n";
 
             return code;
         }
@@ -104,7 +114,7 @@ namespace KayoCompiler.Ast
 
         public override string Gen()
         {
-            return $".{type} {name}\n";
+            return string.Empty;
         }
     }
 

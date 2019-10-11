@@ -7,7 +7,7 @@ namespace KayoCompiler
     {
         static void Main(string[] args)
         {
-            Debug.ParserDebug("./test.txt");
+            Debug.Run("./test.txt");
         }
     }
 }

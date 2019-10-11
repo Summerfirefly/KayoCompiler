@@ -16,7 +16,18 @@
 
         public override string Gen()
         {
-            return $"push {value}\n";
+            CodeGenData.stackDepth++;
+            switch (CodeGenData.stackDepth)
+            {
+                case 1:
+                    return $"movq\t${value}, %rax\n";
+                case 2:
+                    return $"movq\t${value}, %rdx\n";
+                case 3:
+                    return $"movq\t${value}, %rcx\n";
+                default:
+                    return $"pushq\t${value}\n";
+            }
         }
 
         public override VarType Type()
@@ -36,7 +47,18 @@
 
         public override string Gen()
         {
-            return $"push {value}\n";
+            CodeGenData.stackDepth++;
+            switch (CodeGenData.stackDepth)
+            {
+                case 1:
+                    return $"movq\t${value}, %rax\n";
+                case 2:
+                    return $"movq\t${value}, %rdx\n";
+                case 3:
+                    return $"movq\t${value}, %rcx\n";
+                default:
+                    return $"pushq\t${value}\n";
+            }
         }
 
         public override VarType Type()
@@ -56,7 +78,20 @@
 
         public override string Gen()
         {
-            return $"push [{name}]\n";
+            int index = SymbolTable.GetVarIndex(name, CodeGenData.currentField);
+            int offset = (index + 1) * 8;
+            CodeGenData.stackDepth++;
+            switch (CodeGenData.stackDepth)
+            {
+                case 1:
+                    return $"movq\t-{offset}(%rbp), %rax\n";
+                case 2:
+                    return $"movq\t-{offset}(%rbp), %rdx\n";
+                case 3:
+                    return $"movq\t-{offset}(%rbp), %rcx\n";
+                default:
+                    return $"pushq\t-{offset}(%rbp)\n";
+            }
         }
 
         public override VarType Type()

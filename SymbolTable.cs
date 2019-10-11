@@ -48,6 +48,17 @@ namespace KayoCompiler
             return null;
         }
 
+        internal static int GetVarIndex(string name, int field)
+        {
+            for (int i = 0; i < vars.Count; i++)
+            {
+                if (vars[i].name == name && vars[i].field == field)
+                    return i;
+            }
+
+            return -1;
+        }
+
         internal static TableVarItem GetVar(int index)
         {
             return vars[index % vars.Count];

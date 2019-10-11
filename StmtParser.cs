@@ -76,6 +76,10 @@ namespace KayoCompiler
             {
                 new Error().PrintErrMsg();
             }
+            else if (node.id.Type() == VarType.TYPE_ERROR)
+            {
+                new Error().PrintErrMsg();
+            }
             else if (node.id.Type() != node.expr.Type())
             {
                 new TypeMismatchError(node.id.Type(), node.expr.Type()).PrintErrMsg();
@@ -151,6 +155,11 @@ namespace KayoCompiler
             {
                 node.id = new IdNode(next.Value);
                 Move();
+
+                if (node.id.Type() == VarType.TYPE_ERROR)
+                {
+                    new Error().PrintErrMsg();
+                }
             }
             else
             {
