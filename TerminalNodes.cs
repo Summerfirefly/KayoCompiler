@@ -20,13 +20,13 @@
             switch (CodeGenData.stackDepth)
             {
                 case 1:
-                    return $"movq\t${value}, %rax\n";
+                    return $"mov\trax, {value}\n";
                 case 2:
-                    return $"movq\t${value}, %rdx\n";
+                    return $"mov\trdx, {value}\n";
                 case 3:
-                    return $"movq\t${value}, %rcx\n";
+                    return $"mov\trcx, {value}\n";
                 default:
-                    return $"pushq\t${value}\n";
+                    return $"push\tqword {value}\n";
             }
         }
 
@@ -51,13 +51,13 @@
             switch (CodeGenData.stackDepth)
             {
                 case 1:
-                    return $"movq\t${value}, %rax\n";
+                    return $"mov\trax, {value}\n";
                 case 2:
-                    return $"movq\t${value}, %rdx\n";
+                    return $"mov\trdx, {value}\n";
                 case 3:
-                    return $"movq\t${value}, %rcx\n";
+                    return $"mov\trcx, {value}\n";
                 default:
-                    return $"pushq\t${value}\n";
+                    return $"push\tqword {value}\n";
             }
         }
 
@@ -84,13 +84,13 @@
             switch (CodeGenData.stackDepth)
             {
                 case 1:
-                    return $"movq\t-{offset}(%rbp), %rax\n";
+                    return $"mov\trax, [rbp-{offset}]\n";
                 case 2:
-                    return $"movq\t-{offset}(%rbp), %rdx\n";
+                    return $"mov\trdx, [rbp-{offset}]\n";
                 case 3:
-                    return $"movq\t-{offset}(%rbp), %rcx\n";
+                    return $"mov\trcx, [rbp-{offset}]\n";
                 default:
-                    return $"pushq\t-{offset}(%rbp)\n";
+                    return $"push\tqword [rbp-{offset}]\n";
             }
         }
 

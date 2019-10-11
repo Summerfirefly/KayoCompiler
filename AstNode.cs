@@ -25,18 +25,18 @@ namespace KayoCompiler.Ast
 
             string code = string.Empty;
 
-            code += "entry:\n";
-            code += "pushq\t%rbp\n";
-            code += "movq\t%rsp, %rbp\n";
-            code += $"addq\t${SymbolTable.VarCount * 8}, %rsp\n";
+            code += "_entry:\n";
+            code += "push\trbp\n";
+            code += "mov\trbp, rsp\n";
+            code += $"sub\trsp, {SymbolTable.VarCount * 8}\n";
 
             foreach (var child in children)
             {
                 code += child?.Gen() ?? string.Empty;
             }
 
-            code += "movq\t%rbp, %rsp\n";
-            code += "popq\t%rbp\n";
+            code += "mov\trsp, rbp\n";
+            code += "pop\trbp\n";
             code += "ret\n";
 
             return code;

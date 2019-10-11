@@ -62,18 +62,18 @@
             switch (CodeGenData.stackDepth)
             {
                 case 2:
-                    code += "orq\t%rax, %rdx\n";
+                    code += "or\trax, rdx\n";
                     break;
                 case 3:
-                    code += "orq\t%rdx, %rcx\n";
+                    code += "or\trdx, rcx\n";
                     break;
                 case 4:
-                    code += "popq\t%rbx";
-                    code += "orq\t%rcx, %rbx\n";
+                    code += "pop\trbx";
+                    code += "or\trcx, rbx\n";
                     break;
                 default:
-                    code += "popq\t%rbx\n";
-                    code += "orq\t(%rsp), %rbx\n";
+                    code += "pop\trbx\n";
+                    code += "or\tqword [rsp], rbx\n";
                     break;
             }
             CodeGenData.stackDepth--;
@@ -140,18 +140,18 @@
             switch (CodeGenData.stackDepth)
             {
                 case 2:
-                    code += "andq\t%rax, %rdx\n";
+                    code += "and\trax, rdx\n";
                     break;
                 case 3:
-                    code += "andq\t%rdx, %rcx\n";
+                    code += "and\trdx, rcx\n";
                     break;
                 case 4:
-                    code += "popq\t%rbx";
-                    code += "andq\t%rcx,%rbx\n";
+                    code += "pop\trbx";
+                    code += "and\trcx, rbx\n";
                     break;
                 default:
-                    code += "popq\t%rbx\n";
-                    code += "andq\t(%rsp), %rbx\n";
+                    code += "pop\trbx\n";
+                    code += "and\tqword [rsp], rbx\n";
                     break;
             }
             CodeGenData.stackDepth--;
@@ -222,68 +222,50 @@
             switch (CodeGenData.stackDepth)
             {
                 case 2:
-                    code += "cmpq\t%rax, %rdx\n";
+                    code += "cmp\trdx, rax\n";
                     break;
                 case 3:
-                    code += "cmpq\t%rdx, %rcx\n";
+                    code += "cmp\trcx, rdx\n";
                     break;
                 case 4:
-                    code += "popq\t%rbx";
-                    code += "cmpq\t%rcx, %rbx\n";
+                    code += "pop\trbx";
+                    code += "cmp\trbx, rcx\n";
                     break;
                 default:
-                    code += "popq\t%rbx\n";
-                    code += "cmpq\t(%rsp), %rbx\n";
+                    code += "pop\trbx\n";
+                    code += "cmp\trbx, qword [rsp]\n";
                     break;
             }
-            CodeGenData.stackDepth -= 2;
 
-            int trueLabel = CodeGenData.labelNum++;
-            int endLabel = CodeGenData.labelNum++;
             switch (op)
             {
                 case Tag.DL_EQ:
-                    code += $"je\t{trueLabel}\n";
+                    code += "sete\tbl\n";
                     break;
                 case Tag.DL_NEQ:
-                    code += $"jne\t{trueLabel}\n";
+                    code += "setne\tbl\n";
                     break;
             }
 
+            code += "movzx\trbx, bl\n";
+
             switch (CodeGenData.stackDepth)
             {
-                case 0:
-                    code += "movq\t$0, %rax\n";
-                    break;
-                case 1:
-                    code += "movq\t$0, %rdx\n";
-                    break;
                 case 2:
-                    code += "movq\t$0, %rcx\n";
+                    code += "mov\trax, rbx\n";
+                    break;
+                case 3:
+                    code += "mov\trdx, rbx\n";
+                    break;
+                case 4:
+                    code += "mov\trcx, rbx\n";
                     break;
                 default:
-                    code += "pushq\t$0\n";
+                    code += "push\trbx\n";
                     break;
             }
-            code += $"jmp\t{endLabel}\n";
-            code += $"{trueLabel}:\n";
-            switch (CodeGenData.stackDepth)
-            {
-                case 0:
-                    code += "movq\t$1, %rax\n";
-                    break;
-                case 1:
-                    code += "movq\t$1, %rdx\n";
-                    break;
-                case 2:
-                    code += "movq\t$1, %rcx\n";
-                    break;
-                default:
-                    code += "pushq\t$1\n";
-                    break;
-            }
-            code += $"{endLabel}:\n";
-            CodeGenData.stackDepth++;
+
+            CodeGenData.stackDepth--;
 
             code += tail?.Gen() ?? string.Empty;
 
@@ -354,74 +336,56 @@
             switch (CodeGenData.stackDepth)
             {
                 case 2:
-                    code += "cmpq\t%rax, %rdx\n";
+                    code += "cmp\trdx, rax\n";
                     break;
                 case 3:
-                    code += "cmpq\t%rdx, %rcx\n";
+                    code += "cmp\trcx, rdx\n";
                     break;
                 case 4:
-                    code += "popq\t%rbx";
-                    code += "cmpq\t%rcx, %rbx\n";
+                    code += "pop\trbx";
+                    code += "cmp\trbx, rcx\n";
                     break;
                 default:
-                    code += "popq\t%rbx\n";
-                    code += "cmpq\t(%rsp), %rbx\n";
+                    code += "pop\trbx\n";
+                    code += "cmp\trbx, qword [rsp]\n";
                     break;
             }
-            CodeGenData.stackDepth -= 2;
 
-            int trueLabel = CodeGenData.labelNum++;
-            int endLabel = CodeGenData.labelNum++;
             switch (op)
             {
                 case Tag.DL_GT:
-                    code += $"jg\t{trueLabel}\n";
+                    code += "setg\tbl\n";
                     break;
                 case Tag.DL_NGT:
-                    code += $"jle\t{trueLabel}\n";
+                    code += "setng\tbl\n";
                     break;
                 case Tag.DL_LT:
-                    code += $"jl\t{trueLabel}\n";
+                    code += "setl\tbl\n";
                     break;
                 case Tag.DL_NLT:
-                    code += $"jge\t{trueLabel}\n";
+                    code += "setnl\tbl\n";
                     break;
             }
 
+            code += "movzx\trbx, bl\n";
+
             switch (CodeGenData.stackDepth)
             {
-                case 0:
-                    code += "movq\t$0, %rax\n";
-                    break;
-                case 1:
-                    code += "movq\t$0, %rdx\n";
-                    break;
                 case 2:
-                    code += "movq\t$0, %rcx\n";
+                    code += "mov\trax, rbx\n";
+                    break;
+                case 3:
+                    code += "mov\trdx, rbx\n";
+                    break;
+                case 4:
+                    code += "mov\trcx, rbx\n";
                     break;
                 default:
-                    code += "pushq\t$0\n";
+                    code += "push\trbx\n";
                     break;
             }
-            code += $"jmp\t{endLabel}\n";
-            code += $"{trueLabel}:\n";
-            switch (CodeGenData.stackDepth)
-            {
-                case 0:
-                    code += "movq\t$1, %rax\n";
-                    break;
-                case 1:
-                    code += "movq\t$1, %rdx\n";
-                    break;
-                case 2:
-                    code += "movq\t$1, %rcx\n";
-                    break;
-                default:
-                    code += "pushq\t$1\n";
-                    break;
-            }
-            code += $"{endLabel}:\n";
-            CodeGenData.stackDepth++;
+
+            CodeGenData.stackDepth--;
 
             code += tail?.Gen() ?? string.Empty;
 
@@ -492,18 +456,18 @@
                 switch (CodeGenData.stackDepth)
                 {
                     case 2:
-                        code += "addq\t%rax, %rdx\n";
+                        code += "add\trax, rdx\n";
                         break;
                     case 3:
-                        code += "addq\t%rdx, %rcx\n";
+                        code += "add\trdx, rcx\n";
                         break;
                     case 4:
-                        code += "popq\t%rbx\n";
-                        code += "addq\t%rcx, %rbx\n";
+                        code += "pop\trbx\n";
+                        code += "add\trcx, rbx\n";
                         break;
                     default:
-                        code += "popq\t%rbx\n";
-                        code += "addq\t(%rsp), %rbx\n";
+                        code += "pop\trbx\n";
+                        code += "add\tqword [rsp], rbx\n";
                         break;
                 }
             }
@@ -512,18 +476,18 @@
                 switch (CodeGenData.stackDepth)
                 {
                     case 2:
-                        code += "subq\t%rax, %rdx\n";
+                        code += "sub\trax, rdx\n";
                         break;
                     case 3:
-                        code += "subq\t%rdx, %rcx\n";
+                        code += "sub\trdx, rcx\n";
                         break;
                     case 4:
-                        code += "popq\t%rbx\n";
-                        code += "subq\t%rcx, %rbx\n";
+                        code += "pop\trbx\n";
+                        code += "sub\trcx, rbx\n";
                         break;
                     default:
-                        code += "popq\t%rbx\n";
-                        code += "subq\t(%rsp), %rbx\n";
+                        code += "pop\trbx\n";
+                        code += "sub\tqword [rsp], rbx\n";
                         break;
                 }
             }
@@ -597,19 +561,19 @@
                 switch (CodeGenData.stackDepth)
                 {
                     case 2:
-                        code += "imulq\t%rax, %rdx\n";
+                        code += "imul\trax, rdx\n";
                         break;
                     case 3:
-                        code += "imulq\t%rdx, %rcx\n";
+                        code += "imul\trdx, rcx\n";
                         break;
                     case 4:
-                        code += "popq\t%rbx\n";
-                        code += "imulq\t%rcx, %rbx\n";
+                        code += "pop\trbx\n";
+                        code += "imul\trcx, rbx\n";
                         break;
                     default:
-                        code += "popq\t%rbx\n";
-                        code += "imulq\t%rbx, (%rsp)\n";
-                        code += "movq\t%rbx, (%rsp)\n";
+                        code += "pop\trbx\n";
+                        code += "imul\trbx, qword [rsp]\n";
+                        code += "mov\trbx, qword [rsp]\n";
                         break;
                 }
             }
@@ -618,40 +582,40 @@
                 switch (CodeGenData.stackDepth)
                 {
                     case 2:
-                        code += "movq\t%rdx, %rbx\n";
-                        code += "cqto\n";
-                        code += "idivq\t%rbx\n";
+                        code += "mov\trbx, rdx\n";
+                        code += "cqo\n";
+                        code += "idiv\trbx\n";
                         break;
                     case 3:
-                        code += "pushq\t%rax\n";
-                        code += "movq\t%rdx, %rax\n";
-                        code += "cqto\n";
-                        code += "idivq\t%rcx\n";
-                        code += "movq\t%rax, %rdx\n";
-                        code += "popq\t%rax\n";
+                        code += "push\trax\n";
+                        code += "mov\trax, rdx\n";
+                        code += "cqo\n";
+                        code += "idiv\trcx\n";
+                        code += "mov\trdx, rax\n";
+                        code += "pop\trax\n";
                         break;
                     case 4:
-                        code += "popq\t%rbx\n";
-                        code += "pushq\t%rax\n";
-                        code += "pushq\t%rdx\n";
-                        code += "movq\t%rcx, %rax\n";
-                        code += "cqto\n";
-                        code += "idivq\t%rbx";
-                        code += "movq\t%rax, %rcx\n";
-                        code += "popq\t%rdx\n";
-                        code += "popq\t%rax\n";
+                        code += "pop\trbx\n";
+                        code += "push\trax\n";
+                        code += "push\trdx\n";
+                        code += "mov\trax, rcx\n";
+                        code += "cqo\n";
+                        code += "idiv\trbx";
+                        code += "mov\trcx, rax\n";
+                        code += "pop\trdx\n";
+                        code += "pop\trax\n";
                         break;
                     default:
-                        code += "popq\t%rbx\n";
-                        code += "pushq\t%rax\n";
-                        code += "pushq\t%rdx\n";
-                        code += "movq\t16(%rsp), %rax\n";
-                        code += "cqto\n";
-                        code += "idivq\t%rbx\n";
-                        code += "movq\t%rax, %rbx\n";
-                        code += "popq\t%rdx\n";
-                        code += "popq\t%rax\n";
-                        code += "movq\t%rbx, (%rsp)\n";
+                        code += "pop\trbx\n";
+                        code += "push\trax\n";
+                        code += "push\trdx\n";
+                        code += "mov\trax, qword 16[rsp]\n";
+                        code += "cqo\n";
+                        code += "idiv\trbx\n";
+                        code += "mov\trbx, rax\n";
+                        code += "pop\trdx\n";
+                        code += "pop\trax\n";
+                        code += "mov\tqword [rsp], rbx\n";
                         break;
                 }
             }
@@ -697,16 +661,16 @@
                 switch (CodeGenData.stackDepth)
                 {
                     case 1:
-                        code += "not\t%rax\n";
+                        code += "not\trax\n";
                         break;
                     case 2:
-                        code += "not\t%rdx\n";
+                        code += "not\trdx\n";
                         break;
                     case 3:
-                        code += "not\t%rcx\n";
+                        code += "not\trcx\n";
                         break;
                     default:
-                        code += "not\t(%rsp)\n";
+                        code += "not\tqword [rsp]\n";
                         break;
                 }
             }

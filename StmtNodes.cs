@@ -54,16 +54,16 @@
             switch (CodeGenData.stackDepth)
             {
                 case 1:
-                    code += $"movq\t%rax, -{offset}(%rbp)\n";
+                    code += $"mov\tqword [rbp-{offset}], rax\n";
                     break;
                 case 2:
-                    code += $"movq\t%rdx, -{offset}(%rbp)\n";
+                    code += $"mov\tqword [rbp-{offset}], rdx\n";
                     break;
                 case 3:
-                    code += $"movq\t%rcx, -{offset}(%rbp)\n";
+                    code += $"mov\tqword [rbp-{offset}], rcx\n";
                     break;
                 default:
-                    code += $"popq\t-{offset}(%rbp)\n";
+                    code += $"push\tqword [rbp-{offset}]\n";
                     break;
             }
 
