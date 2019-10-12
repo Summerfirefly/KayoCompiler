@@ -1,13 +1,13 @@
-GLOBAL puts
+GLOBAL write
 
 SECTION .data
 str_true:	db "true"
 str_false:	db "false"
 
 SECTION .text
-; void puts(int a)
-; void puts(bool a)
-puts:
+; void write(int a)
+; void write(bool a)
+write:
 push	rbp
 mov	rbp, rsp
 push	rax

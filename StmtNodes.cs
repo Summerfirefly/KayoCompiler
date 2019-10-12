@@ -127,7 +127,7 @@
             else
                 code += "push\t1\n";
 
-            code += "call\tputs\n";
+            code += "call\twrite\n";
 
             return code;
         }

@@ -18,7 +18,8 @@ namespace KayoCompiler.Ast
             string code = string.Empty;
 
             code += "GLOBAL _start\n";
-            code += "EXTERN puts\n";
+            if (CodeGenUtils.HasWrite)
+                code += "EXTERN write\n";
             code += "SECTION .text\n";
             code += "_start:\n";
             code += "call\t_entry\n";

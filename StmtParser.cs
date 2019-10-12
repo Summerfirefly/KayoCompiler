@@ -134,6 +134,7 @@ namespace KayoCompiler
 
         private void WriteStmt(WriteStmtNode node)
         {
+            CodeGenUtils.HasWrite = true;
             Move();
             Expr(ref node.expr);
 

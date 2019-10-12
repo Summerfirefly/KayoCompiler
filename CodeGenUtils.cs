@@ -5,6 +5,7 @@
         internal static int LabelNum { get; set; } = 1;
         internal static int CurrentField { get; set; } = 0;
         internal static int StackDepth { get; set; } = 0;
+        internal static bool HasWrite { get; set; } = false;
 
         internal static string CurrentStackTop
         {
