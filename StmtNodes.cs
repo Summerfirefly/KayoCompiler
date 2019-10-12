@@ -8,14 +8,14 @@
 
         public override string Gen()
         {
-            int label = CodeGenData.labelNum++;
-            int endIf = CodeGenData.labelNum++;
+            int label = CodeGenData.LabelNum++;
+            int endIf = CodeGenData.LabelNum++;
             string code = string.Empty;
 
             code += condition?.Gen() ?? string.Empty;
             code += $"jz {label}\n";
 
-            CodeGenData.stackDepth--;
+            CodeGenData.StackDepth--;
 
             code += body?.Gen() ?? string.Empty;
             code += $"jmp {endIf}\n";
@@ -47,11 +47,11 @@
         public override string Gen()
         {
             string code = string.Empty;
-            int index = SymbolTable.GetVarIndex(id.name, CodeGenData.currentField);
+            int index = SymbolTable.GetVarIndex(id.name, CodeGenData.CurrentField);
             int offset = (index + 1) * 8;
             code += expr?.Gen() ?? string.Empty;
 
-            switch (CodeGenData.stackDepth)
+            switch (CodeGenData.StackDepth)
             {
                 case 1:
                     code += $"mov\tqword [rbp-{offset}], rax\n";
@@ -67,7 +67,7 @@
                     break;
             }
 
-            CodeGenData.stackDepth--;
+            CodeGenData.StackDepth--;
 
             return code;
         }
@@ -80,14 +80,14 @@
 
         public override string Gen()
         {
-            int startLabel = CodeGenData.labelNum++;
-            int endLabel = CodeGenData.labelNum++;
+            int startLabel = CodeGenData.LabelNum++;
+            int endLabel = CodeGenData.LabelNum++;
             string code = string.Empty;
 
             code += $"{startLabel}:\n";
             code += condition?.Gen() ?? string.Empty;
 
-            CodeGenData.stackDepth--;
+            CodeGenData.StackDepth--;
 
             code += $"jz {endLabel}\n";
             code += body?.Gen() ?? string.Empty;
@@ -106,7 +106,28 @@
         {
             string code = string.Empty;
             code += expr?.Gen() ?? string.Empty;
-            code += "put\n";
+
+            switch (CodeGenData.StackDepth)
+            {
+                case 1:
+                    code += "push\trax\n";
+                    break;
+                case 2:
+                    code += "push\trdx\n";
+                    break;
+                case 3:
+                    code += "push\trcx\n";
+                    break;
+            }
+
+            CodeGenData.StackDepth--;
+            code += $";{expr?.Type()}\n";
+            if (expr?.Type() == VarType.TYPE_BOOL)
+                code += "push\t0\n";
+            else
+                code += "push\t1\n";
+
+            code += "call\tputs\n";
 
             return code;
         }
