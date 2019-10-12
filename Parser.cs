@@ -37,7 +37,7 @@ namespace KayoCompiler
         private void Block(BlockNode node)
         {
             if (next == null) return;
-            CodeGenData.CurrentField++;
+            CodeGenUtils.CurrentField++;
 
             if (next.Tag == Tag.DL_LBRACE)
             {
@@ -65,7 +65,7 @@ namespace KayoCompiler
                 new TokenMissingError(Tag.DL_RBRACE).PrintErrMsg();
             }
 
-            CodeGenData.CurrentField--;
+            CodeGenUtils.CurrentField--;
         }
 
         private void Decls(DeclsNode node)
@@ -104,7 +104,7 @@ namespace KayoCompiler
 
                     if (node.name != null)
                     {
-                        TableVarItem variable = new TableVarItem { name = node.name, field = CodeGenData.CurrentField };
+                        TableVarItem variable = new TableVarItem { name = node.name, field = CodeGenUtils.CurrentField };
                         switch (node.type)
                         {
                             case Tag.KW_INT:

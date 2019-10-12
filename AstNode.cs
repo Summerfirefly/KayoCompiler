@@ -61,14 +61,14 @@ namespace KayoCompiler.Ast
             if (children == null) return string.Empty;
 
             string code = string.Empty;
-            CodeGenData.CurrentField++;
+            CodeGenUtils.CurrentField++;
 
             foreach (var child in children)
             {
                 code += child?.Gen() ?? string.Empty;
             }
 
-            CodeGenData.CurrentField--;
+            CodeGenUtils.CurrentField--;
             return code;
         }
 
