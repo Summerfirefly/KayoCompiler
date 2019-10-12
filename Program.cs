@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 
 namespace KayoCompiler
 {
@@ -7,7 +6,13 @@ namespace KayoCompiler
     {
         static void Main(string[] args)
         {
-            Debug.Run("./test.txt");
+            if (args.Length == 0)
+            {
+                Console.WriteLine("No file input");
+                return;
+            }
+
+            new Generator(new Parser(new Scanner(args[0]))).Generate();
         }
     }
 }

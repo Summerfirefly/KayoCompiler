@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using System.IO;
 
 namespace KayoCompiler
@@ -18,12 +16,22 @@ namespace KayoCompiler
 
         internal void Generate()
         {
-            StreamWriter sw = new StreamWriter(new FileStream(tmpFilePath, FileMode.Create));
-            string code = parser.Parse().Gen();
-            sw.Write(code);
+            var program = parser.Parse();
 
-            sw.Flush();
-            sw.Close();
+            if (CodeGenUtils.ErrorNum == 0)
+            {
+                StreamWriter sw = new StreamWriter(new FileStream(tmpFilePath, FileMode.Create));
+                string code = program.Gen();
+                sw.Write(code);
+                sw.Flush();
+                sw.Close();
+            }
+            else
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"{CodeGenUtils.ErrorNum} errors, stop");
+                Console.ResetColor();
+            }
         }
     }
 }

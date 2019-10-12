@@ -10,6 +10,7 @@ namespace KayoCompiler.Errors
         public Error()
         {
             lineNum = Scanner.LineNum;
+            CodeGenUtils.ErrorNum++;
         }
 
         public virtual void PrintErrMsg()
