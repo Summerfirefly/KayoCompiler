@@ -13,17 +13,17 @@
             string code = string.Empty;
 
             code += condition?.Gen() ?? string.Empty;
-            code += $"jz {label}\n";
+            code += $"jz _L{label}\n";
 
             CodeGenData.StackDepth--;
 
             code += body?.Gen() ?? string.Empty;
-            code += $"jmp {endIf}\n";
-            code += $"{label}:\n";
+            code += $"jmp _L{endIf}\n";
+            code += $"_L{label}:\n";
 
             code += elseStmt?.Gen() ?? string.Empty;
 
-            code += $"{endIf}:\n";
+            code += $"_L{endIf}:\n";
 
             return code;
         }
@@ -84,15 +84,15 @@
             int endLabel = CodeGenData.LabelNum++;
             string code = string.Empty;
 
-            code += $"{startLabel}:\n";
+            code += $"_L{startLabel}:\n";
             code += condition?.Gen() ?? string.Empty;
 
             CodeGenData.StackDepth--;
 
-            code += $"jz {endLabel}\n";
+            code += $"jz _L{endLabel}\n";
             code += body?.Gen() ?? string.Empty;
-            code += $"jmp {startLabel}\n";
-            code += $"{endLabel}:\n";
+            code += $"jmp _L{startLabel}\n";
+            code += $"_L{endLabel}:\n";
 
             return code;
         }

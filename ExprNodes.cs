@@ -222,18 +222,18 @@
             switch (CodeGenData.StackDepth)
             {
                 case 2:
-                    code += "cmp\trdx, rax\n";
+                    code += "cmp\trax, rdx\n";
                     break;
                 case 3:
-                    code += "cmp\trcx, rdx\n";
+                    code += "cmp\trdx, rcx\n";
                     break;
                 case 4:
                     code += "pop\trbx";
-                    code += "cmp\trbx, rcx\n";
+                    code += "cmp\trcx, rbx\n";
                     break;
                 default:
                     code += "pop\trbx\n";
-                    code += "cmp\trbx, qword [rsp]\n";
+                    code += "cmp\tqword [rsp], rbx\n";
                     break;
             }
 
@@ -336,18 +336,18 @@
             switch (CodeGenData.StackDepth)
             {
                 case 2:
-                    code += "cmp\trdx, rax\n";
+                    code += "cmp\trax, rdx\n";
                     break;
                 case 3:
-                    code += "cmp\trcx, rdx\n";
+                    code += "cmp\trdx, rcx\n";
                     break;
                 case 4:
                     code += "pop\trbx";
-                    code += "cmp\trbx, rcx\n";
+                    code += "cmp\trcx, rbx\n";
                     break;
                 default:
                     code += "pop\trbx\n";
-                    code += "cmp\trbx, qword [rsp]\n";
+                    code += "cmp\tqword [rsp], rbx\n";
                     break;
             }
 

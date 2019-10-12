@@ -10,12 +10,6 @@ namespace KayoCompiler
             Parser parser = new Parser(new Scanner(testFilePath));
             Generator generator = new Generator(parser);
             generator.Generate();
-
-            for (int i = 0; i < SymbolTable.VarCount; i++)
-            {
-                var item = SymbolTable.GetVar(i);
-                Console.WriteLine($"{item.name} {item.type} {item.field}");
-            }
         }
     }
 }
