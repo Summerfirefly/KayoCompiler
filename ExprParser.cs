@@ -16,43 +16,25 @@ namespace KayoCompiler
                 case Tag.KW_FALSE:
                 case Tag.DL_NOT:
                     node = new ExprNode();
-                    LogicExpr(ref node.expr);
-                    break;
-            }
-        }
-
-        private void LogicExpr(ref LogicExprNode node)
-        {
-            switch (next?.Tag)
-            {
-                case Tag.ID:
-                case Tag.NUM:
-                case Tag.DL_LPAR:
-                case Tag.KW_TRUE:
-                case Tag.KW_FALSE:
-                case Tag.DL_NOT:
-                    node = new LogicExprNode();
-                    LogicTerm(ref node.term);
-                    LogicExprTail(ref node.tail);
-                    break;
-            }
-        }
-
-        private void LogicExprTail(ref LogicExprTailNode node)
-        {
-            switch (next?.Tag)
-            {
-                case Tag.DL_OR:
-                    node = new LogicExprTailNode();
-                    Move();
-                    LogicTerm(ref node.term);
-                    LogicExprTail(ref node.tail);
+                    var child = node.AddChild(new LogicTermNode());
+                    LogicTerm(ref child);
+                    while (next?.Tag == Tag.DL_OR)
+                    {
+                        child = node.AddChild(new LogicTermNode());
+                        LogicTerm(ref child);
+                    }
                     break;
             }
         }
 
         private void LogicTerm(ref LogicTermNode node)
         {
+            if (next?.Tag == Tag.DL_OR)
+            {
+                node.Op = next.Tag;
+                Move();
+            }
+
             switch (next?.Tag)
             {
                 case Tag.ID:
@@ -61,28 +43,28 @@ namespace KayoCompiler
                 case Tag.KW_TRUE:
                 case Tag.KW_FALSE:
                 case Tag.DL_NOT:
-                    node = new LogicTermNode();
-                    LogicFactor(ref node.factor);
-                    LogicTermTail(ref node.tail);
+                    var child = node.AddChild(new LogicFactorNode());
+                    LogicFactor(ref child);
+                    while (next?.Tag == Tag.DL_AND)
+                    {
+                        child = node.AddChild(new LogicFactorNode());
+                        LogicFactor(ref child);
+                    }
                     break;
-            }
-        }
-
-        private void LogicTermTail(ref LogicTermTailNode node)
-        {
-            switch (next?.Tag)
-            {
-                case Tag.DL_AND:
-                    node = new LogicTermTailNode();
-                    Move();
-                    LogicFactor(ref node.factor);
-                    LogicTermTail(ref node.tail);
+                default:
+                    node = null;
                     break;
             }
         }
 
         private void LogicFactor(ref LogicFactorNode node)
         {
+            if (next?.Tag == Tag.DL_AND)
+            {
+                node.Op = next.Tag;
+                Move();
+            }
+
             switch (next?.Tag)
             {
                 case Tag.ID:
@@ -91,32 +73,28 @@ namespace KayoCompiler
                 case Tag.KW_TRUE:
                 case Tag.KW_FALSE:
                 case Tag.DL_NOT:
-                    node = new LogicFactorNode();
-                    LogicRel(ref node.rel);
-                    LogicFactorTail(ref node.tail);
-                    break;
-            }
-        }
-
-        private void LogicFactorTail(ref LogicFactorTailNode node)
-        {
-            switch (next?.Tag)
-            {
-                case Tag.DL_EQ:
-                case Tag.DL_NEQ:
-                    node = new LogicFactorTailNode
+                    var child = node.AddChild(new LogicRelNode());
+                    LogicRel(ref child);
+                    while (next?.Tag == Tag.DL_EQ || next?.Tag == Tag.DL_NEQ)
                     {
-                        op = next.Tag
-                    };
-                    Move();
-                    LogicRel(ref node.rel);
-                    LogicFactorTail(ref node.tail);
+                        child = node.AddChild(new LogicRelNode());
+                        LogicRel(ref child);
+                    }
+                    break;
+                default:
+                    node = null;
                     break;
             }
         }
 
         private void LogicRel(ref LogicRelNode node)
         {
+            if (next?.Tag == Tag.DL_EQ || next?.Tag == Tag.DL_NEQ)
+            {
+                node.Op = next.Tag;
+                Move();
+            }
+
             switch (next?.Tag)
             {
                 case Tag.ID:
@@ -125,34 +103,35 @@ namespace KayoCompiler
                 case Tag.KW_TRUE:
                 case Tag.KW_FALSE:
                 case Tag.DL_NOT:
-                    node = new LogicRelNode();
-                    MathExpr(ref node.expr);
-                    LogicRelTail(ref node.tail);
-                    break;
-            }
-        }
-
-        private void LogicRelTail(ref LogicRelTailNode node)
-        {
-            switch (next?.Tag)
-            {
-                case Tag.DL_LT:
-                case Tag.DL_NLT:
-                case Tag.DL_GT:
-                case Tag.DL_NGT:
-                    node = new LogicRelTailNode
+                    var child = node.AddChild(new MathExprNode());
+                    MathExpr(ref child);
+                    while (
+                        next?.Tag == Tag.DL_LT ||
+                        next?.Tag == Tag.DL_NLT ||
+                        next?.Tag == Tag.DL_GT ||
+                        next?.Tag == Tag.DL_NGT)
                     {
-                        op = next.Tag
-                    };
-                    Move();
-                    MathExpr(ref node.expr);
-                    LogicRelTail(ref node.tail);
+                        child = node.AddChild(new MathExprNode());
+                        MathExpr(ref child);
+                    }
+                    break;
+                default:
+                    node = null;
                     break;
             }
         }
 
         private void MathExpr(ref MathExprNode node)
         {
+            if (next?.Tag == Tag.DL_LT ||
+                next?.Tag == Tag.DL_NLT ||
+                next?.Tag == Tag.DL_GT ||
+                next?.Tag == Tag.DL_NGT)
+            {
+                node.Op = next.Tag;
+                Move();
+            }
+
             switch (next?.Tag)
             {
                 case Tag.ID:
@@ -161,32 +140,28 @@ namespace KayoCompiler
                 case Tag.KW_TRUE:
                 case Tag.KW_FALSE:
                 case Tag.DL_NOT:
-                    node = new MathExprNode();
-                    MathTerm(ref node.term);
-                    MathExprTail(ref node.tail);
-                    break;
-            }
-        }
-
-        private void MathExprTail(ref MathExprTailNode node)
-        {
-            switch (next?.Tag)
-            {
-                case Tag.DL_PLUS:
-                case Tag.DL_MINUS:
-                    node = new MathExprTailNode
+                    var child = node.AddChild(new MathTermNode());
+                    MathTerm(ref child);
+                    while (next?.Tag == Tag.DL_PLUS || next?.Tag == Tag.DL_MINUS)
                     {
-                        op = next.Tag
-                    };
-                    Move();
-                    MathTerm(ref node.term);
-                    MathExprTail(ref node.tail);
+                        child = node.AddChild(new MathTermNode());
+                        MathTerm(ref child);
+                    }
+                    break;
+                default:
+                    node = null;
                     break;
             }
         }
 
         private void MathTerm(ref MathTermNode node)
         {
+            if (next?.Tag == Tag.DL_PLUS || next?.Tag == Tag.DL_MINUS)
+            {
+                node.Op = next.Tag;
+                Move();
+            }
+
             switch (next?.Tag)
             {
                 case Tag.ID:
@@ -195,33 +170,27 @@ namespace KayoCompiler
                 case Tag.KW_TRUE:
                 case Tag.KW_FALSE:
                 case Tag.DL_NOT:
-                    node = new MathTermNode();
-                    MathFactor(ref node.factor);
-                    MathTermTail(ref node.tail);
-                    break;
-            }
-        }
-
-        private void MathTermTail(ref MathTermTailNode node)
-        {
-            switch (next?.Tag)
-            {
-                case Tag.DL_MULTI:
-                case Tag.DL_OBELUS:
-                    node = new MathTermTailNode
+                    var child = node.AddChild(new MathFactorNode());
+                    MathFactor(ref child);
+                    while (next?.Tag == Tag.DL_MULTI || next?.Tag == Tag.DL_OBELUS)
                     {
-                        op = next.Tag
-                    };
-                    Move();
-                    MathFactor(ref node.factor);
-                    MathTermTail(ref node.tail);
+                        child = node.AddChild(new MathFactorNode());
+                        MathFactor(ref child);
+                    }
+                    break;
+                default:
+                    node = null;
                     break;
             }
         }
 
         private void MathFactor(ref MathFactorNode node)
         {
-            node = new MathFactorNode();
+            while (next?.Tag == Tag.DL_MULTI || next?.Tag == Tag.DL_OBELUS)
+            {
+                node.Op = next.Tag;
+                Move();
+            }
 
             switch (next?.Tag)
             {
@@ -248,6 +217,7 @@ namespace KayoCompiler
                     break;
                 case Tag.DL_NOT:
                     Move();
+                    node.factor = new MathFactorNode();
                     MathFactor(ref node.factor);
                     break;
                 default:
