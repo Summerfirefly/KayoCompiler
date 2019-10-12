@@ -132,6 +132,58 @@ namespace KayoCompiler
             Stmt(node.body);
         }
 
+        private void ForStmt(ForStmtNode node)
+        {
+            Move();
+
+            if (next?.Tag == Tag.DL_LPAR)
+            {
+                Move();
+            }
+            else
+            {
+                new TokenMissingError(Tag.DL_LPAR).PrintErrMsg();
+            }
+
+            node.preStmt = new StmtNode();
+            Stmt(node.preStmt);
+
+            Expr(ref node.condition);
+
+            if (node.condition == null)
+            {
+                new Error().PrintErrMsg();
+            }
+            else if (node.condition.Type() != VarType.TYPE_BOOL)
+            {
+                new Error().PrintErrMsg();
+            }
+
+            if (next?.Tag == Tag.DL_SEM)
+            {
+                Move();
+            }
+            else
+            {
+                new TokenMissingError(Tag.DL_SEM).PrintErrMsg();
+            }
+
+            node.loopStmt = new StmtNode();
+            Stmt(node.loopStmt);
+
+            if (next?.Tag == Tag.DL_RPAR)
+            {
+                Move();
+            }
+            else
+            {
+                new TokenMissingError(Tag.DL_RPAR).PrintErrMsg();
+            }
+
+            node.body = new StmtNode();
+            Stmt(node.body);
+        }
+
         private void WriteStmt(WriteStmtNode node)
         {
             CodeGenUtils.HasWrite = true;

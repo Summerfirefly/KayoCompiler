@@ -141,6 +141,7 @@ namespace KayoCompiler
                 case Tag.ID:
                 case Tag.KW_IF:
                 case Tag.KW_WHILE:
+                case Tag.KW_FOR:
                 case Tag.KW_WRITE:
                 case Tag.KW_READ:
                 case Tag.DL_LBRACE:
@@ -169,6 +170,10 @@ namespace KayoCompiler
                 case Tag.KW_WHILE:
                     node.stmt = new WhileStmtNode();
                     WhileStmt(node.stmt as WhileStmtNode);
+                    break;
+                case Tag.KW_FOR:
+                    node.stmt = new ForStmtNode();
+                    ForStmt(node.stmt as ForStmtNode);
                     break;
                 case Tag.KW_WRITE:
                     node.stmt = new WriteStmtNode();

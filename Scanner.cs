@@ -19,6 +19,7 @@ namespace KayoCompiler
             { "int", Tag.KW_INT },
             { "read", Tag.KW_READ },
             { "while", Tag.KW_WHILE },
+            { "for", Tag.KW_FOR },
             { "write", Tag.KW_WRITE },
             { "true", Tag.KW_TRUE },
             { "false", Tag.KW_FALSE }

@@ -98,6 +98,35 @@
         }
     }
 
+    class ForStmtNode : AstNode
+    {
+        internal StmtNode preStmt;
+        internal ExprNode condition;
+        internal StmtNode loopStmt;
+        internal StmtNode body;
+
+        public override string Gen()
+        {
+            int startLabel = CodeGenUtils.LabelNum++;
+            int endLabel = CodeGenUtils.LabelNum++;
+            string code = string.Empty;
+
+            code += preStmt?.Gen() ?? string.Empty;
+            code += $"_L{startLabel}:\n";
+            code += condition?.Gen() ?? string.Empty;
+            code += $"cmp\t{CodeGenUtils.CurrentStackTop}, 0\n";
+            CodeGenUtils.StackDepth--;
+
+            code += $"je _L{endLabel}\n";
+            code += body?.Gen() ?? string.Empty;
+            code += loopStmt?.Gen() ?? string.Empty;
+            code += $"jmp _L{startLabel}\n";
+            code += $"_L{endLabel}:\n";
+
+            return code;
+        }
+    }
+
     class WriteStmtNode : AstNode
     {
         public ExprNode expr;

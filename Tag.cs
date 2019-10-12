@@ -5,10 +5,11 @@
         NULL,
 
         // Keywords:
-        // bool, else, if, int, read,
-        // while, write, true, false
+        // bool, else, for, if, int,
+        // read, while, write, true, false
         KW_BOOL,
         KW_ELSE,
+        KW_FOR,
         KW_IF,
         KW_INT,
         KW_READ,
