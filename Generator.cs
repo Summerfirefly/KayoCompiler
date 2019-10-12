@@ -10,7 +10,7 @@ namespace KayoCompiler
         private readonly Parser parser;
         private readonly string tmpFilePath;
 
-        internal Generator(Parser parser, string tmpFilePath = "tmp.code")
+        internal Generator(Parser parser, string tmpFilePath = "tmp.asm")
         {
             this.parser = parser;
             this.tmpFilePath = tmpFilePath;

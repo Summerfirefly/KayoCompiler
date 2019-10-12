@@ -8,8 +8,6 @@ namespace KayoCompiler
         private readonly Scanner scanner = null;
         private Token next = null;
 
-        internal static int CurrentField { get; set; } = 0;
-
         internal Parser(Scanner scanner)
         {
             this.scanner = scanner;
@@ -39,7 +37,7 @@ namespace KayoCompiler
         private void Block(BlockNode node)
         {
             if (next == null) return;
-            CurrentField++;
+            CodeGenData.CurrentField++;
 
             if (next.Tag == Tag.DL_LBRACE)
             {
@@ -67,7 +65,7 @@ namespace KayoCompiler
                 new TokenMissingError(Tag.DL_RBRACE).PrintErrMsg();
             }
 
-            CurrentField--;
+            CodeGenData.CurrentField--;
         }
 
         private void Decls(DeclsNode node)
@@ -106,7 +104,7 @@ namespace KayoCompiler
 
                     if (node.name != null)
                     {
-                        TableVarItem variable = new TableVarItem { name = node.name, field = CurrentField };
+                        TableVarItem variable = new TableVarItem { name = node.name, field = CodeGenData.CurrentField };
                         switch (node.type)
                         {
                             case Tag.KW_INT:

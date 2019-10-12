@@ -59,7 +59,7 @@
         {
             string code = string.Empty;
             code += term?.Gen() ?? string.Empty;
-            switch (CodeGenData.stackDepth)
+            switch (CodeGenData.StackDepth)
             {
                 case 2:
                     code += "or\trax, rdx\n";
@@ -76,7 +76,7 @@
                     code += "or\tqword [rsp], rbx\n";
                     break;
             }
-            CodeGenData.stackDepth--;
+            CodeGenData.StackDepth--;
             code += tail?.Gen() ?? string.Empty;
 
             return code;
@@ -137,7 +137,7 @@
         {
             string code = string.Empty;
             code += factor?.Gen() ?? string.Empty;
-            switch (CodeGenData.stackDepth)
+            switch (CodeGenData.StackDepth)
             {
                 case 2:
                     code += "and\trax, rdx\n";
@@ -154,7 +154,7 @@
                     code += "and\tqword [rsp], rbx\n";
                     break;
             }
-            CodeGenData.stackDepth--;
+            CodeGenData.StackDepth--;
             code += tail?.Gen() ?? string.Empty;
 
             return code;
@@ -219,7 +219,7 @@
             string code = string.Empty;
             code += rel?.Gen() ?? string.Empty;
 
-            switch (CodeGenData.stackDepth)
+            switch (CodeGenData.StackDepth)
             {
                 case 2:
                     code += "cmp\trdx, rax\n";
@@ -249,7 +249,7 @@
 
             code += "movzx\trbx, bl\n";
 
-            switch (CodeGenData.stackDepth)
+            switch (CodeGenData.StackDepth)
             {
                 case 2:
                     code += "mov\trax, rbx\n";
@@ -265,7 +265,7 @@
                     break;
             }
 
-            CodeGenData.stackDepth--;
+            CodeGenData.StackDepth--;
 
             code += tail?.Gen() ?? string.Empty;
 
@@ -333,7 +333,7 @@
             string code = string.Empty;
             code += expr?.Gen() ?? string.Empty;
 
-            switch (CodeGenData.stackDepth)
+            switch (CodeGenData.StackDepth)
             {
                 case 2:
                     code += "cmp\trdx, rax\n";
@@ -369,7 +369,7 @@
 
             code += "movzx\trbx, bl\n";
 
-            switch (CodeGenData.stackDepth)
+            switch (CodeGenData.StackDepth)
             {
                 case 2:
                     code += "mov\trax, rbx\n";
@@ -385,7 +385,7 @@
                     break;
             }
 
-            CodeGenData.stackDepth--;
+            CodeGenData.StackDepth--;
 
             code += tail?.Gen() ?? string.Empty;
 
@@ -453,7 +453,7 @@
 
             if (op == Tag.DL_PLUS)
             {
-                switch (CodeGenData.stackDepth)
+                switch (CodeGenData.StackDepth)
                 {
                     case 2:
                         code += "add\trax, rdx\n";
@@ -473,7 +473,7 @@
             }
             else
             {
-                switch (CodeGenData.stackDepth)
+                switch (CodeGenData.StackDepth)
                 {
                     case 2:
                         code += "sub\trax, rdx\n";
@@ -492,7 +492,7 @@
                 }
             }
 
-            CodeGenData.stackDepth--;
+            CodeGenData.StackDepth--;
 
             code += tail?.Gen() ?? string.Empty;
 
@@ -558,7 +558,7 @@
 
             if (op == Tag.DL_MULTI)
             {
-                switch (CodeGenData.stackDepth)
+                switch (CodeGenData.StackDepth)
                 {
                     case 2:
                         code += "imul\trax, rdx\n";
@@ -579,7 +579,7 @@
             }
             else
             {
-                switch (CodeGenData.stackDepth)
+                switch (CodeGenData.StackDepth)
                 {
                     case 2:
                         code += "mov\trbx, rdx\n";
@@ -620,7 +620,7 @@
                 }
             }
 
-            CodeGenData.stackDepth--;
+            CodeGenData.StackDepth--;
 
             code += tail?.Gen() ?? string.Empty;
 
@@ -658,7 +658,7 @@
 
             if (factor != null)
             {
-                switch (CodeGenData.stackDepth)
+                switch (CodeGenData.StackDepth)
                 {
                     case 1:
                         code += "not\trax\n";

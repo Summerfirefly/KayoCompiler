@@ -16,8 +16,8 @@
 
         public override string Gen()
         {
-            CodeGenData.stackDepth++;
-            switch (CodeGenData.stackDepth)
+            CodeGenData.StackDepth++;
+            switch (CodeGenData.StackDepth)
             {
                 case 1:
                     return $"mov\trax, {value}\n";
@@ -47,8 +47,8 @@
 
         public override string Gen()
         {
-            CodeGenData.stackDepth++;
-            switch (CodeGenData.stackDepth)
+            CodeGenData.StackDepth++;
+            switch (CodeGenData.StackDepth)
             {
                 case 1:
                     return $"mov\trax, {value}\n";
@@ -78,10 +78,10 @@
 
         public override string Gen()
         {
-            int index = SymbolTable.GetVarIndex(name, CodeGenData.currentField);
+            int index = SymbolTable.GetVarIndex(name, CodeGenData.CurrentField);
             int offset = (index + 1) * 8;
-            CodeGenData.stackDepth++;
-            switch (CodeGenData.stackDepth)
+            CodeGenData.StackDepth++;
+            switch (CodeGenData.StackDepth)
             {
                 case 1:
                     return $"mov\trax, [rbp-{offset}]\n";
@@ -96,7 +96,7 @@
 
         public override VarType Type()
         {
-            TableVarItem? item = SymbolTable.FindVar(name, Parser.CurrentField);
+            TableVarItem? item = SymbolTable.FindVar(name, CodeGenData.CurrentField);
             return item?.type ?? VarType.TYPE_ERROR;
         }
     }

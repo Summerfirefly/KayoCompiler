@@ -1,18 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace KayoCompiler.Ast
 {
     abstract class AstNode
     {
         public abstract string Gen();
-    }
-
-    internal struct CodeGenData
-    {
-        internal static int labelNum = 1;
-        internal static int currentField = 0;
-        internal static int stackDepth = 0;
     }
 
     class ProgramNode : AstNode
@@ -24,6 +16,15 @@ namespace KayoCompiler.Ast
             if (children == null) return string.Empty;
 
             string code = string.Empty;
+
+            code += "GLOBAL _start\n";
+            code += "EXTERN puts\n";
+            code += "SECTION .text\n";
+            code += "_start:\n";
+            code += "call\t_entry\n";
+            code += "mov\trax, 60\n";
+            code += "mov\trdi, 0\n";
+            code += "syscall\n";
 
             code += "_entry:\n";
             code += "push\trbp\n";
@@ -60,14 +61,14 @@ namespace KayoCompiler.Ast
             if (children == null) return string.Empty;
 
             string code = string.Empty;
-            CodeGenData.currentField++;
+            CodeGenData.CurrentField++;
 
             foreach (var child in children)
             {
                 code += child?.Gen() ?? string.Empty;
             }
 
-            CodeGenData.currentField--;
+            CodeGenData.CurrentField--;
             return code;
         }
 
