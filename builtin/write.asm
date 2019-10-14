@@ -18,16 +18,24 @@ mov	rax, qword [rsp+40]
 cmp	rax, 0
 je	put_bool
 
-put_int:
+convert_int:
 mov	rax, qword [rsp+48]
-put_int_loop:
+mov	rcx, 0
+convert_int_loop:
 cqo
 mov	rbx, 10
 idiv	rbx
 add	rdx, 48
 push	rdx
-call	putc
+inc	rcx
 cmp	rax, 0
+jne	convert_int_loop
+
+put_int_loop:
+call	putc
+add	rsp, 8
+dec	rcx
+cmp	rcx, 0
 jne	put_int_loop
 jmp	exit
 
