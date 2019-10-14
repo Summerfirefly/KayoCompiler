@@ -531,7 +531,7 @@ namespace KayoCompiler.Ast
                                     code += "pop\trbx\n";
                                     code += "push\trax\n";
                                     code += "push\trdx\n";
-                                    code += "mov\trax, qword 16[rsp]\n";
+                                    code += "mov\trax, qword [rsp+16]\n";
                                     code += "cqo\n";
                                     code += "idiv\trbx\n";
                                     code += "mov\trbx, rax\n";

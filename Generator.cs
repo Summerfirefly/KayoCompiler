@@ -21,7 +21,29 @@ namespace KayoCompiler
             if (CodeGenUtils.ErrorNum == 0)
             {
                 StreamWriter sw = new StreamWriter(new FileStream(tmpFilePath, FileMode.Create));
-                string code = program.Gen();
+                string code = string.Empty;
+
+                code += "GLOBAL _start\n";
+                if (CodeGenUtils.HasWrite)
+                    code += "EXTERN write\n";
+                code += "SECTION .text\n";
+                code += "_start:\n";
+                code += "call\t_entry\n";
+                code += "mov\trax, 60\n";
+                code += "mov\trdi, 0\n";
+                code += "syscall\n";
+
+                code += "_entry:\n";
+                code += "push\trbp\n";
+                code += "mov\trbp, rsp\n";
+                code += $"sub\trsp, {SymbolTable.VarCount * 8}\n";
+
+                code += program.Gen();
+
+                code += "mov\trsp, rbp\n";
+                code += "pop\trbp\n";
+                code += "ret\n";
+
                 sw.Write(code);
                 sw.Flush();
                 sw.Close();

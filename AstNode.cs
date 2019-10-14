@@ -17,29 +17,10 @@ namespace KayoCompiler.Ast
 
             string code = string.Empty;
 
-            code += "GLOBAL _start\n";
-            if (CodeGenUtils.HasWrite)
-                code += "EXTERN write\n";
-            code += "SECTION .text\n";
-            code += "_start:\n";
-            code += "call\t_entry\n";
-            code += "mov\trax, 60\n";
-            code += "mov\trdi, 0\n";
-            code += "syscall\n";
-
-            code += "_entry:\n";
-            code += "push\trbp\n";
-            code += "mov\trbp, rsp\n";
-            code += $"sub\trsp, {SymbolTable.VarCount * 8}\n";
-
             foreach (var child in children)
             {
                 code += child?.Gen() ?? string.Empty;
             }
-
-            code += "mov\trsp, rbp\n";
-            code += "pop\trbp\n";
-            code += "ret\n";
 
             return code;
         }
