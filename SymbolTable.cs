@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using KayoCompiler.Ast;
 
 namespace KayoCompiler
 {
@@ -9,62 +8,73 @@ namespace KayoCompiler
         SYMBOL_EXIST
     }
 
-    struct TableVarItem
-    {
-        internal VarType type;
-        internal string name;
-        internal int field;
-    }
-
     static class SymbolTable
     {
-        static readonly Dictionary<string, List<TableVarItem>> vars = new Dictionary<string, List<TableVarItem>>();
-        
-        internal static int VarCount
+        static readonly Dictionary<string, List<VarSymbol>> vars = new Dictionary<string, List<VarSymbol>>();
+        static readonly Dictionary<string, FunSymbol> funs = new Dictionary<string, FunSymbol>();
+    
+        internal static int CurFunVarCount
         {
             get
             {
-                return vars.Count;
+                return funs[ScopeManager.CurrentFun].localVarCount;
             }
         }
 
-        internal static TableAddStatus AddVar(TableVarItem varItem)
+        internal static TableAddStatus AddFun(FunSymbol varItem)
         {
-            if (FindVar(varItem.name, varItem.field) != null)
+            if (FindFun(varItem.name) != null)
+                return TableAddStatus.SYMBOL_EXIST;
+            
+            funs.Add(varItem.name, varItem);
+            return TableAddStatus.SUCCEED;
+        }
+
+        internal static TableAddStatus AddVar(VarSymbol varItem)
+        {
+            if (FindVar(varItem.name)?.scopeId == ScopeManager.CurrentScope)
                 return TableAddStatus.SYMBOL_EXIST;
 
             if (!vars.ContainsKey(varItem.name))
-                vars.Add(varItem.name, new List<TableVarItem>());
+                vars.Add(varItem.name, new List<VarSymbol>());
             
             vars[varItem.name].Add(varItem);
-            vars[varItem.name].Sort((x, y) => y.field - x.field );
+            vars[varItem.name].Sort((x, y) => y.scopeId - x.scopeId );
 
             return TableAddStatus.SUCCEED;
         }
 
-        internal static TableVarItem? FindVar(string name, int field)
+        internal static FunSymbol FindFun(string name)
+        {
+            if (!funs.ContainsKey(name))
+                return null;
+
+            return funs[name];
+        }
+
+        internal static VarSymbol FindVar(string name)
         {
             if (!vars.ContainsKey(name))
                 return null;
             
             foreach (var item in vars[name])
             {
-                if (item.name == name && item.field <= field)
+                if (ScopeManager.IsVisibleNow(item.scopeId))
                     return item;
             }
 
             return null;
         }
 
-        internal static int GetVarIndex(string name, int field)
+        internal static int GetVarIndex(string name)
         {
             if (!vars.ContainsKey(name))
                 return -1;
             
-            for (int i = 0; i < vars[name].Count; i++)
+            foreach (var item in vars[name])
             {
-                if (vars[name][i].name == name && vars[name][i].field <= field)
-                    return i;
+                if (ScopeManager.IsVisibleNow(item.scopeId))
+                    return item.indexInFun;
             }
 
             return -1;

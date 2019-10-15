@@ -1,4 +1,4 @@
-﻿namespace KayoCompiler.Ast
+﻿namespace KayoCompiler
 {
     enum VarType
     {

@@ -47,7 +47,7 @@
         public override string Gen()
         {
             string code = string.Empty;
-            int index = SymbolTable.GetVarIndex(id.name, CodeGenUtils.CurrentField);
+            int index = SymbolTable.GetVarIndex(id.name);
             int offset = (index + 1) * 8;
             code += expr?.Gen() ?? string.Empty;
 

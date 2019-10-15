@@ -78,7 +78,7 @@
 
         public override string Gen()
         {
-            int index = SymbolTable.GetVarIndex(name, CodeGenUtils.CurrentField);
+            int index = SymbolTable.GetVarIndex(name);
             int offset = (index + 1) * 8;
             CodeGenUtils.StackDepth++;
             switch (CodeGenUtils.StackDepth)
@@ -96,7 +96,7 @@
 
         public override VarType Type()
         {
-            TableVarItem? item = SymbolTable.FindVar(name, CodeGenUtils.CurrentField);
+            VarSymbol item = SymbolTable.FindVar(name);
             return item?.type ?? VarType.TYPE_ERROR;
         }
     }

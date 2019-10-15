@@ -36,7 +36,7 @@ namespace KayoCompiler
                 code += "_entry:\n";
                 code += "push\trbp\n";
                 code += "mov\trbp, rsp\n";
-                code += $"sub\trsp, {SymbolTable.VarCount * 8}\n";
+                code += $"sub\trsp, {SymbolTable.CurFunVarCount * 8}\n";
 
                 code += program.Gen();
 

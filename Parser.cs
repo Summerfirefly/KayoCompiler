@@ -18,6 +18,8 @@ namespace KayoCompiler
         {
             ProgramNode p = new ProgramNode();
             Program(p);
+            ScopeManager.ScopeIdReset();
+
             return p;
         }
 
@@ -25,9 +27,17 @@ namespace KayoCompiler
         {
             BlockNode block = new BlockNode();
             node.AddChild(block);
+            ScopeManager.LocalVarCountReset();
 
             Block(block);
 
+            SymbolTable.AddFun(new FunSymbol
+            {
+                returnType = VarType.TYPE_VOID,
+                name = "test_main",
+                localVarCount = ScopeManager.LocalVarCount
+            });
+            ScopeManager.LocalVarCountReset();
             while (next != null)
             {
                 if (next.Tag != Tag.COMMENT)
@@ -43,7 +53,7 @@ namespace KayoCompiler
         private void Block(BlockNode node)
         {
             if (next == null) return;
-            CodeGenUtils.CurrentField++;
+            ScopeManager.ScopeEnter();
 
             if (next.Tag == Tag.DL_LBRACE)
             {
@@ -71,7 +81,7 @@ namespace KayoCompiler
                 new TokenMissingError(Tag.DL_RBRACE).PrintErrMsg();
             }
 
-            CodeGenUtils.CurrentField--;
+            ScopeManager.ScopeLeave();
         }
 
         private void Decls(DeclsNode node)
@@ -110,7 +120,13 @@ namespace KayoCompiler
 
                     if (node.name != null)
                     {
-                        TableVarItem variable = new TableVarItem { name = node.name, field = CodeGenUtils.CurrentField };
+                        VarSymbol variable = new VarSymbol
+                        {
+                            name = node.name,
+                            scopeId = ScopeManager.CurrentScope,
+                            indexInFun = ScopeManager.LocalVarCount++
+                        };
+                        
                         switch (node.type)
                         {
                             case Tag.KW_INT:
