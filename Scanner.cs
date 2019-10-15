@@ -17,6 +17,8 @@ namespace KayoCompiler
             { "else", Tag.KW_ELSE },
             { "if", Tag.KW_IF },
             { "int", Tag.KW_INT },
+            { "void", Tag.KW_VOID },
+            { "fun", Tag.KW_FUN },
             { "read", Tag.KW_READ },
             { "while", Tag.KW_WHILE },
             { "for", Tag.KW_FOR },
@@ -36,14 +38,16 @@ namespace KayoCompiler
             { "&&", Tag.DL_AND },   { "!", Tag.DL_NOT },
             { ";", Tag.DL_SEM },    { "(", Tag.DL_LPAR },
             { ")", Tag.DL_RPAR },   { "{", Tag.DL_LBRACE },
-            { "}", Tag.DL_RBRACE }, { "/**/", Tag.COMMENT }
+            { "}", Tag.DL_RBRACE }, { ":", Tag.DL_COL },
+            { ",", Tag.DL_COM },    { "/**/", Tag.COMMENT }
         };
 
         private readonly char[] delimiterFirst = new char[]
         {
             '+', '-', '*', '/', '>',
             '<', '=', '!', '|', '&',
-            ';', '(', ')', '{', '}'
+            ';', '(', ')', '{', '}',
+            ':', ','
         };
 
         public Scanner(string path)

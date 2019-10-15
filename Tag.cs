@@ -5,13 +5,15 @@
         NULL,
 
         // Keywords:
-        // bool, else, for, if, int,
+        // bool, else, for, if, int, void, fun
         // read, while, write, true, false
         KW_BOOL,
         KW_ELSE,
         KW_FOR,
         KW_IF,
         KW_INT,
+        KW_VOID,
+        KW_FUN,
         KW_READ,
         KW_WHILE,
         KW_WRITE,
@@ -38,6 +40,8 @@
         DL_RPAR,        // )
         DL_LBRACE,      // {
         DL_RBRACE,      // }
+        DL_COL,         // :
+        DL_COM,         // ,
 
         // Other type
         ID,
