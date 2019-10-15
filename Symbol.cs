@@ -16,5 +16,11 @@ namespace KayoCompiler
 		internal string name;
 		internal List<VarType> parasType;
 		internal int localVarCount;
+
+		internal FunSymbol()
+		{
+			name = string.Empty;
+			parasType = new List<VarType>();
+		}
 	}
 }

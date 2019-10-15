@@ -66,6 +66,8 @@ namespace KayoCompiler
             return null;
         }
 
+        // 仅在代码生成阶段使用，即已经保证程序的正确性
+        // 用于生成局部变量/函数参数相对栈基地址的偏移
         internal static int GetVarIndex(string name)
         {
             if (!vars.ContainsKey(name))

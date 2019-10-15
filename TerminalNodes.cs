@@ -79,18 +79,18 @@
         public override string Gen()
         {
             int index = SymbolTable.GetVarIndex(name);
-            int offset = (index + 1) * 8;
+            int offset = -(index + 1) * 8;
             CodeGenUtils.StackDepth++;
             switch (CodeGenUtils.StackDepth)
             {
                 case 1:
-                    return $"mov\trax, [rbp-{offset}]\n";
+                    return $"mov\trax, [rbp{(offset>0?"+":"")}{offset}]\n";
                 case 2:
-                    return $"mov\trdx, [rbp-{offset}]\n";
+                    return $"mov\trdx, [rbp{(offset>0?"+":"")}{offset}]\n";
                 case 3:
-                    return $"mov\trcx, [rbp-{offset}]\n";
+                    return $"mov\trcx, [rbp{(offset>0?"+":"")}{offset}]\n";
                 default:
-                    return $"push\tqword [rbp-{offset}]\n";
+                    return $"push\tqword [rbp{(offset>0?"+":"")}{offset}]\n";
             }
         }
 

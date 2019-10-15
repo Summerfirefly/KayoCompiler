@@ -7,6 +7,7 @@ namespace KayoCompiler
     {
         private void IfStmt(IfStmtNode node)
         {
+            ScopeManager.ScopeEnter();
             node.body = new StmtNode();
             Move();
 
@@ -40,6 +41,7 @@ namespace KayoCompiler
             }
 
             Stmt(node.body);
+            ScopeManager.ScopeLeave();
 
             if (next?.Tag == Tag.KW_ELSE)
             {
@@ -50,10 +52,12 @@ namespace KayoCompiler
 
         private void ElseStmt(ElseStmtNode node)
         {
+            ScopeManager.ScopeEnter();
             node.body = new StmtNode();
             Move();
 
             Stmt(node.body);
+            ScopeManager.ScopeLeave();
         }
 
         private void SetStmt(SetStmtNode node)
@@ -97,6 +101,7 @@ namespace KayoCompiler
 
         private void WhileStmt(WhileStmtNode node)
         {
+            ScopeManager.ScopeEnter();
             node.body = new StmtNode();
             Move();
 
@@ -130,10 +135,12 @@ namespace KayoCompiler
             }
 
             Stmt(node.body);
+            ScopeManager.ScopeLeave();
         }
 
         private void ForStmt(ForStmtNode node)
         {
+            ScopeManager.ScopeEnter();
             Move();
 
             if (next?.Tag == Tag.DL_LPAR)
@@ -182,6 +189,7 @@ namespace KayoCompiler
 
             node.body = new StmtNode();
             Stmt(node.body);
+            ScopeManager.ScopeLeave();
         }
 
         private void WriteStmt(WriteStmtNode node)

@@ -11,6 +11,7 @@
             int falseLabel = CodeGenUtils.LabelNum++;
             int endIf = CodeGenUtils.LabelNum++;
             string code = string.Empty;
+            ScopeManager.ScopeEnter();
 
             code += condition?.Gen() ?? string.Empty;
             code += $"cmp\t{CodeGenUtils.CurrentStackTop}, 0\n";
@@ -20,6 +21,8 @@
             code += body?.Gen() ?? string.Empty;
             code += $"jmp _L{endIf}\n";
             code += $"_L{falseLabel}:\n";
+            
+            ScopeManager.ScopeLeave();
 
             code += elseStmt?.Gen() ?? string.Empty;
 
@@ -35,7 +38,11 @@
 
         public override string Gen()
         {
-            return body?.Gen() ?? string.Empty;
+            ScopeManager.ScopeEnter();
+            string code = body?.Gen() ?? string.Empty;
+            ScopeManager.ScopeLeave();
+
+            return code;
         }
     }
 
@@ -48,22 +55,22 @@
         {
             string code = string.Empty;
             int index = SymbolTable.GetVarIndex(id.name);
-            int offset = (index + 1) * 8;
+            int offset = -(index + 1) * 8;
             code += expr?.Gen() ?? string.Empty;
 
             switch (CodeGenUtils.StackDepth)
             {
                 case 1:
-                    code += $"mov\tqword [rbp-{offset}], rax\n";
+                    code += $"mov\tqword [rbp{(offset>0?"+":"")}{offset}], rax\n";
                     break;
                 case 2:
-                    code += $"mov\tqword [rbp-{offset}], rdx\n";
+                    code += $"mov\tqword [rbp{(offset>0?"+":"")}{offset}], rdx\n";
                     break;
                 case 3:
-                    code += $"mov\tqword [rbp-{offset}], rcx\n";
+                    code += $"mov\tqword [rbp{(offset>0?"+":"")}{offset}], rcx\n";
                     break;
                 default:
-                    code += $"push\tqword [rbp-{offset}]\n";
+                    code += $"push\tqword [rbp{(offset>0?"+":"")}{offset}]\n";
                     break;
             }
 
@@ -83,6 +90,7 @@
             int startLabel = CodeGenUtils.LabelNum++;
             int endLabel = CodeGenUtils.LabelNum++;
             string code = string.Empty;
+            ScopeManager.ScopeEnter();
 
             code += $"_L{startLabel}:\n";
             code += condition?.Gen() ?? string.Empty;
@@ -94,6 +102,7 @@
             code += $"jmp _L{startLabel}\n";
             code += $"_L{endLabel}:\n";
 
+            ScopeManager.ScopeLeave();
             return code;
         }
     }
@@ -110,6 +119,7 @@
             int startLabel = CodeGenUtils.LabelNum++;
             int endLabel = CodeGenUtils.LabelNum++;
             string code = string.Empty;
+            ScopeManager.ScopeEnter();
 
             code += preStmt?.Gen() ?? string.Empty;
             code += $"_L{startLabel}:\n";
@@ -123,6 +133,7 @@
             code += $"jmp _L{startLabel}\n";
             code += $"_L{endLabel}:\n";
 
+            ScopeManager.ScopeLeave();
             return code;
         }
     }

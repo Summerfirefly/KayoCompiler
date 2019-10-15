@@ -16,7 +16,7 @@ namespace KayoCompiler
 			}
 		}
 
-		internal static string CurrentFun = "test_main";
+		internal static string CurrentFun = string.Empty;
 
 		private static Stack<int> scopePath = new Stack<int>();
 
@@ -31,6 +31,18 @@ namespace KayoCompiler
 		internal static void LocalVarCountReset()
 		{
 			LocalVarCount = 0;
+		}
+
+		internal static void FunctionEnter(string funName)
+		{
+			CurrentFun = funName;
+			LocalVarCountReset();
+		}
+
+		internal static void FunctionLeave()
+		{
+			CurrentFun = string.Empty;
+			LocalVarCountReset();
 		}
 
 		internal static void ScopeEnter()

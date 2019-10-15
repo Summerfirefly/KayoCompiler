@@ -9,7 +9,7 @@ namespace KayoCompiler.Ast
 
     class ProgramNode : AstNode
     {
-        internal List<BlockNode> children;
+        internal List<FunctionNode> children;
 
         public override string Gen()
         {
@@ -25,12 +25,41 @@ namespace KayoCompiler.Ast
             return code;
         }
 
-        public void AddChild(BlockNode child)
+        public void AddChild(FunctionNode child)
         {
             if (children == null)
-                children = new List<BlockNode>();
+                children = new List<FunctionNode>();
 
             children.Add(child);
+        }
+    }
+
+    class FunctionNode : AstNode
+    {
+        internal string name;
+        internal BlockNode body;
+
+        public override string Gen()
+        {
+            string code = string.Empty;
+            ScopeManager.FunctionEnter(name);
+            ScopeManager.ScopeEnter();
+
+            code += $"{name}:\n";
+            code += "push\trbp\n";
+            code += "mov\trbp, rsp\n";
+            code += $"sub\trsp, {SymbolTable.CurFunVarCount * 8}\n";
+
+            code += body?.Gen();
+
+            code += "mov\trsp, rbp\n";
+            code += "pop\trbp\n";
+            code += "ret\n";
+
+            ScopeManager.ScopeLeave();
+            ScopeManager.FunctionLeave();
+
+            return code;
         }
     }
 
@@ -43,14 +72,12 @@ namespace KayoCompiler.Ast
             if (children == null) return string.Empty;
 
             string code = string.Empty;
-            ScopeManager.ScopeEnter();
 
             foreach (var child in children)
             {
                 code += child?.Gen() ?? string.Empty;
             }
 
-            ScopeManager.ScopeLeave();
             return code;
         }
 

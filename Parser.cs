@@ -25,19 +25,11 @@ namespace KayoCompiler
 
         private void Program(ProgramNode node)
         {
-            BlockNode block = new BlockNode();
-            node.AddChild(block);
-            ScopeManager.LocalVarCountReset();
+            FunctionNode function = new FunctionNode();
+            node.AddChild(function);
 
-            Block(block);
+            Function(function);
 
-            SymbolTable.AddFun(new FunSymbol
-            {
-                returnType = VarType.TYPE_VOID,
-                name = "test_main",
-                localVarCount = ScopeManager.LocalVarCount
-            });
-            ScopeManager.LocalVarCountReset();
             while (next != null)
             {
                 if (next.Tag != Tag.COMMENT)
@@ -50,12 +42,120 @@ namespace KayoCompiler
             }
         }
 
+        private void Function(FunctionNode node)
+        {
+            ScopeManager.ScopeEnter();
+            FunSymbol fun = new FunSymbol();
+
+            switch (next.Tag)
+            {
+                case Tag.KW_VOID:
+                    fun.returnType = VarType.TYPE_VOID;
+                    Move();
+                    break;
+                case Tag.KW_BOOL:
+                    fun.returnType = VarType.TYPE_BOOL;
+                    Move();
+                    break;
+                case Tag.KW_INT:
+                    fun.returnType = VarType.TYPE_INT;
+                    Move();
+                    break;
+                default:
+                    new Error().PrintErrMsg();
+                    break;
+            }
+
+            if (next?.Tag == Tag.ID)
+            {
+                fun.name = next.Value;
+                node.name = next.Value;
+                ScopeManager.FunctionEnter(next.Value);
+                Move();
+            }
+            else
+            {
+                new TokenMissingError(Tag.ID).PrintErrMsg();
+            }
+
+            if (next?.Tag == Tag.DL_LPAR)
+            {
+                Move();
+            }
+            else
+            {
+                new TokenMissingError(Tag.DL_LPAR).PrintErrMsg();
+            }
+
+            // Parameters
+            switch (next?.Tag)
+            {
+                case Tag.KW_VOID:
+                    Move();
+                    break;
+                case Tag.KW_INT:
+                case Tag.KW_BOOL:
+                    do
+                    {
+                        VarType paraType = VarType.TYPE_ERROR;
+                        switch (next.Tag)
+                        {
+                            case Tag.KW_INT:
+                                paraType = VarType.TYPE_INT;
+                                break;
+                            case Tag.KW_BOOL:
+                                paraType = VarType.TYPE_BOOL;
+                                break;
+                        }
+
+                        fun.parasType.Add(paraType);
+                        Move();
+
+                        if (next?.Tag == Tag.ID)
+                        {
+                            var status = SymbolTable.AddVar(new VarSymbol
+                            {
+                                type = paraType,
+                                name = next.Value,
+                                scopeId = ScopeManager.CurrentScope,
+                                indexInFun = fun.parasType.Count - 4
+                            });
+
+                            if (status == TableAddStatus.SYMBOL_EXIST)
+                            {
+                                new ConflictingDeclarationError().PrintErrMsg();
+                            }
+
+                            Move();
+                        }
+                    } while (next?.Tag == Tag.DL_COM);
+                    break;
+            }
+
+            if (next?.Tag == Tag.DL_RPAR)
+            {
+                Move();
+            }
+            else
+            {
+                new TokenMissingError(Tag.DL_RPAR).PrintErrMsg();
+            }
+
+            node.body = new BlockNode();
+            Block(node.body);
+
+            fun.localVarCount = ScopeManager.LocalVarCount;
+            SymbolTable.AddFun(fun);
+
+            ScopeManager.ScopeLeave();
+            ScopeManager.FunctionLeave();
+        }
+
         private void Block(BlockNode node)
         {
             if (next == null) return;
-            ScopeManager.ScopeEnter();
 
-            if (next.Tag == Tag.DL_LBRACE)
+            if (next?.Tag == Tag.DL_LBRACE)
             {
                 Move();
             }
@@ -72,7 +172,7 @@ namespace KayoCompiler
             node.AddChild(stmts);
             Stmts(stmts);
 
-            if (next.Tag == Tag.DL_RBRACE)
+            if (next?.Tag == Tag.DL_RBRACE)
             {
                 Move();
             }
@@ -80,8 +180,6 @@ namespace KayoCompiler
             {
                 new TokenMissingError(Tag.DL_RBRACE).PrintErrMsg();
             }
-
-            ScopeManager.ScopeLeave();
         }
 
         private void Decls(DeclsNode node)
