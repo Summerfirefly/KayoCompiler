@@ -18,7 +18,7 @@ namespace KayoCompiler
 
     static class SymbolTable
     {
-        static readonly List<TableVarItem> vars = new List<TableVarItem>();
+        static readonly Dictionary<string, List<TableVarItem>> vars = new Dictionary<string, List<TableVarItem>>();
         
         internal static int VarCount
         {
@@ -33,14 +33,21 @@ namespace KayoCompiler
             if (FindVar(varItem.name, varItem.field) != null)
                 return TableAddStatus.SYMBOL_EXIST;
 
-            vars.Add(varItem);
-            vars.Sort((x, y) => y.field - x.field );
+            if (!vars.ContainsKey(varItem.name))
+                vars.Add(varItem.name, new List<TableVarItem>());
+            
+            vars[varItem.name].Add(varItem);
+            vars[varItem.name].Sort((x, y) => y.field - x.field );
+
             return TableAddStatus.SUCCEED;
         }
 
         internal static TableVarItem? FindVar(string name, int field)
         {
-            foreach (var item in vars)
+            if (!vars.ContainsKey(name))
+                return null;
+            
+            foreach (var item in vars[name])
             {
                 if (item.name == name && item.field <= field)
                     return item;
@@ -51,9 +58,12 @@ namespace KayoCompiler
 
         internal static int GetVarIndex(string name, int field)
         {
-            for (int i = 0; i < vars.Count; i++)
+            if (!vars.ContainsKey(name))
+                return -1;
+            
+            for (int i = 0; i < vars[name].Count; i++)
             {
-                if (vars[i].name == name && vars[i].field <= field)
+                if (vars[name][i].name == name && vars[name][i].field <= field)
                     return i;
             }
 
