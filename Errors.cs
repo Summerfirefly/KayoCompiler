@@ -103,4 +103,12 @@ namespace KayoCompiler.Errors
             return "unknown";
         }
     }
+
+    class UnknownTokenError : Error
+    {
+        public override void PrintErrMsg()
+        {
+            PrintErrMsg($"error: Unknown token at line {lineNum}");
+        }
+    }
 }

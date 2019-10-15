@@ -28,9 +28,15 @@ namespace KayoCompiler
 
             Block(block);
 
-            if (next != null)
+            while (next != null)
             {
-                new Error().PrintErrMsg();
+                if (next.Tag != Tag.COMMENT)
+                {
+                    new UnknownTokenError().PrintErrMsg();
+                    break;
+                }
+
+                Move();
             }
         }
 
@@ -191,7 +197,7 @@ namespace KayoCompiler
                     Move();
                     break;
                 default:
-                    new Error().PrintErrMsg();
+                    new UnknownTokenError().PrintErrMsg();
                     Move();
                     break;
             }

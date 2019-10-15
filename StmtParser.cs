@@ -27,7 +27,7 @@ namespace KayoCompiler
             }
             else if (node.condition.Type() != VarType.TYPE_BOOL)
             {
-                new Error().PrintErrMsg();
+                new TypeMismatchError(VarType.TYPE_BOOL, node.condition.Type()).PrintErrMsg();
             }
 
             if (next?.Tag == Tag.DL_RPAR)
@@ -117,7 +117,7 @@ namespace KayoCompiler
             }
             else if (node.condition.Type() != VarType.TYPE_BOOL)
             {
-                new Error().PrintErrMsg();
+                new TypeMismatchError(VarType.TYPE_BOOL, node.condition.Type()).PrintErrMsg();
             }
 
             if (next?.Tag == Tag.DL_RPAR)
@@ -156,7 +156,7 @@ namespace KayoCompiler
             }
             else if (node.condition.Type() != VarType.TYPE_BOOL)
             {
-                new Error().PrintErrMsg();
+                new TypeMismatchError(VarType.TYPE_BOOL, node.condition.Type()).PrintErrMsg();
             }
 
             if (next?.Tag == Tag.DL_SEM)
