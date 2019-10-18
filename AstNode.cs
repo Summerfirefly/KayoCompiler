@@ -52,6 +52,7 @@ namespace KayoCompiler.Ast
 
             code += body?.Gen();
 
+            code += $"{name}_return:\n";
             code += "mov\trsp, rbp\n";
             code += "pop\trbp\n";
             code += "ret\n";

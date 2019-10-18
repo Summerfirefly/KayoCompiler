@@ -236,5 +236,29 @@ namespace KayoCompiler
                 new TokenMissingError(Tag.DL_SEM).PrintErrMsg();
             }
         }
+
+        private void ReturnStmt(ReturnStmtNode node)
+        {
+            Move();
+
+            if (next?.Tag != Tag.DL_SEM)
+            {
+                Expr(ref node.expr);
+
+                if (node.expr?.Type() != SymbolTable.FindFun(ScopeManager.CurrentFun).returnType)
+                {
+                    new Error().PrintErrMsg();
+                }
+            }
+
+            if (next?.Tag == Tag.DL_SEM)
+            {
+                Move();
+            }
+            else
+            {
+                new TokenMissingError(Tag.DL_SEM).PrintErrMsg();
+            }
+        }
     }
 }

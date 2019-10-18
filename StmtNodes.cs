@@ -182,4 +182,19 @@
             return $"get [{id.name}]\n";
         }
     }
+
+    class ReturnStmtNode : AstNode
+    {
+        public ExprNode expr;
+
+        public override string Gen()
+        {
+            string code = string.Empty;
+
+            code += expr?.Gen();
+            code += $"jmp\t{ScopeManager.CurrentFun}_return\n";
+
+            return code;
+        }
+    }
 }
