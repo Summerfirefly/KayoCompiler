@@ -194,6 +194,7 @@ namespace KayoCompiler.Ast
         {
             string code = string.Empty;
             int argc = 0;
+            args.Reverse();
 
             foreach (ExprNode arg in args)
             {
