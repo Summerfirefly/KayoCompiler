@@ -32,6 +32,7 @@ namespace KayoCompiler
         {
             { "+", Tag.DL_PLUS },   { "-", Tag.DL_MINUS },
             { "*", Tag.DL_MULTI },  { "/", Tag.DL_OBELUS },
+            { "%", Tag.DL_MOD },
             { "<", Tag.DL_LT },     { ">", Tag.DL_GT },
             { ">=", Tag.DL_NLT },   { "<=", Tag.DL_NGT },
             { "==", Tag.DL_EQ },    { "!=", Tag.DL_NEQ },
@@ -48,7 +49,7 @@ namespace KayoCompiler
             '+', '-', '*', '/', '>',
             '<', '=', '!', '|', '&',
             ';', '(', ')', '{', '}',
-            ':', ','
+            ':', ',', '%'
         };
 
         public Scanner(string path)

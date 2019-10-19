@@ -499,7 +499,7 @@ namespace KayoCompiler.Ast
                                     break;
                             }
                         }
-                        else
+                        else if (node.Op == Tag.DL_OBELUS)
                         {
                             switch (CodeGenUtils.StackDepth)
                             {
@@ -535,6 +535,48 @@ namespace KayoCompiler.Ast
                                     code += "cqo\n";
                                     code += "idiv\trbx\n";
                                     code += "mov\trbx, rax\n";
+                                    code += "pop\trdx\n";
+                                    code += "pop\trax\n";
+                                    code += "mov\tqword [rsp], rbx\n";
+                                    break;
+                            }
+                        }
+                        else
+                        {
+                            switch (CodeGenUtils.StackDepth)
+                            {
+                                case 2:
+                                    code += "mov\trbx, rdx\n";
+                                    code += "cqo\n";
+                                    code += "idiv\trbx\n";
+                                    code += "mov\trax, rdx\n";
+                                    break;
+                                case 3:
+                                    code += "push\trax\n";
+                                    code += "mov\trax, rdx\n";
+                                    code += "cqo\n";
+                                    code += "idiv\trcx\n";
+                                    code += "pop\trax\n";
+                                    break;
+                                case 4:
+                                    code += "pop\trbx\n";
+                                    code += "push\trax\n";
+                                    code += "push\trdx\n";
+                                    code += "mov\trax, rcx\n";
+                                    code += "cqo\n";
+                                    code += "idiv\trbx";
+                                    code += "mov\trcx, rdx\n";
+                                    code += "pop\trdx\n";
+                                    code += "pop\trax\n";
+                                    break;
+                                default:
+                                    code += "pop\trbx\n";
+                                    code += "push\trax\n";
+                                    code += "push\trdx\n";
+                                    code += "mov\trax, qword [rsp+16]\n";
+                                    code += "cqo\n";
+                                    code += "idiv\trbx\n";
+                                    code += "mov\trbx, rdx\n";
                                     code += "pop\trdx\n";
                                     code += "pop\trax\n";
                                     code += "mov\tqword [rsp], rbx\n";

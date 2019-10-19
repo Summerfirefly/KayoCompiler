@@ -26,6 +26,7 @@
         DL_MINUS,       // -
         DL_MULTI,       // *
         DL_OBELUS,      // /
+        DL_MOD,         // %
         DL_LT,          // <
         DL_GT,          // >
         DL_NLT,         // >=

@@ -171,7 +171,7 @@ namespace KayoCompiler
                 case Tag.DL_NOT:
                     var child = node.AddChild(new MathFactorNode());
                     MathFactor(ref child);
-                    while (next.Tag == Tag.DL_MULTI || next.Tag == Tag.DL_OBELUS)
+                    while (next.Tag == Tag.DL_MULTI || next.Tag == Tag.DL_OBELUS || next.Tag == Tag.DL_MOD)
                     {
                         child = node.AddChild(new MathFactorNode());
                         MathFactor(ref child);
@@ -185,7 +185,7 @@ namespace KayoCompiler
 
         private void MathFactor(ref MathFactorNode node)
         {
-            while (next.Tag == Tag.DL_MULTI || next.Tag == Tag.DL_OBELUS)
+            if (next.Tag == Tag.DL_MULTI || next.Tag == Tag.DL_OBELUS || next.Tag == Tag.DL_MOD)
             {
                 node.Op = next.Tag;
                 DiscardToken();
