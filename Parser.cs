@@ -25,7 +25,7 @@ namespace KayoCompiler
 
 		private void Program(ProgramNode node)
 		{
-			while (next != null)
+			while (next.Tag != Tag.NULL)
 			{
 				switch (next.Tag)
 				{
@@ -36,11 +36,11 @@ namespace KayoCompiler
 						node.AddChild(function);
 
 						Function(function);
-                        break;
+						break;
 				}
 			}
 
-			while (next != null)
+			while (next.Tag != Tag.NULL)
 			{
 				if (next.Tag != Tag.COMMENT)
 				{
@@ -76,7 +76,7 @@ namespace KayoCompiler
 					break;
 			}
 
-			if (next?.Tag == Tag.ID)
+			if (next.Tag == Tag.ID)
 			{
 				fun.name = next.Value;
 				node.name = next.Value;
@@ -88,71 +88,9 @@ namespace KayoCompiler
 				new TokenMissingError(Tag.ID).PrintErrMsg();
 			}
 
-			if (next?.Tag == Tag.DL_LPAR)
-			{
-				Move();
-			}
-			else
-			{
-				new TokenMissingError(Tag.DL_LPAR).PrintErrMsg();
-			}
-
-			// Parameters
-			switch (next?.Tag)
-			{
-				case Tag.KW_VOID:
-					Move();
-					break;
-				case Tag.KW_INT:
-				case Tag.KW_BOOL:
-					do
-					{
-                        if (next?.Tag == Tag.DL_COM)
-                            Move();
-
-						VarType paraType = VarType.TYPE_ERROR;
-						switch (next.Tag)
-						{
-							case Tag.KW_INT:
-								paraType = VarType.TYPE_INT;
-								break;
-							case Tag.KW_BOOL:
-								paraType = VarType.TYPE_BOOL;
-								break;
-						}
-
-						fun.parasType.Add(paraType);
-						Move();
-
-						if (next?.Tag == Tag.ID)
-						{
-							var status = SymbolTable.AddVar(new VarSymbol
-							{
-								type = paraType,
-								name = next.Value,
-								scopeId = ScopeManager.CurrentScope,
-								indexInFun = -2 - fun.parasType.Count
-							});
-
-							if (status == TableAddStatus.SYMBOL_EXIST)
-							{
-								new ConflictingDeclarationError().PrintErrMsg();
-							}
-
-							Move();
-						}
-					} while (next?.Tag == Tag.DL_COM);
-					break;
-			}
-
-			if (next?.Tag == Tag.DL_RPAR)
-			{
-				Move();
-			}
-			else
-			{
-				new TokenMissingError(Tag.DL_RPAR).PrintErrMsg();
-			}
+			RequireTag(Tag.DL_LPAR);
+			Paras(fun);
+			RequireTag(Tag.DL_RPAR);
 
 			SymbolTable.AddFun(fun);
 
@@ -165,18 +103,74 @@ namespace KayoCompiler
 			ScopeManager.FunctionLeave();
 		}
 
+		private void Paras(FunSymbol fun)
+		{
+			switch (next.Tag)
+			{
+				case Tag.KW_VOID:
+				case Tag.KW_INT:
+				case Tag.KW_BOOL:
+					Para(fun);
+					if (next.Tag == Tag.DL_COM)
+					{
+						Move();
+						Paras(fun);
+					}
+					break;
+			}
+		}
+
+		private void Para(FunSymbol fun)
+		{
+			switch (next.Tag)
+			{
+				case Tag.KW_VOID:
+					Move();
+					break;
+				case Tag.KW_INT:
+				case Tag.KW_BOOL:
+					VarType paraType = VarType.TYPE_ERROR;
+					switch (next.Tag)
+					{
+						case Tag.KW_INT:
+							paraType = VarType.TYPE_INT;
+							break;
+						case Tag.KW_BOOL:
+							paraType = VarType.TYPE_BOOL;
+							break;
+					}
+
+					fun.parasType.Add(paraType);
+					Move();
+
+					if (next.Tag == Tag.ID)
+					{
+						var status = SymbolTable.AddVar(new VarSymbol
+						{
+							type = paraType,
+							name = next.Value,
+							scopeId = ScopeManager.CurrentScope,
+							indexInFun = -2 - fun.parasType.Count
+						});
+
+						if (status == TableAddStatus.SYMBOL_EXIST)
+						{
+							new ConflictingDeclarationError().PrintErrMsg();
+						}
+
+						Move();
+					}
+					else
+					{
+						new TokenMissingError(Tag.ID).PrintErrMsg();
+					}
+					break;
+			}
+		}
+
 		private void Block(BlockNode node)
 		{
-			if (next == null) return;
-
-			if (next?.Tag == Tag.DL_LBRACE)
-			{
-				Move();
-			}
-			else
-			{
-				new TokenMissingError(Tag.DL_LBRACE).PrintErrMsg();
-			}
+			RequireTag(Tag.DL_LBRACE);
 
 			DeclsNode decls = new DeclsNode();
 			node.AddChild(decls);
@@ -186,19 +180,12 @@ namespace KayoCompiler
 			node.AddChild(stmts);
 			Stmts(stmts);
 
-			if (next?.Tag == Tag.DL_RBRACE)
-			{
-				Move();
-			}
-			else
-			{
-				new TokenMissingError(Tag.DL_RBRACE).PrintErrMsg();
-			}
+			RequireTag(Tag.DL_RBRACE);
 		}
 
 		private void Decls(DeclsNode node)
 		{
-			switch (next?.Tag)
+			switch (next.Tag)
 			{
 				case Tag.KW_INT:
 				case Tag.KW_BOOL:
@@ -212,65 +199,56 @@ namespace KayoCompiler
 
 		private void Decl(DeclNode node)
 		{
-			switch (next?.Tag)
+			switch (next.Tag)
 			{
 				case Tag.KW_INT:
 				case Tag.KW_BOOL:
 					node.type = next.Tag;
 					Move();
-
-					if (next?.Tag == Tag.ID)
-					{
-						node.name = next.Value;
-						Move();
-					}
-					else
-					{
-						new TokenMissingError(Tag.ID).PrintErrMsg();
-						break;
-					}
-
-					if (node.name != null)
-					{
-						VarSymbol variable = new VarSymbol
-						{
-							name = node.name,
-							scopeId = ScopeManager.CurrentScope,
-							indexInFun = ScopeManager.LocalVarCount++
-						};
-
-						switch (node.type)
-						{
-							case Tag.KW_INT:
-								variable.type = VarType.TYPE_INT;
-								break;
-							case Tag.KW_BOOL:
-								variable.type = VarType.TYPE_BOOL;
-								break;
-						}
-
-						if (SymbolTable.AddVar(variable) == TableAddStatus.SYMBOL_EXIST)
-						{
-							new ConflictingDeclarationError().PrintErrMsg();
-						}
-					}
-
-					if (next.Tag == Tag.DL_SEM)
-					{
-						Move();
-					}
-					else
-					{
-						new TokenMissingError(Tag.DL_SEM).PrintErrMsg();
-					}
-
 					break;
 			}
+
+			if (next.Tag == Tag.ID)
+			{
+				node.name = next.Value;
+				Move();
+			}
+			else
+			{
+				new TokenMissingError(Tag.ID).PrintErrMsg();
+			}
+
+			if (node.name != null)
+			{
+				VarSymbol variable = new VarSymbol
+				{
+					name = node.name,
+					scopeId = ScopeManager.CurrentScope,
+					indexInFun = ScopeManager.LocalVarCount++
+				};
+
+				switch (node.type)
+				{
+					case Tag.KW_INT:
+						variable.type = VarType.TYPE_INT;
+						break;
+					case Tag.KW_BOOL:
+						variable.type = VarType.TYPE_BOOL;
+						break;
+				}
+
+				if (SymbolTable.AddVar(variable) == TableAddStatus.SYMBOL_EXIST)
+				{
+					new ConflictingDeclarationError().PrintErrMsg();
+				}
+			}
+
+			RequireTag(Tag.DL_SEM);
 		}
 
 		private void Stmts(StmtsNode node)
 		{
-			switch (next?.Tag)
+			switch (next.Tag)
 			{
 				case Tag.ID:
 				case Tag.KW_IF:
@@ -292,7 +270,7 @@ namespace KayoCompiler
 
 		private void Stmt(StmtNode node)
 		{
-			switch (next?.Tag)
+			switch (next.Tag)
 			{
 				case Tag.ID:
 					node.stmt = new SetStmtNode();
@@ -340,9 +318,21 @@ namespace KayoCompiler
 		{
 			next = scanner.NextToken();
 
-			while (next?.Tag == Tag.COMMENT)
+			while (next.Tag == Tag.COMMENT)
 			{
 				next = scanner.NextToken();
+			}
+		}
+
+		private void RequireTag(Tag tokenTag)
+		{
+			if (next.Tag == tokenTag)
+			{
+				Move();
+			}
+			else
+			{
+				new TokenMissingError(tokenTag).PrintErrMsg();
 			}
 		}
 	}

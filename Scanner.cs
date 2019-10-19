@@ -59,7 +59,7 @@ namespace KayoCompiler
 
         public Token NextToken()
         {
-            Token token = null;
+            Token token = new Token { Tag = Tag.NULL, Value = string.Empty };
 
             if (next > -1)
             {

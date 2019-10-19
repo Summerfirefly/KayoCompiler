@@ -11,14 +11,7 @@ namespace KayoCompiler
             node.body = new StmtNode();
             Move();
 
-            if (next?.Tag == Tag.DL_LPAR)
-            {
-                Move();
-            }
-            else
-            {
-                new TokenMissingError(Tag.DL_LPAR).PrintErrMsg();
-            }
+            RequireTag(Tag.DL_LPAR);
 
             Expr(ref node.condition);
 
@@ -31,19 +24,12 @@ namespace KayoCompiler
                 new TypeMismatchError(VarType.TYPE_BOOL, node.condition.Type()).PrintErrMsg();
             }
 
-            if (next?.Tag == Tag.DL_RPAR)
-            {
-                Move();
-            }
-            else
-            {
-                new TokenMissingError(Tag.DL_RPAR).PrintErrMsg();
-            }
+            RequireTag(Tag.DL_RPAR);
 
             Stmt(node.body);
             ScopeManager.ScopeLeave();
 
-            if (next?.Tag == Tag.KW_ELSE)
+            if (next.Tag == Tag.KW_ELSE)
             {
                 node.elseStmt = new ElseStmtNode();
                 ElseStmt(node.elseStmt);
@@ -65,14 +51,7 @@ namespace KayoCompiler
             node.id = new IdNode(next.Value);
             Move();
 
-            if (next?.Tag == Tag.DL_SET)
-            {
-                Move();
-            }
-            else
-            {
-                new TokenMissingError(Tag.DL_SET).PrintErrMsg();
-            }
+            RequireTag(Tag.DL_SET);
             
             Expr(ref node.expr);
 
@@ -89,14 +68,7 @@ namespace KayoCompiler
                 new TypeMismatchError(node.id.Type(), node.expr.Type()).PrintErrMsg();
             }
 
-            if (next?.Tag == Tag.DL_SEM)
-            {
-                Move();
-            }
-            else
-            {
-                new TokenMissingError(Tag.DL_SEM).PrintErrMsg();
-            }
+            RequireTag(Tag.DL_SEM);
         }
 
         private void WhileStmt(WhileStmtNode node)
@@ -105,14 +77,7 @@ namespace KayoCompiler
             node.body = new StmtNode();
             Move();
 
-            if (next?.Tag == Tag.DL_LPAR)
-            {
-                Move();
-            }
-            else
-            {
-                new TokenMissingError(Tag.DL_LPAR).PrintErrMsg();
-            }
+            RequireTag(Tag.DL_LPAR);
 
             Expr(ref node.condition);
 
@@ -125,14 +90,7 @@ namespace KayoCompiler
                 new TypeMismatchError(VarType.TYPE_BOOL, node.condition.Type()).PrintErrMsg();
             }
 
-            if (next?.Tag == Tag.DL_RPAR)
-            {
-                Move();
-            }
-            else
-            {
-                new TokenMissingError(Tag.DL_RPAR).PrintErrMsg();
-            }
+            RequireTag(Tag.DL_RPAR);
 
             Stmt(node.body);
             ScopeManager.ScopeLeave();
@@ -143,14 +101,7 @@ namespace KayoCompiler
             ScopeManager.ScopeEnter();
             Move();
 
-            if (next?.Tag == Tag.DL_LPAR)
-            {
-                Move();
-            }
-            else
-            {
-                new TokenMissingError(Tag.DL_LPAR).PrintErrMsg();
-            }
+            RequireTag(Tag.DL_LPAR);
 
             node.preStmt = new StmtNode();
             Stmt(node.preStmt);
@@ -166,26 +117,12 @@ namespace KayoCompiler
                 new TypeMismatchError(VarType.TYPE_BOOL, node.condition.Type()).PrintErrMsg();
             }
 
-            if (next?.Tag == Tag.DL_SEM)
-            {
-                Move();
-            }
-            else
-            {
-                new TokenMissingError(Tag.DL_SEM).PrintErrMsg();
-            }
+            RequireTag(Tag.DL_SEM);
 
             node.loopStmt = new StmtNode();
             Stmt(node.loopStmt);
 
-            if (next?.Tag == Tag.DL_RPAR)
-            {
-                Move();
-            }
-            else
-            {
-                new TokenMissingError(Tag.DL_RPAR).PrintErrMsg();
-            }
+            RequireTag(Tag.DL_RPAR);
 
             node.body = new StmtNode();
             Stmt(node.body);
@@ -198,21 +135,14 @@ namespace KayoCompiler
             Move();
             Expr(ref node.expr);
 
-            if (next?.Tag == Tag.DL_SEM)
-            {
-                Move();
-            }
-            else
-            {
-                new TokenMissingError(Tag.DL_SEM).PrintErrMsg();
-            }
+            RequireTag(Tag.DL_SEM);
         }
 
         private void ReadStmt(ReadStmtNode node)
         {
             Move();
 
-            if (next?.Tag == Tag.ID)
+            if (next.Tag == Tag.ID)
             {
                 node.id = new IdNode(next.Value);
                 Move();
@@ -227,21 +157,14 @@ namespace KayoCompiler
                 new TokenMissingError(Tag.ID).PrintErrMsg();
             }
 
-            if (next.Tag == Tag.DL_SEM)
-            {
-                Move();
-            }
-            else
-            {
-                new TokenMissingError(Tag.DL_SEM).PrintErrMsg();
-            }
+            RequireTag(Tag.DL_SEM);
         }
 
         private void ReturnStmt(ReturnStmtNode node)
         {
             Move();
 
-            if (next?.Tag != Tag.DL_SEM)
+            if (next.Tag != Tag.DL_SEM)
             {
                 Expr(ref node.expr);
 
@@ -251,14 +174,7 @@ namespace KayoCompiler
                 }
             }
 
-            if (next?.Tag == Tag.DL_SEM)
-            {
-                Move();
-            }
-            else
-            {
-                new TokenMissingError(Tag.DL_SEM).PrintErrMsg();
-            }
+            RequireTag(Tag.DL_SEM);
         }
     }
 }

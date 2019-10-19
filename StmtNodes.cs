@@ -195,6 +195,7 @@
 			if (expr != null)
 			{
 				code += "mov\trbx, rax\n";
+                CodeGenUtils.StackDepth--;
 			}
             code += $"jmp\t{ScopeManager.CurrentFun}_return\n";
 
