@@ -120,7 +120,7 @@ namespace KayoCompiler.Ast
 
     class DeclNode : AstNode
     {
-        public Tag type;
+        public VarType type;
         public string name;
 
         public override string Gen()

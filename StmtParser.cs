@@ -11,7 +11,7 @@ namespace KayoCompiler
             node.body = new StmtNode();
             Move();
 
-            RequireTag(Tag.DL_LPAR);
+            TryMatch(Tag.DL_LPAR);
 
             Expr(ref node.condition);
 
@@ -24,7 +24,7 @@ namespace KayoCompiler
                 new TypeMismatchError(VarType.TYPE_BOOL, node.condition.Type()).PrintErrMsg();
             }
 
-            RequireTag(Tag.DL_RPAR);
+            TryMatch(Tag.DL_RPAR);
 
             Stmt(node.body);
             ScopeManager.ScopeLeave();
@@ -51,7 +51,7 @@ namespace KayoCompiler
             node.id = new IdNode(next.Value);
             Move();
 
-            RequireTag(Tag.DL_SET);
+            TryMatch(Tag.DL_SET);
             
             Expr(ref node.expr);
 
@@ -68,7 +68,7 @@ namespace KayoCompiler
                 new TypeMismatchError(node.id.Type(), node.expr.Type()).PrintErrMsg();
             }
 
-            RequireTag(Tag.DL_SEM);
+            TryMatch(Tag.DL_SEM);
         }
 
         private void WhileStmt(WhileStmtNode node)
@@ -77,7 +77,7 @@ namespace KayoCompiler
             node.body = new StmtNode();
             Move();
 
-            RequireTag(Tag.DL_LPAR);
+            TryMatch(Tag.DL_LPAR);
 
             Expr(ref node.condition);
 
@@ -90,7 +90,7 @@ namespace KayoCompiler
                 new TypeMismatchError(VarType.TYPE_BOOL, node.condition.Type()).PrintErrMsg();
             }
 
-            RequireTag(Tag.DL_RPAR);
+            TryMatch(Tag.DL_RPAR);
 
             Stmt(node.body);
             ScopeManager.ScopeLeave();
@@ -101,7 +101,7 @@ namespace KayoCompiler
             ScopeManager.ScopeEnter();
             Move();
 
-            RequireTag(Tag.DL_LPAR);
+            TryMatch(Tag.DL_LPAR);
 
             node.preStmt = new StmtNode();
             Stmt(node.preStmt);
@@ -117,12 +117,12 @@ namespace KayoCompiler
                 new TypeMismatchError(VarType.TYPE_BOOL, node.condition.Type()).PrintErrMsg();
             }
 
-            RequireTag(Tag.DL_SEM);
+            TryMatch(Tag.DL_SEM);
 
             node.loopStmt = new StmtNode();
             Stmt(node.loopStmt);
 
-            RequireTag(Tag.DL_RPAR);
+            TryMatch(Tag.DL_RPAR);
 
             node.body = new StmtNode();
             Stmt(node.body);
@@ -135,7 +135,7 @@ namespace KayoCompiler
             Move();
             Expr(ref node.expr);
 
-            RequireTag(Tag.DL_SEM);
+            TryMatch(Tag.DL_SEM);
         }
 
         private void ReadStmt(ReadStmtNode node)
@@ -157,7 +157,7 @@ namespace KayoCompiler
                 new TokenMissingError(Tag.ID).PrintErrMsg();
             }
 
-            RequireTag(Tag.DL_SEM);
+            TryMatch(Tag.DL_SEM);
         }
 
         private void ReturnStmt(ReturnStmtNode node)
@@ -174,7 +174,7 @@ namespace KayoCompiler
                 }
             }
 
-            RequireTag(Tag.DL_SEM);
+            TryMatch(Tag.DL_SEM);
         }
     }
 }

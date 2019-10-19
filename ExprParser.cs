@@ -205,7 +205,7 @@ namespace KayoCompiler
                 case Tag.DL_LPAR:
                     Move();
                     Expr(ref node.expr);
-                    RequireTag(Tag.DL_RPAR);
+                    TryMatch(Tag.DL_RPAR);
                     break;
                 case Tag.KW_TRUE:
                 case Tag.KW_FALSE:
