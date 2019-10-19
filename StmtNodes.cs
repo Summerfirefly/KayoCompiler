@@ -192,6 +192,10 @@
             string code = string.Empty;
 
             code += expr?.Gen();
+			if (expr != null)
+			{
+				code += "mov\trbx, rax\n";
+			}
             code += $"jmp\t{ScopeManager.CurrentFun}_return\n";
 
             return code;
