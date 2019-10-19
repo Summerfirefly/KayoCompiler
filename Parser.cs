@@ -1,4 +1,5 @@
-﻿using KayoCompiler.Ast;
+﻿using System.Collections.Generic;
+using KayoCompiler.Ast;
 using KayoCompiler.Errors;
 
 namespace KayoCompiler
@@ -6,12 +7,23 @@ namespace KayoCompiler
 	internal partial class Parser
 	{
 		private readonly Scanner scanner = null;
-		private Token next = null;
+		private readonly Queue<Token> buffer;
+		private Token next
+		{
+			get
+			{
+				if (buffer.Count == 0)
+					MoreToken();
+				
+				return buffer.Peek();
+			}
+		}
 
 		internal Parser(Scanner scanner)
 		{
 			this.scanner = scanner;
-			Move();
+			buffer = new Queue<Token>();
+			MoreToken();
 		}
 
 		internal ProgramNode Parse()
@@ -37,18 +49,17 @@ namespace KayoCompiler
 
 						Function(function);
 						break;
+					default:
+						new UnknownTokenError().PrintErrMsg();
+						DiscardToken();
+						break;
 				}
 			}
 
-			while (next.Tag != Tag.NULL)
+			if (next.Tag != Tag.NULL)
 			{
-				if (next.Tag != Tag.COMMENT)
-				{
-					new UnknownTokenError().PrintErrMsg();
-					break;
-				}
-
-				Move();
+				new UnknownTokenError().PrintErrMsg();
+				DiscardToken();
 			}
 		}
 
@@ -61,15 +72,15 @@ namespace KayoCompiler
 			{
 				case Tag.KW_VOID:
 					fun.returnType = VarType.TYPE_VOID;
-					Move();
+					DiscardToken();
 					break;
 				case Tag.KW_BOOL:
 					fun.returnType = VarType.TYPE_BOOL;
-					Move();
+					DiscardToken();
 					break;
 				case Tag.KW_INT:
 					fun.returnType = VarType.TYPE_INT;
-					Move();
+					DiscardToken();
 					break;
 				default:
 					new Error().PrintErrMsg();
@@ -109,7 +120,7 @@ namespace KayoCompiler
 					Para(fun);
 					if (next.Tag == Tag.DL_COM)
 					{
-						Move();
+						DiscardToken();
 						Paras(fun);
 					}
 					break;
@@ -121,7 +132,7 @@ namespace KayoCompiler
 			switch (next.Tag)
 			{
 				case Tag.KW_VOID:
-					Move();
+					DiscardToken();
 					break;
 				case Tag.KW_INT:
 				case Tag.KW_BOOL:
@@ -137,7 +148,7 @@ namespace KayoCompiler
 					}
 
 					fun.parasType.Add(paraType);
-					Move();
+					DiscardToken();
 
 					string id = TryMatch(Tag.ID);
 					if (id != null)
@@ -194,11 +205,11 @@ namespace KayoCompiler
 			{
 				case Tag.KW_INT:
 					node.type = VarType.TYPE_INT;
-					Move();
+					DiscardToken();
 					break;
 				case Tag.KW_BOOL:
 					node.type = VarType.TYPE_BOOL;
-					Move();
+					DiscardToken();
 					break;
 			}
 
@@ -250,8 +261,17 @@ namespace KayoCompiler
 			switch (next.Tag)
 			{
 				case Tag.ID:
-					node.stmt = new SetStmtNode();
-					SetStmt(node.stmt as SetStmtNode);
+					var moreToken = MoreToken();
+					if (moreToken.Tag == Tag.DL_SET)
+					{
+						node.stmt = new SetStmtNode();
+						SetStmt(node.stmt as SetStmtNode);
+					}
+					else if (moreToken.Tag == Tag.DL_LPAR)
+					{
+						node.stmt = new FuncCallStmtNode();
+						FuncCallStmt(node.stmt as FuncCallStmtNode);
+					}
 					break;
 				case Tag.KW_IF:
 					node.stmt = new IfStmtNode();
@@ -282,23 +302,32 @@ namespace KayoCompiler
 					Block(node.stmt as BlockNode);
 					break;
 				case Tag.DL_SEM:
-					Move();
+					DiscardToken();
 					break;
 				default:
 					new UnknownTokenError().PrintErrMsg();
-					Move();
+					DiscardToken();
 					break;
 			}
 		}
 
-		private void Move()
+		private void DiscardToken()
 		{
-			next = scanner.NextToken();
+			if (buffer.Count > 0)
+				buffer.Dequeue();
+		}
 
-			while (next.Tag == Tag.COMMENT)
+		private Token MoreToken()
+		{
+			Token token = scanner.NextToken();
+
+			while (token.Tag == Tag.COMMENT)
 			{
-				next = scanner.NextToken();
+				token = scanner.NextToken();
 			}
+
+			buffer.Enqueue(token);
+			return token;
 		}
 
 		private string TryMatch(Tag tokenTag)
@@ -308,7 +337,7 @@ namespace KayoCompiler
 			if (next.Tag == tokenTag)
 			{
 				value = next.Value;
-				Move();
+				buffer.Dequeue();
 			}
 			else
 			{

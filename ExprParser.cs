@@ -5,7 +5,7 @@ namespace KayoCompiler
 {
     internal partial class Parser
     {
-        private void Expr(ref ExprNode node)
+        private void Expr(ExprNode node)
         {
             switch (next.Tag)
             {
@@ -15,7 +15,6 @@ namespace KayoCompiler
                 case Tag.KW_TRUE:
                 case Tag.KW_FALSE:
                 case Tag.DL_NOT:
-                    node = new ExprNode();
                     var child = node.AddChild(new LogicTermNode());
                     LogicTerm(ref child);
                     while (next.Tag == Tag.DL_OR)
@@ -32,7 +31,7 @@ namespace KayoCompiler
             if (next.Tag == Tag.DL_OR)
             {
                 node.Op = next.Tag;
-                Move();
+                DiscardToken();
             }
 
             switch (next.Tag)
@@ -62,7 +61,7 @@ namespace KayoCompiler
             if (next.Tag == Tag.DL_AND)
             {
                 node.Op = next.Tag;
-                Move();
+                DiscardToken();
             }
 
             switch (next.Tag)
@@ -92,7 +91,7 @@ namespace KayoCompiler
             if (next.Tag == Tag.DL_EQ || next.Tag == Tag.DL_NEQ)
             {
                 node.Op = next.Tag;
-                Move();
+                DiscardToken();
             }
 
             switch (next.Tag)
@@ -129,7 +128,7 @@ namespace KayoCompiler
                 next.Tag == Tag.DL_NGT)
             {
                 node.Op = next.Tag;
-                Move();
+                DiscardToken();
             }
 
             switch (next.Tag)
@@ -159,7 +158,7 @@ namespace KayoCompiler
             if (next.Tag == Tag.DL_PLUS || next.Tag == Tag.DL_MINUS)
             {
                 node.Op = next.Tag;
-                Move();
+                DiscardToken();
             }
 
             switch (next.Tag)
@@ -189,31 +188,41 @@ namespace KayoCompiler
             while (next.Tag == Tag.DL_MULTI || next.Tag == Tag.DL_OBELUS)
             {
                 node.Op = next.Tag;
-                Move();
+                DiscardToken();
             }
 
             switch (next.Tag)
             {
                 case Tag.ID:
-                    node.value = new IdNode(next.Value);
-                    Move();
+                    var moreToken = MoreToken();
+                    if (moreToken.Tag == Tag.DL_LPAR)
+                    {
+                        node.func = new FuncCallStmtNode();
+                        FuncCallStmt(node.func);
+                    }
+                    else
+                    {
+                        node.value = new IdNode(next.Value);
+                        DiscardToken();
+                    }
                     break;
                 case Tag.NUM:
                     node.value = new IntNode(int.Parse(next.Value));
-                    Move();
+                    DiscardToken();
                     break;
                 case Tag.DL_LPAR:
-                    Move();
-                    Expr(ref node.expr);
+                    DiscardToken();
+                    node.expr = new ExprNode();
+                    Expr(node.expr);
                     TryMatch(Tag.DL_RPAR);
                     break;
                 case Tag.KW_TRUE:
                 case Tag.KW_FALSE:
                     node.value = new BoolNode(bool.Parse(next.Value));
-                    Move();
+                    DiscardToken();
                     break;
                 case Tag.DL_NOT:
-                    Move();
+                    DiscardToken();
                     node.factor = new MathFactorNode();
                     MathFactor(ref node.factor);
                     break;

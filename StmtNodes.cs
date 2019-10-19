@@ -1,4 +1,6 @@
-﻿namespace KayoCompiler.Ast
+﻿using System.Collections.Generic;
+
+namespace KayoCompiler.Ast
 {
     class IfStmtNode : AstNode
     {
@@ -161,7 +163,7 @@
             }
 
             CodeGenUtils.StackDepth--;
-            code += $";{expr?.Type()}\n";
+            
             if (expr?.Type() == VarType.TYPE_BOOL)
                 code += "push\t0\n";
             else
@@ -180,6 +182,67 @@
         public override string Gen()
         {
             return $"get [{id.name}]\n";
+        }
+    }
+
+    class FuncCallStmtNode : AstNode
+    {
+        internal string name;
+        internal List<ExprNode> args = new List<ExprNode>();
+
+        public override string Gen()
+        {
+            string code = string.Empty;
+            int argc = 0;
+
+            foreach (ExprNode arg in args)
+            {
+                code += arg?.Gen();
+                switch (CodeGenUtils.StackDepth)
+                {
+                    case 1:
+                        code += $"push\trax\n";
+                        break;
+                    case 2:
+                        code += $"push\trdx\n";
+                        break;
+                    case 3:
+                        code += $"push\trcx\n";
+                        break;
+                }
+                CodeGenUtils.StackDepth--;
+                argc++;
+            }
+
+            code += $"call\t{name}\n";
+            if (argc > 0)
+            {
+                code += $"add\trsp, {argc * 8}\n";
+            }
+
+            CodeGenUtils.StackDepth++;
+            switch (CodeGenUtils.StackDepth)
+            {
+                case 1:
+                    code += $"mov\trax, rbx\n";
+                    break;
+                case 2:
+                    code += $"mov\trdx, rbx\n";
+                    break;
+                case 3:
+                    code += $"mov\trcx, rbx\n";
+                    break;
+                default:
+                    code += $"push\trbx\n";
+                    break;
+            }
+
+            return code;
+        }
+
+        internal VarType Type()
+        {
+            return SymbolTable.FindFun(name).returnType;
         }
     }
 

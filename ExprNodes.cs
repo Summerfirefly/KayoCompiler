@@ -589,6 +589,7 @@ namespace KayoCompiler.Ast
         public TerminalNode value;
         public ExprNode expr;
         public MathFactorNode factor;
+        public FuncCallStmtNode func;
 
         public override string Gen()
         {
@@ -596,6 +597,7 @@ namespace KayoCompiler.Ast
             code += value?.Gen() ?? string.Empty;
             code += expr?.Gen() ?? string.Empty;
             code += factor?.Gen() ?? string.Empty;
+            code += func?.Gen() ?? string.Empty;
 
             if (factor != null)
             {
@@ -621,7 +623,7 @@ namespace KayoCompiler.Ast
 
         public override VarType Type()
         {
-            VarType type = value?.Type() ?? expr?.Type() ?? factor?.Type() ?? VarType.TYPE_ERROR;
+            VarType type = value?.Type() ?? expr?.Type() ?? factor?.Type() ?? func?.Type() ?? VarType.TYPE_ERROR;
             if (factor != null && type != VarType.TYPE_BOOL)
             {
                 new TypeMismatchError(type, VarType.TYPE_BOOL).PrintErrMsg();
