@@ -231,6 +231,16 @@ namespace KayoCompiler
 				}
 			}
 
+			if (next.Tag == Tag.DL_SET)
+			{
+				TryMatch(Tag.DL_SET);
+				node.init = new ExprNode();
+				Expr(node.init);
+
+				if (node.init.Type() != node.type)
+					new TypeMismatchError(node.type, node.init.Type()).PrintErrMsg();
+			}
+
 			TryMatch(Tag.DL_SEM);
 		}
 

@@ -122,10 +122,24 @@ namespace KayoCompiler.Ast
     {
         public VarType type;
         public string name;
+        public ExprNode init;
 
         public override string Gen()
         {
-            return string.Empty;
+            if (init == null)
+            {
+                return string.Empty;
+            }
+            
+            string code = string.Empty;
+            int index = SymbolTable.GetVarIndex(name);
+            int offset = -(index + 1) * 8;
+
+            code += init.Gen();
+            code += $"mov\t[rbp{(offset>0?"+":"")}{offset}], rax\n";
+            CodeGenUtils.StackDepth--;
+
+            return code;
         }
     }
 
