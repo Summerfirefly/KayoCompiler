@@ -19,7 +19,14 @@ cmp	rax, 0
 je	put_bool
 
 convert_int:
-mov	rax, qword [rsp+48]
+mov	rdi, qword [rsp+48]
+mov	rax, rdi
+cmp	rax, 0
+jnl	abs_end
+; abs
+not	rax
+add	rax, 1
+abs_end:
 mov	rcx, 0
 convert_int_loop:
 cqo
@@ -30,6 +37,11 @@ push	rdx
 inc	rcx
 cmp	rax, 0
 jne	convert_int_loop
+
+cmp	rdi, 0
+jnl	put_int_loop
+push	'-'
+inc	rcx
 
 put_int_loop:
 call	putc
