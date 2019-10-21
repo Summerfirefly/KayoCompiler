@@ -11,6 +11,8 @@ namespace KayoCompiler
             {
                 case Tag.ID:
                 case Tag.NUM:
+                case Tag.DL_PLUS:
+                case Tag.DL_MINUS:
                 case Tag.DL_LPAR:
                 case Tag.KW_TRUE:
                 case Tag.KW_FALSE:
@@ -38,6 +40,8 @@ namespace KayoCompiler
             {
                 case Tag.ID:
                 case Tag.NUM:
+                case Tag.DL_PLUS:
+                case Tag.DL_MINUS:
                 case Tag.DL_LPAR:
                 case Tag.KW_TRUE:
                 case Tag.KW_FALSE:
@@ -68,6 +72,8 @@ namespace KayoCompiler
             {
                 case Tag.ID:
                 case Tag.NUM:
+                case Tag.DL_PLUS:
+                case Tag.DL_MINUS:
                 case Tag.DL_LPAR:
                 case Tag.KW_TRUE:
                 case Tag.KW_FALSE:
@@ -98,6 +104,8 @@ namespace KayoCompiler
             {
                 case Tag.ID:
                 case Tag.NUM:
+                case Tag.DL_PLUS:
+                case Tag.DL_MINUS:
                 case Tag.DL_LPAR:
                 case Tag.KW_TRUE:
                 case Tag.KW_FALSE:
@@ -135,6 +143,8 @@ namespace KayoCompiler
             {
                 case Tag.ID:
                 case Tag.NUM:
+                case Tag.DL_PLUS:
+                case Tag.DL_MINUS:
                 case Tag.DL_LPAR:
                 case Tag.KW_TRUE:
                 case Tag.KW_FALSE:
@@ -155,16 +165,12 @@ namespace KayoCompiler
 
         private void MathTerm(ref MathTermNode node)
         {
-            if (next.Tag == Tag.DL_PLUS || next.Tag == Tag.DL_MINUS)
-            {
-                node.Op = next.Tag;
-                DiscardToken();
-            }
-
             switch (next.Tag)
             {
                 case Tag.ID:
                 case Tag.NUM:
+                case Tag.DL_PLUS:
+                case Tag.DL_MINUS:
                 case Tag.DL_LPAR:
                 case Tag.KW_TRUE:
                 case Tag.KW_FALSE:
@@ -210,6 +216,14 @@ namespace KayoCompiler
                     node.value = new IntNode(int.Parse(next.Value));
                     DiscardToken();
                     break;
+                case Tag.DL_PLUS:
+                case Tag.DL_MINUS:
+                case Tag.DL_NOT:
+                    node.factorOp = next.Tag;
+                    DiscardToken();
+                    node.factor = new MathFactorNode();
+                    MathFactor(ref node.factor);
+                    break;
                 case Tag.DL_LPAR:
                     DiscardToken();
                     node.expr = new ExprNode();
@@ -220,11 +234,6 @@ namespace KayoCompiler
                 case Tag.KW_FALSE:
                     node.value = new BoolNode(bool.Parse(next.Value));
                     DiscardToken();
-                    break;
-                case Tag.DL_NOT:
-                    DiscardToken();
-                    node.factor = new MathFactorNode();
-                    MathFactor(ref node.factor);
                     break;
                 default:
                     node = null;

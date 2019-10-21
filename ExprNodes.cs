@@ -377,54 +377,32 @@ namespace KayoCompiler.Ast
 
             if (children != null)
             {
+                int index = 0;
                 foreach (var node in children)
                 {
                     code += node.Gen();
-                    if (node.Op != Tag.NULL)
-                    {
-                        if (node.Op == Tag.DL_PLUS)
-                        {
-                            switch (CodeGenUtils.StackDepth)
-                            {
-                                case 2:
-                                    code += "add\trax, rdx\n";
-                                    break;
-                                case 3:
-                                    code += "add\trdx, rcx\n";
-                                    break;
-                                case 4:
-                                    code += "pop\trbx\n";
-                                    code += "add\trcx, rbx\n";
-                                    break;
-                                default:
-                                    code += "pop\trbx\n";
-                                    code += "add\tqword [rsp], rbx\n";
-                                    break;
-                            }
-                        }
-                        else
-                        {
-                            switch (CodeGenUtils.StackDepth)
-                            {
-                                case 2:
-                                    code += "sub\trax, rdx\n";
-                                    break;
-                                case 3:
-                                    code += "sub\trdx, rcx\n";
-                                    break;
-                                case 4:
-                                    code += "pop\trbx\n";
-                                    code += "sub\trcx, rbx\n";
-                                    break;
-                                default:
-                                    code += "pop\trbx\n";
-                                    code += "sub\tqword [rsp], rbx\n";
-                                    break;
-                            }
-                        }
+                    index++;
+                    if (index == 1) continue;
 
-                        CodeGenUtils.StackDepth--;
+                    switch (CodeGenUtils.StackDepth)
+                    {
+                        case 2:
+                            code += "add\trax, rdx\n";
+                            break;
+                        case 3:
+                            code += "add\trdx, rcx\n";
+                            break;
+                        case 4:
+                            code += "pop\trbx\n";
+                            code += "add\trcx, rbx\n";
+                            break;
+                        default:
+                            code += "pop\trbx\n";
+                            code += "add\tqword [rsp], rbx\n";
+                            break;
                     }
+
+                    CodeGenUtils.StackDepth--;
                 }
             }
 
@@ -541,7 +519,7 @@ namespace KayoCompiler.Ast
                                     break;
                             }
                         }
-                        else
+                        else if (node.Op == Tag.DL_MOD)
                         {
                             switch (CodeGenUtils.StackDepth)
                             {
@@ -628,6 +606,7 @@ namespace KayoCompiler.Ast
 
     class MathFactorNode : ExprBaseNode<AstNode>
     {
+        public Tag factorOp;
         public TerminalNode value;
         public ExprNode expr;
         public MathFactorNode factor;
@@ -643,20 +622,45 @@ namespace KayoCompiler.Ast
 
             if (factor != null)
             {
-                switch (CodeGenUtils.StackDepth)
+                if (factorOp == Tag.DL_NOT)
                 {
-                    case 1:
-                        code += "xor\trax, 1\n";
-                        break;
-                    case 2:
-                        code += "xor\trdx, 1\n";
-                        break;
-                    case 3:
-                        code += "xor\trcx, 1\n";
-                        break;
-                    default:
-                        code += "xor\tqword [rsp], 1\n";
-                        break;
+                    switch (CodeGenUtils.StackDepth)
+                    {
+                        case 1:
+                            code += "xor\trax, 1\n";
+                            break;
+                        case 2:
+                            code += "xor\trdx, 1\n";
+                            break;
+                        case 3:
+                            code += "xor\trcx, 1\n";
+                            break;
+                        default:
+                            code += "xor\tqword [rsp], 1\n";
+                            break;
+                    }
+                }
+                else if (factorOp == Tag.DL_MINUS)
+                {
+                    switch (CodeGenUtils.StackDepth)
+                    {
+                        case 1:
+                            code += "not\trax\n";
+                            code += "add\trax, 1\n";
+                            break;
+                        case 2:
+                            code += "not\trdx\n";
+                            code += "add\trdx, 1\n";
+                            break;
+                        case 3:
+                            code += "not\trcx\n";
+                            code += "add\trcx, 1\n";
+                            break;
+                        default:
+                            code += "not\tqword [rsp]\n";
+                            code += "add\tqword [rsp], 1\n";
+                            break;
+                    }
                 }
             }
 
@@ -666,9 +670,12 @@ namespace KayoCompiler.Ast
         public override VarType Type()
         {
             VarType type = value?.Type() ?? expr?.Type() ?? factor?.Type() ?? func?.Type() ?? VarType.TYPE_ERROR;
-            if (factor != null && type != VarType.TYPE_BOOL)
+            if (factor != null)
             {
-                new TypeMismatchError(type, VarType.TYPE_BOOL).PrintErrMsg();
+                if (factorOp == Tag.DL_NOT && type != VarType.TYPE_BOOL)
+                    new TypeMismatchError(type, VarType.TYPE_BOOL).PrintErrMsg();
+                else if (type != VarType.TYPE_INT)
+                    new TypeMismatchError(type, VarType.TYPE_INT).PrintErrMsg();
             }
 
             return type;
