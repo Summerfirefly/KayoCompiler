@@ -28,7 +28,7 @@ namespace KayoCompiler
                     code += "EXTERN write\n";
                 code += "SECTION .text\n";
                 code += "_start:\n";
-                code += "call\tmain\n";
+                code += "call\tfunc_main\n";
                 code += "mov\trax, 60\n";
                 code += "mov\trdi, 0\n";
                 code += "syscall\n";

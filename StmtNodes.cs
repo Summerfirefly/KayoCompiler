@@ -215,7 +215,7 @@ namespace KayoCompiler.Ast
                 argc++;
             }
 
-            code += $"call\t{name}\n";
+            code += $"call\tfunc_{name}\n";
             if (argc > 0)
             {
                 code += $"add\trsp, {argc * 8}\n";
@@ -261,7 +261,7 @@ namespace KayoCompiler.Ast
 				code += "mov\trbx, rax\n";
                 CodeGenUtils.StackDepth--;
 			}
-            code += $"jmp\t{ScopeManager.CurrentFun}_return\n";
+            code += $"jmp\tfunc_{ScopeManager.CurrentFun}_return\n";
 
             return code;
         }

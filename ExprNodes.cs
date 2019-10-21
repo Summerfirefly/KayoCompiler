@@ -29,7 +29,7 @@ namespace KayoCompiler.Ast
         }
     }
 
-    class ExprNode : ExprBaseNode<LogicTermNode>
+    class ExprNode : ExprBaseNode<AndExprNode>
     {
         public override string Gen()
         {
@@ -101,7 +101,7 @@ namespace KayoCompiler.Ast
         }
     }
 
-    class LogicTermNode : ExprBaseNode<LogicFactorNode>
+    class AndExprNode : ExprBaseNode<EqualExprNode>
     {
         public override string Gen()
         {
@@ -173,7 +173,7 @@ namespace KayoCompiler.Ast
         }
     }
 
-    class LogicFactorNode : ExprBaseNode<LogicRelNode>
+    class EqualExprNode : ExprBaseNode<CmpExprNode>
     {
         public override string Gen()
         {
@@ -268,7 +268,7 @@ namespace KayoCompiler.Ast
         }
     }
 
-    class LogicRelNode : ExprBaseNode<MathExprNode>
+    class CmpExprNode : ExprBaseNode<AddExprNode>
     {
         public override string Gen()
         {
@@ -369,7 +369,7 @@ namespace KayoCompiler.Ast
         }
     }
 
-    class MathExprNode : ExprBaseNode<MathTermNode>
+    class AddExprNode : ExprBaseNode<MulExprNode>
     {
         public override string Gen()
         {
@@ -377,32 +377,33 @@ namespace KayoCompiler.Ast
 
             if (children != null)
             {
-                int index = 0;
                 foreach (var node in children)
                 {
                     code += node.Gen();
-                    index++;
-                    if (index == 1) continue;
 
-                    switch (CodeGenUtils.StackDepth)
+                    if (node.Op != Tag.NULL)
                     {
-                        case 2:
-                            code += "add\trax, rdx\n";
-                            break;
-                        case 3:
-                            code += "add\trdx, rcx\n";
-                            break;
-                        case 4:
-                            code += "pop\trbx\n";
-                            code += "add\trcx, rbx\n";
-                            break;
-                        default:
-                            code += "pop\trbx\n";
-                            code += "add\tqword [rsp], rbx\n";
-                            break;
-                    }
+                        string opStr = node.Op == Tag.DL_PLUS ? "add" : "sub";
+                        switch (CodeGenUtils.StackDepth)
+                        {
+                            case 2:
+                                code += $"{opStr}\trax, rdx\n";
+                                break;
+                            case 3:
+                                code += $"{opStr}\trdx, rcx\n";
+                                break;
+                            case 4:
+                                code += "pop\trbx\n";
+                                code += $"{opStr}\trcx, rbx\n";
+                                break;
+                            default:
+                                code += "pop\trbx\n";
+                                code += $"{opStr}\tqword [rsp], rbx\n";
+                                break;
+                        }
 
-                    CodeGenUtils.StackDepth--;
+                        CodeGenUtils.StackDepth--;
+                    }
                 }
             }
 
@@ -443,7 +444,7 @@ namespace KayoCompiler.Ast
         }
     }
 
-    class MathTermNode : ExprBaseNode<MathFactorNode>
+    class MulExprNode : ExprBaseNode<FactorNode>
     {
         public override string Gen()
         {
@@ -604,12 +605,12 @@ namespace KayoCompiler.Ast
         }
     }
 
-    class MathFactorNode : ExprBaseNode<AstNode>
+    class FactorNode : ExprBaseNode<AstNode>
     {
         public Tag factorOp;
         public TerminalNode value;
         public ExprNode expr;
-        public MathFactorNode factor;
+        public FactorNode factor;
         public FuncCallStmtNode func;
 
         public override string Gen()

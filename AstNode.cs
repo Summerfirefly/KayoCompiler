@@ -45,14 +45,14 @@ namespace KayoCompiler.Ast
             ScopeManager.FunctionEnter(name);
             ScopeManager.ScopeEnter();
 
-            code += $"{name}:\n";
+            code += $"func_{name}:\n";
             code += "push\trbp\n";
             code += "mov\trbp, rsp\n";
             code += $"sub\trsp, {SymbolTable.CurFunVarCount * 8}\n";
 
             code += body?.Gen();
 
-            code += $"{name}_return:\n";
+            code += $"func_{name}_return:\n";
             code += "mov\trsp, rbp\n";
             code += "pop\trbp\n";
             code += "ret\n";

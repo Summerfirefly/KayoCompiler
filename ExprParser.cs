@@ -7,196 +7,88 @@ namespace KayoCompiler
     {
         private void Expr(ExprNode node)
         {
-            switch (next.Tag)
+            var child = node.AddChild(new AndExprNode());
+            AndExpr(child);
+            while (next.Tag == Tag.DL_OR)
             {
-                case Tag.ID:
-                case Tag.NUM:
-                case Tag.DL_PLUS:
-                case Tag.DL_MINUS:
-                case Tag.DL_LPAR:
-                case Tag.KW_TRUE:
-                case Tag.KW_FALSE:
-                case Tag.DL_NOT:
-                    var child = node.AddChild(new LogicTermNode());
-                    LogicTerm(ref child);
-                    while (next.Tag == Tag.DL_OR)
-                    {
-                        child = node.AddChild(new LogicTermNode());
-                        LogicTerm(ref child);
-                    }
-                    break;
-            }
-        }
-
-        private void LogicTerm(ref LogicTermNode node)
-        {
-            if (next.Tag == Tag.DL_OR)
-            {
-                node.Op = next.Tag;
+                child = node.AddChild(new AndExprNode());
+                child.Op = Tag.DL_OR;
                 DiscardToken();
-            }
-
-            switch (next.Tag)
-            {
-                case Tag.ID:
-                case Tag.NUM:
-                case Tag.DL_PLUS:
-                case Tag.DL_MINUS:
-                case Tag.DL_LPAR:
-                case Tag.KW_TRUE:
-                case Tag.KW_FALSE:
-                case Tag.DL_NOT:
-                    var child = node.AddChild(new LogicFactorNode());
-                    LogicFactor(ref child);
-                    while (next.Tag == Tag.DL_AND)
-                    {
-                        child = node.AddChild(new LogicFactorNode());
-                        LogicFactor(ref child);
-                    }
-                    break;
-                default:
-                    node = null;
-                    break;
+                AndExpr(child);
             }
         }
 
-        private void LogicFactor(ref LogicFactorNode node)
+        private void AndExpr(AndExprNode node)
         {
-            if (next.Tag == Tag.DL_AND)
+            var child = node.AddChild(new EqualExprNode());
+            EqualExpr(child);
+            while (next.Tag == Tag.DL_AND)
             {
-                node.Op = next.Tag;
+                child = node.AddChild(new EqualExprNode());
+                child.Op = Tag.DL_AND;
                 DiscardToken();
-            }
-
-            switch (next.Tag)
-            {
-                case Tag.ID:
-                case Tag.NUM:
-                case Tag.DL_PLUS:
-                case Tag.DL_MINUS:
-                case Tag.DL_LPAR:
-                case Tag.KW_TRUE:
-                case Tag.KW_FALSE:
-                case Tag.DL_NOT:
-                    var child = node.AddChild(new LogicRelNode());
-                    LogicRel(ref child);
-                    while (next.Tag == Tag.DL_EQ || next.Tag == Tag.DL_NEQ)
-                    {
-                        child = node.AddChild(new LogicRelNode());
-                        LogicRel(ref child);
-                    }
-                    break;
-                default:
-                    node = null;
-                    break;
+                EqualExpr(child);
             }
         }
 
-        private void LogicRel(ref LogicRelNode node)
+        private void EqualExpr(EqualExprNode node)
         {
-            if (next.Tag == Tag.DL_EQ || next.Tag == Tag.DL_NEQ)
+            var child = node.AddChild(new CmpExprNode());
+            CmpExpr(child);
+            while (next.Tag == Tag.DL_EQ || next.Tag == Tag.DL_NEQ)
             {
-                node.Op = next.Tag;
+                child = node.AddChild(new CmpExprNode());
+                child.Op = next.Tag;
                 DiscardToken();
-            }
-
-            switch (next.Tag)
-            {
-                case Tag.ID:
-                case Tag.NUM:
-                case Tag.DL_PLUS:
-                case Tag.DL_MINUS:
-                case Tag.DL_LPAR:
-                case Tag.KW_TRUE:
-                case Tag.KW_FALSE:
-                case Tag.DL_NOT:
-                    var child = node.AddChild(new MathExprNode());
-                    MathExpr(ref child);
-                    while (
-                        next.Tag == Tag.DL_LT ||
-                        next.Tag == Tag.DL_NLT ||
-                        next.Tag == Tag.DL_GT ||
-                        next.Tag == Tag.DL_NGT)
-                    {
-                        child = node.AddChild(new MathExprNode());
-                        MathExpr(ref child);
-                    }
-                    break;
-                default:
-                    node = null;
-                    break;
+                CmpExpr(child);
             }
         }
 
-        private void MathExpr(ref MathExprNode node)
+        private void CmpExpr(CmpExprNode node)
         {
-            if (next.Tag == Tag.DL_LT ||
+            var child = node.AddChild(new AddExprNode());
+            AddExpr(child);
+            while (
+                next.Tag == Tag.DL_LT ||
                 next.Tag == Tag.DL_NLT ||
                 next.Tag == Tag.DL_GT ||
                 next.Tag == Tag.DL_NGT)
             {
-                node.Op = next.Tag;
+                child = node.AddChild(new AddExprNode());
+                child.Op = next.Tag;
                 DiscardToken();
-            }
-
-            switch (next.Tag)
-            {
-                case Tag.ID:
-                case Tag.NUM:
-                case Tag.DL_PLUS:
-                case Tag.DL_MINUS:
-                case Tag.DL_LPAR:
-                case Tag.KW_TRUE:
-                case Tag.KW_FALSE:
-                case Tag.DL_NOT:
-                    var child = node.AddChild(new MathTermNode());
-                    MathTerm(ref child);
-                    while (next.Tag == Tag.DL_PLUS || next.Tag == Tag.DL_MINUS)
-                    {
-                        child = node.AddChild(new MathTermNode());
-                        MathTerm(ref child);
-                    }
-                    break;
-                default:
-                    node = null;
-                    break;
+                AddExpr(child);
             }
         }
 
-        private void MathTerm(ref MathTermNode node)
+        private void AddExpr(AddExprNode node)
         {
-            switch (next.Tag)
+            var child = node.AddChild(new MulExprNode());
+            MulExpr(child);
+            while (next.Tag == Tag.DL_PLUS || next.Tag == Tag.DL_MINUS)
             {
-                case Tag.ID:
-                case Tag.NUM:
-                case Tag.DL_PLUS:
-                case Tag.DL_MINUS:
-                case Tag.DL_LPAR:
-                case Tag.KW_TRUE:
-                case Tag.KW_FALSE:
-                case Tag.DL_NOT:
-                    var child = node.AddChild(new MathFactorNode());
-                    MathFactor(ref child);
-                    while (next.Tag == Tag.DL_MULTI || next.Tag == Tag.DL_OBELUS || next.Tag == Tag.DL_MOD)
-                    {
-                        child = node.AddChild(new MathFactorNode());
-                        MathFactor(ref child);
-                    }
-                    break;
-                default:
-                    node = null;
-                    break;
+                child = node.AddChild(new MulExprNode());
+                child.Op = next.Tag;
+                DiscardToken();
+                MulExpr(child);
             }
         }
 
-        private void MathFactor(ref MathFactorNode node)
+        private void MulExpr(MulExprNode node)
         {
-            if (next.Tag == Tag.DL_MULTI || next.Tag == Tag.DL_OBELUS || next.Tag == Tag.DL_MOD)
+            var child = node.AddChild(new FactorNode());
+            Factor(child);
+            while (next.Tag == Tag.DL_MULTI || next.Tag == Tag.DL_OBELUS || next.Tag == Tag.DL_MOD)
             {
-                node.Op = next.Tag;
+                child = node.AddChild(new FactorNode());
+                child.Op = next.Tag;
                 DiscardToken();
+                Factor(child);
             }
+        }
 
+        private void Factor(FactorNode node)
+        {
             switch (next.Tag)
             {
                 case Tag.ID:
@@ -221,8 +113,8 @@ namespace KayoCompiler
                 case Tag.DL_NOT:
                     node.factorOp = next.Tag;
                     DiscardToken();
-                    node.factor = new MathFactorNode();
-                    MathFactor(ref node.factor);
+                    node.factor = new FactorNode();
+                    Factor(node.factor);
                     break;
                 case Tag.DL_LPAR:
                     DiscardToken();
@@ -236,7 +128,7 @@ namespace KayoCompiler
                     DiscardToken();
                     break;
                 default:
-                    node = null;
+                    new Error().PrintErrMsg();
                     break;
             }
         }
