@@ -196,19 +196,36 @@ namespace KayoCompiler.Ast
             int argc = 0;
             args.Reverse();
 
+            // Save value in register
+            switch (CodeGenUtils.StackDepth)
+            {
+                case 1:
+                    code += "push\trax\n";
+                    break;
+                case 2:
+                    code += "push\trax\n";
+                    code += "push\trdx\n";
+                    break;
+                case 3:
+                    code += "push\trax\n";
+                    code += "push\trdx\n";
+                    code += "push\trcx\n";
+                    break;
+            }
+
             foreach (ExprNode arg in args)
             {
                 code += arg?.Gen();
                 switch (CodeGenUtils.StackDepth)
                 {
                     case 1:
-                        code += $"push\trax\n";
+                        code += "push\trax\n";
                         break;
                     case 2:
-                        code += $"push\trdx\n";
+                        code += "push\trdx\n";
                         break;
                     case 3:
-                        code += $"push\trcx\n";
+                        code += "push\trcx\n";
                         break;
                 }
                 CodeGenUtils.StackDepth--;
@@ -225,16 +242,22 @@ namespace KayoCompiler.Ast
             switch (CodeGenUtils.StackDepth)
             {
                 case 1:
-                    code += $"mov\trax, rbx\n";
+                    code += "mov\trax, rbx\n";
                     break;
                 case 2:
-                    code += $"mov\trdx, rbx\n";
+                    code += "pop\trax\n";
+                    code += "mov\trdx, rbx\n";
                     break;
                 case 3:
-                    code += $"mov\trcx, rbx\n";
+                    code += "pop\trax\n";
+                    code += "pop\trdx\n";
+                    code += "mov\trcx, rbx\n";
                     break;
                 default:
-                    code += $"push\trbx\n";
+                    code += "pop\trax\n";
+                    code += "pop\trdx\n";
+                    code += "pop\trcx\n";
+                    code += "push\trbx\n";
                     break;
             }
 
