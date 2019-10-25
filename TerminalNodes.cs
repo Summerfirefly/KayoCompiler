@@ -16,18 +16,17 @@
 
         public override string Gen()
         {
+            string code = string.Empty;
+
             CodeGenUtils.StackDepth++;
-            switch (CodeGenUtils.StackDepth)
+            if (CodeGenUtils.StackDepth > 3)
             {
-                case 1:
-                    return $"mov\trax, {value}\n";
-                case 2:
-                    return $"mov\trdx, {value}\n";
-                case 3:
-                    return $"mov\trcx, {value}\n";
-                default:
-                    return $"push\tqword {value}\n";
+                code += $"push\t{CodeGenUtils.CurrentStackTop}\n";
             }
+
+            code += $"mov\t{CodeGenUtils.CurrentStackTop}, {value}\n";
+
+            return code;
         }
 
         public override VarType Type()
@@ -47,18 +46,17 @@
 
         public override string Gen()
         {
+            string code = string.Empty;
+
             CodeGenUtils.StackDepth++;
-            switch (CodeGenUtils.StackDepth)
+            if (CodeGenUtils.StackDepth > 3)
             {
-                case 1:
-                    return $"mov\trax, {value}\n";
-                case 2:
-                    return $"mov\trdx, {value}\n";
-                case 3:
-                    return $"mov\trcx, {value}\n";
-                default:
-                    return $"push\tqword {value}\n";
+                code += $"push\t{CodeGenUtils.CurrentStackTop}\n";
             }
+
+            code += $"mov\t{CodeGenUtils.CurrentStackTop}, {value}\n";
+
+            return code;
         }
 
         public override VarType Type()
@@ -78,20 +76,19 @@
 
         public override string Gen()
         {
+            string code = string.Empty;
             int index = SymbolTable.GetVarIndex(name);
             int offset = -(index + 1) * 8;
+
             CodeGenUtils.StackDepth++;
-            switch (CodeGenUtils.StackDepth)
+            if (CodeGenUtils.StackDepth > 3)
             {
-                case 1:
-                    return $"mov\trax, [rbp{(offset>0?"+":"")}{offset}]\n";
-                case 2:
-                    return $"mov\trdx, [rbp{(offset>0?"+":"")}{offset}]\n";
-                case 3:
-                    return $"mov\trcx, [rbp{(offset>0?"+":"")}{offset}]\n";
-                default:
-                    return $"push\tqword [rbp{(offset>0?"+":"")}{offset}]\n";
+                code += $"push\t{CodeGenUtils.CurrentStackTop}\n";
             }
+
+            code += $"mov\t{CodeGenUtils.CurrentStackTop}, [rbp{(offset>0?"+":"")}{offset}]\n";
+
+            return code;
         }
 
         public override VarType Type()

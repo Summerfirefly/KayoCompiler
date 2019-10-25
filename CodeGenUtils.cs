@@ -11,18 +11,16 @@
         {
             get
             {
-                switch (StackDepth)
+                switch (StackDepth % 3)
                 {
                     case 0:
-                        return string.Empty;
+                        return "r11";
                     case 1:
                         return "rax";
                     case 2:
-                        return "rdx";
-                    case 3:
-                        return "rcx";
+                        return "r10";
                     default:
-                        return "[rsp]";
+                        return string.Empty;
                 }
             }
         }

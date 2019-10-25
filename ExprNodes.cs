@@ -42,22 +42,23 @@ namespace KayoCompiler.Ast
                     code += node.Gen();
                     if (node.Op != Tag.NULL)
                     {
-                        switch (CodeGenUtils.StackDepth)
+                        switch (CodeGenUtils.StackDepth % 3)
                         {
+                            case 0:
+                                code += "or\tr10, r11\n";
+                                break;
+                            case 1:
+                                code += "or\tr11, rax\n";
+                                break;
                             case 2:
-                                code += "or\trax, rdx\n";
-                                break;
-                            case 3:
-                                code += "or\trdx, rcx\n";
-                                break;
-                            case 4:
-                                code += "pop\trbx";
-                                code += "or\trcx, rbx\n";
+                                code += "or\trax, r10\n";
                                 break;
                             default:
-                                code += "pop\trbx\n";
-                                code += "or\tqword [rsp], rbx\n";
                                 break;
+                        }
+                        if (CodeGenUtils.StackDepth > 3)
+                        {
+                            code += $"pop\t{CodeGenUtils.CurrentStackTop}\n";
                         }
                         CodeGenUtils.StackDepth--;
                     }
@@ -114,22 +115,21 @@ namespace KayoCompiler.Ast
                     code += node.Gen();
                     if (node.Op != Tag.NULL)
                     {
-                        switch (CodeGenUtils.StackDepth)
+                        switch (CodeGenUtils.StackDepth % 3)
                         {
+                            case 0:
+                                code += "and\tr10, r11\n";
+                                break;
+                            case 1:
+                                code += "and\tr11, rax\n";
+                                break;
                             case 2:
-                                code += "and\trax, rdx\n";
+                                code += "and\trax, r10\n";
                                 break;
-                            case 3:
-                                code += "and\trdx, rcx\n";
-                                break;
-                            case 4:
-                                code += "pop\trbx";
-                                code += "and\trcx, rbx\n";
-                                break;
-                            default:
-                                code += "pop\trbx\n";
-                                code += "and\tqword [rsp], rbx\n";
-                                break;
+                        }
+                        if (CodeGenUtils.StackDepth > 3)
+                        {
+                            code += $"pop\t{CodeGenUtils.CurrentStackTop}\n";
                         }
                         CodeGenUtils.StackDepth--;
                     }
@@ -186,23 +186,24 @@ namespace KayoCompiler.Ast
                     code += node.Gen();
                     if (node.Op != Tag.NULL)
                     {
-                        switch (CodeGenUtils.StackDepth)
+                        switch (CodeGenUtils.StackDepth % 3)
                         {
+                            case 0:
+                                code += "cmp\tr10, r11\n";
+                                break;
+                            case 1:
+                                code += "cmp\tr11, rax\n";
+                                break;
                             case 2:
-                                code += "cmp\trax, rdx\n";
-                                break;
-                            case 3:
-                                code += "cmp\trdx, rcx\n";
-                                break;
-                            case 4:
-                                code += "pop\trbx";
-                                code += "cmp\trcx, rbx\n";
-                                break;
-                            default:
-                                code += "pop\trbx\n";
-                                code += "cmp\tqword [rsp], rbx\n";
+                                code += "cmp\trax, r10\n";
                                 break;
                         }
+
+                        if (CodeGenUtils.StackDepth > 3)
+                        {
+                            code += $"pop\t{CodeGenUtils.CurrentStackTop}\n";
+                        }
+                        CodeGenUtils.StackDepth--;
 
                         switch (node.Op)
                         {
@@ -214,25 +215,7 @@ namespace KayoCompiler.Ast
                                 break;
                         }
 
-                        code += "movzx\trbx, bl\n";
-
-                        switch (CodeGenUtils.StackDepth)
-                        {
-                            case 2:
-                                code += "mov\trax, rbx\n";
-                                break;
-                            case 3:
-                                code += "mov\trdx, rbx\n";
-                                break;
-                            case 4:
-                                code += "mov\trcx, rbx\n";
-                                break;
-                            default:
-                                code += "push\trbx\n";
-                                break;
-                        }
-
-                        CodeGenUtils.StackDepth--;
+                        code += $"movzx\t{CodeGenUtils.CurrentStackTop}, bl\n";
                     }
                 }
             }
@@ -281,23 +264,24 @@ namespace KayoCompiler.Ast
                     code += node.Gen();
                     if (node.Op != Tag.NULL)
                     {
-                        switch (CodeGenUtils.StackDepth)
+                        switch (CodeGenUtils.StackDepth % 3)
                         {
+                            case 0:
+                                code += "cmp\tr10, r11\n";
+                                break;
+                            case 1:
+                                code += "cmp\tr11, rax\n";
+                                break;
                             case 2:
-                                code += "cmp\trax, rdx\n";
-                                break;
-                            case 3:
-                                code += "cmp\trdx, rcx\n";
-                                break;
-                            case 4:
-                                code += "pop\trbx";
-                                code += "cmp\trcx, rbx\n";
-                                break;
-                            default:
-                                code += "pop\trbx\n";
-                                code += "cmp\tqword [rsp], rbx\n";
+                                code += "cmp\trax, r10\n";
                                 break;
                         }
+
+                        if (CodeGenUtils.StackDepth > 3)
+                        {
+                            code += $"pop\t{CodeGenUtils.CurrentStackTop}\n";
+                        }
+                        CodeGenUtils.StackDepth--;
 
                         switch (node.Op)
                         {
@@ -315,25 +299,7 @@ namespace KayoCompiler.Ast
                                 break;
                         }
 
-                        code += "movzx\trbx, bl\n";
-
-                        switch (CodeGenUtils.StackDepth)
-                        {
-                            case 2:
-                                code += "mov\trax, rbx\n";
-                                break;
-                            case 3:
-                                code += "mov\trdx, rbx\n";
-                                break;
-                            case 4:
-                                code += "mov\trcx, rbx\n";
-                                break;
-                            default:
-                                code += "push\trbx\n";
-                                break;
-                        }
-
-                        CodeGenUtils.StackDepth--;
+                        code += $"movzx\t{CodeGenUtils.CurrentStackTop}, bl\n";
                     }
                 }
             }
@@ -384,24 +350,23 @@ namespace KayoCompiler.Ast
                     if (node.Op != Tag.NULL)
                     {
                         string opStr = node.Op == Tag.DL_PLUS ? "add" : "sub";
-                        switch (CodeGenUtils.StackDepth)
+                        switch (CodeGenUtils.StackDepth % 3)
                         {
+                            case 0:
+                                code += $"{opStr}\tr10, r11\n";
+                                break;
+                            case 1:
+                                code += $"{opStr}\tr11, rax\n";
+                                break;
                             case 2:
-                                code += $"{opStr}\trax, rdx\n";
-                                break;
-                            case 3:
-                                code += $"{opStr}\trdx, rcx\n";
-                                break;
-                            case 4:
-                                code += "pop\trbx\n";
-                                code += $"{opStr}\trcx, rbx\n";
-                                break;
-                            default:
-                                code += "pop\trbx\n";
-                                code += $"{opStr}\tqword [rsp], rbx\n";
+                                code += $"{opStr}\trax, r10\n";
                                 break;
                         }
 
+                        if (CodeGenUtils.StackDepth > 3)
+                        {
+                            code += $"pop\t{CodeGenUtils.CurrentStackTop}\n";
+                        }
                         CodeGenUtils.StackDepth--;
                     }
                 }
@@ -459,110 +424,75 @@ namespace KayoCompiler.Ast
                     {
                         if (node.Op == Tag.DL_MULTI)
                         {
-                            switch (CodeGenUtils.StackDepth)
+                            switch (CodeGenUtils.StackDepth % 3)
                             {
+                                case 0:
+                                    code += "imul\tr10, r11\n";
+                                    break;
+                                case 1:
+                                    code += "imul\tr11, rax\n";
+                                    break;
                                 case 2:
-                                    code += "imul\trax, rdx\n";
-                                    break;
-                                case 3:
-                                    code += "imul\trdx, rcx\n";
-                                    break;
-                                case 4:
-                                    code += "pop\trbx\n";
-                                    code += "imul\trcx, rbx\n";
-                                    break;
-                                default:
-                                    code += "pop\trbx\n";
-                                    code += "imul\trbx, qword [rsp]\n";
-                                    code += "mov\trbx, qword [rsp]\n";
+                                    code += "imul\trax, r10\n";
                                     break;
                             }
                         }
                         else if (node.Op == Tag.DL_OBELUS)
                         {
-                            switch (CodeGenUtils.StackDepth)
+                            switch (CodeGenUtils.StackDepth % 3)
                             {
-                                case 2:
-                                    code += "mov\trbx, rdx\n";
-                                    code += "cqo\n";
-                                    code += "idiv\trbx\n";
-                                    break;
-                                case 3:
-                                    code += "push\trax\n";
-                                    code += "mov\trax, rdx\n";
-                                    code += "cqo\n";
-                                    code += "idiv\trcx\n";
-                                    code += "mov\trdx, rax\n";
-                                    code += "pop\trax\n";
-                                    break;
-                                case 4:
-                                    code += "pop\trbx\n";
-                                    code += "push\trax\n";
-                                    code += "push\trdx\n";
-                                    code += "mov\trax, rcx\n";
-                                    code += "cqo\n";
-                                    code += "idiv\trbx";
-                                    code += "mov\trcx, rax\n";
-                                    code += "pop\trdx\n";
-                                    code += "pop\trax\n";
-                                    break;
-                                default:
-                                    code += "pop\trbx\n";
-                                    code += "push\trax\n";
-                                    code += "push\trdx\n";
-                                    code += "mov\trax, qword [rsp+16]\n";
-                                    code += "cqo\n";
-                                    code += "idiv\trbx\n";
+                                case 0:
                                     code += "mov\trbx, rax\n";
-                                    code += "pop\trdx\n";
-                                    code += "pop\trax\n";
-                                    code += "mov\tqword [rsp], rbx\n";
+                                    code += "mov\trax, r10\n";
+                                    code += "cqo\n";
+                                    code += "idiv\tr11\n";
+                                    code += "mov\tr10, rax\n";
+                                    code += "mov\trax, rbx\n";
+                                    break;
+                                case 1:
+                                    code += "mov\trbx, rax\n";
+                                    code += "mov\trax, r11\n";
+                                    code += "cqo\n";
+                                    code += "idiv\trbx\n";
+                                    code += "mov\tr11, rax\n";
+                                    break;
+                                case 2:
+                                    code += "cqo\n";
+                                    code += "idiv\tr10\n";
                                     break;
                             }
                         }
                         else if (node.Op == Tag.DL_MOD)
                         {
-                            switch (CodeGenUtils.StackDepth)
+                            switch (CodeGenUtils.StackDepth % 3)
                             {
+                                case 0:
+                                    code += "mov\trbx, rax\n";
+                                    code += "mov\trax, r10\n";
+                                    code += "cqo\n";
+                                    code += "idiv\tr11\n";
+                                    code += "mov\tr10, rdx\n";
+                                    code += "mov\trax, rbx\n";
+                                    break;
+                                case 1:
+                                    code += "mov\trbx, rax\n";
+                                    code += "mov\trax, r11\n";
+                                    code += "cqo\n";
+                                    code += "idiv\trbx\n";
+                                    code += "mov\tr11, rdx\n";
+                                    break;
                                 case 2:
-                                    code += "mov\trbx, rdx\n";
                                     code += "cqo\n";
-                                    code += "idiv\trbx\n";
+                                    code += "idiv\tr10\n";
                                     code += "mov\trax, rdx\n";
-                                    break;
-                                case 3:
-                                    code += "push\trax\n";
-                                    code += "mov\trax, rdx\n";
-                                    code += "cqo\n";
-                                    code += "idiv\trcx\n";
-                                    code += "pop\trax\n";
-                                    break;
-                                case 4:
-                                    code += "pop\trbx\n";
-                                    code += "push\trax\n";
-                                    code += "push\trdx\n";
-                                    code += "mov\trax, rcx\n";
-                                    code += "cqo\n";
-                                    code += "idiv\trbx";
-                                    code += "mov\trcx, rdx\n";
-                                    code += "pop\trdx\n";
-                                    code += "pop\trax\n";
-                                    break;
-                                default:
-                                    code += "pop\trbx\n";
-                                    code += "push\trax\n";
-                                    code += "push\trdx\n";
-                                    code += "mov\trax, qword [rsp+16]\n";
-                                    code += "cqo\n";
-                                    code += "idiv\trbx\n";
-                                    code += "mov\trbx, rdx\n";
-                                    code += "pop\trdx\n";
-                                    code += "pop\trax\n";
-                                    code += "mov\tqword [rsp], rbx\n";
                                     break;
                             }
                         }
 
+                        if (CodeGenUtils.StackDepth > 3)
+                        {
+                            code += $"pop\t{CodeGenUtils.CurrentStackTop}\n";
+                        }
                         CodeGenUtils.StackDepth--;
                     }
                 }
@@ -625,43 +555,12 @@ namespace KayoCompiler.Ast
             {
                 if (factorOp == Tag.DL_NOT)
                 {
-                    switch (CodeGenUtils.StackDepth)
-                    {
-                        case 1:
-                            code += "xor\trax, 1\n";
-                            break;
-                        case 2:
-                            code += "xor\trdx, 1\n";
-                            break;
-                        case 3:
-                            code += "xor\trcx, 1\n";
-                            break;
-                        default:
-                            code += "xor\tqword [rsp], 1\n";
-                            break;
-                    }
+                    code += $"xor\t{CodeGenUtils.CurrentStackTop}, 1\n";
                 }
                 else if (factorOp == Tag.DL_MINUS)
                 {
-                    switch (CodeGenUtils.StackDepth)
-                    {
-                        case 1:
-                            code += "not\trax\n";
-                            code += "add\trax, 1\n";
-                            break;
-                        case 2:
-                            code += "not\trdx\n";
-                            code += "add\trdx, 1\n";
-                            break;
-                        case 3:
-                            code += "not\trcx\n";
-                            code += "add\trcx, 1\n";
-                            break;
-                        default:
-                            code += "not\tqword [rsp]\n";
-                            code += "add\tqword [rsp], 1\n";
-                            break;
-                    }
+                    code += $"not\t{CodeGenUtils.CurrentStackTop}\n";
+                    code += $"add\t{CodeGenUtils.CurrentStackTop}, 1\n";
                 }
             }
 

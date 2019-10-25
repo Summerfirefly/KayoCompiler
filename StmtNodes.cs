@@ -16,7 +16,12 @@ namespace KayoCompiler.Ast
             ScopeManager.ScopeEnter();
 
             code += condition?.Gen() ?? string.Empty;
+
             code += $"cmp\t{CodeGenUtils.CurrentStackTop}, 0\n";
+            if (CodeGenUtils.StackDepth > 3)
+            {
+                code += $"pop\t{CodeGenUtils.CurrentStackTop}\n";
+            }
             CodeGenUtils.StackDepth--;
 
             code += $"je _L{falseLabel}\n";
@@ -60,22 +65,11 @@ namespace KayoCompiler.Ast
             int offset = -(index + 1) * 8;
             code += expr?.Gen() ?? string.Empty;
 
-            switch (CodeGenUtils.StackDepth)
+            code += $"mov\t[rbp{(offset>0?"+":"")}{offset}], {CodeGenUtils.CurrentStackTop}\n";
+            if (CodeGenUtils.StackDepth > 3)
             {
-                case 1:
-                    code += $"mov\tqword [rbp{(offset>0?"+":"")}{offset}], rax\n";
-                    break;
-                case 2:
-                    code += $"mov\tqword [rbp{(offset>0?"+":"")}{offset}], rdx\n";
-                    break;
-                case 3:
-                    code += $"mov\tqword [rbp{(offset>0?"+":"")}{offset}], rcx\n";
-                    break;
-                default:
-                    code += $"push\tqword [rbp{(offset>0?"+":"")}{offset}]\n";
-                    break;
+                code += $"pop\t{CodeGenUtils.CurrentStackTop}\n";
             }
-
             CodeGenUtils.StackDepth--;
 
             return code;
@@ -96,7 +90,12 @@ namespace KayoCompiler.Ast
 
             code += $"_L{startLabel}:\n";
             code += condition?.Gen() ?? string.Empty;
+
             code += $"cmp\t{CodeGenUtils.CurrentStackTop}, 0\n";
+            if (CodeGenUtils.StackDepth > 3)
+            {
+                code += $"pop\t{CodeGenUtils.CurrentStackTop}\n";
+            }
             CodeGenUtils.StackDepth--;
 
             code += $"je _L{endLabel}\n";
@@ -126,7 +125,12 @@ namespace KayoCompiler.Ast
             code += preStmt?.Gen() ?? string.Empty;
             code += $"_L{startLabel}:\n";
             code += condition?.Gen() ?? string.Empty;
+
             code += $"cmp\t{CodeGenUtils.CurrentStackTop}, 0\n";
+            if (CodeGenUtils.StackDepth > 3)
+            {
+                code += $"pop\t{CodeGenUtils.CurrentStackTop}\n";
+            }
             CodeGenUtils.StackDepth--;
 
             code += $"je _L{endLabel}\n";
@@ -149,20 +153,14 @@ namespace KayoCompiler.Ast
             string code = string.Empty;
             code += expr?.Gen() ?? string.Empty;
 
-            switch (CodeGenUtils.StackDepth)
+            code += $"mov\trbx, {CodeGenUtils.CurrentStackTop}\n";
+            if (CodeGenUtils.StackDepth > 3)
             {
-                case 1:
-                    code += "push\trax\n";
-                    break;
-                case 2:
-                    code += "push\trdx\n";
-                    break;
-                case 3:
-                    code += "push\trcx\n";
-                    break;
+                code += $"pop\t{CodeGenUtils.CurrentStackTop}\n";
             }
-
             CodeGenUtils.StackDepth--;
+
+            code += "push\trbx\n";
             
             if (expr?.Type() == VarType.TYPE_BOOL)
                 code += "push\t0\n";
@@ -170,6 +168,7 @@ namespace KayoCompiler.Ast
                 code += "push\t1\n";
 
             code += "call\twrite\n";
+            code += "add\trsp, 16\n";
 
             return code;
         }
@@ -199,34 +198,29 @@ namespace KayoCompiler.Ast
             // Save value in register
             switch (CodeGenUtils.StackDepth)
             {
+                case 0:
+                    break;
                 case 1:
                     code += "push\trax\n";
                     break;
                 case 2:
                     code += "push\trax\n";
-                    code += "push\trdx\n";
+                    code += "push\tr10\n";
                     break;
-                case 3:
+                default:
                     code += "push\trax\n";
-                    code += "push\trdx\n";
-                    code += "push\trcx\n";
+                    code += "push\tr10\n";
+                    code += "push\tr11\n";
                     break;
             }
 
             foreach (ExprNode arg in args)
             {
                 code += arg?.Gen();
-                switch (CodeGenUtils.StackDepth)
+                code += $"push\t{CodeGenUtils.CurrentStackTop}\n";
+                if (CodeGenUtils.StackDepth > 3)
                 {
-                    case 1:
-                        code += "push\trax\n";
-                        break;
-                    case 2:
-                        code += "push\trdx\n";
-                        break;
-                    case 3:
-                        code += "push\trcx\n";
-                        break;
+                    code += $"pop\t{CodeGenUtils.CurrentStackTop}\n";
                 }
                 CodeGenUtils.StackDepth--;
                 argc++;
@@ -242,22 +236,23 @@ namespace KayoCompiler.Ast
             switch (CodeGenUtils.StackDepth)
             {
                 case 1:
-                    code += "mov\trax, rbx\n";
                     break;
                 case 2:
+                    code += "mov\tr10, rax\n";
                     code += "pop\trax\n";
-                    code += "mov\trdx, rbx\n";
                     break;
                 case 3:
+                    code += "mov\tr11, rax\n";
+                    code += "pop\tr10\n";
                     code += "pop\trax\n";
-                    code += "pop\trdx\n";
-                    code += "mov\trcx, rbx\n";
                     break;
                 default:
+                    code += "mov\trbx, rax\n";
+                    code += "pop\tr11\n";
+                    code += "pop\tr10\n";
                     code += "pop\trax\n";
-                    code += "pop\trdx\n";
-                    code += "pop\trcx\n";
-                    code += "push\trbx\n";
+                    code += $"push\t{CodeGenUtils.CurrentStackTop}\n";
+                    code += $"mov\t{CodeGenUtils.CurrentStackTop}, rbx\n";
                     break;
             }
 
