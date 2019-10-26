@@ -7,9 +7,9 @@
 
     class IntNode : TerminalNode
     {
-        public int value;
+        public long value;
 
-        public IntNode(int num)
+        public IntNode(long num)
         {
             value = num;
         }

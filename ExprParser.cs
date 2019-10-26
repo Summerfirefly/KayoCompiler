@@ -105,7 +105,7 @@ namespace KayoCompiler
                     }
                     break;
                 case Tag.NUM:
-                    node.value = new IntNode(int.Parse(next.Value));
+                    node.value = new IntNode(IntParse(next.Value));
                     DiscardToken();
                     break;
                 case Tag.DL_PLUS:
@@ -131,6 +131,18 @@ namespace KayoCompiler
                     new Error().PrintErrMsg();
                     break;
             }
+        }
+
+        private long IntParse(string str)
+        {
+            long result = 0;
+
+            foreach (byte ch in str)
+            {
+                result = result * 10 + ch - '0';
+            }
+
+            return result;
         }
     }
 }
