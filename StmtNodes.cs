@@ -153,14 +153,17 @@ namespace KayoCompiler.Ast
             string code = string.Empty;
             code += expr?.Gen() ?? string.Empty;
 
-            code += $"mov\trbx, {CodeGenUtils.CurrentStackTop}\n";
             if (CodeGenUtils.StackDepth > 3)
             {
+                code += $"mov\trbx, {CodeGenUtils.CurrentStackTop}\n";
                 code += $"pop\t{CodeGenUtils.CurrentStackTop}\n";
+                code += "push\trbx\n";
+            }
+            else
+            {
+                code += $"push\t{CodeGenUtils.CurrentStackTop}\n";
             }
             CodeGenUtils.StackDepth--;
-
-            code += "push\trbx\n";
             
             if (expr?.Type() == VarType.TYPE_BOOL)
                 code += "push\t0\n";
@@ -180,7 +183,26 @@ namespace KayoCompiler.Ast
 
         public override string Gen()
         {
-            return $"get [{id.name}]\n";
+            string code = string.Empty;
+
+            if (id.Type() == VarType.TYPE_BOOL)
+            {
+                code += "push\t0\n";
+            }
+            else if (id.Type() == VarType.TYPE_INT)
+            {
+                code += "push\t1\n";
+            }
+
+            code += "call\tread\n";
+            code += "add\trsp, 8\n";
+
+            int index = SymbolTable.GetVarIndex(id.name);
+            int offset = -(index + 1) * 8;
+
+            code += $"mov\t[rbp{(offset>0?"+":"")}{offset}], rax\n";
+
+            return code;
         }
     }
 

@@ -145,6 +145,7 @@ namespace KayoCompiler
 
 		private void ReadStmt(ReadStmtNode node)
 		{
+			CodeGenUtils.HasRead = true;
 			DiscardToken();
 
 			if (next.Tag == Tag.ID)

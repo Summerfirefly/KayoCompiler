@@ -26,6 +26,8 @@ namespace KayoCompiler
                 code += "GLOBAL _start\n";
                 if (CodeGenUtils.HasWrite)
                     code += "EXTERN write\n";
+                if (CodeGenUtils.HasRead)
+                    code += "EXTERN read\n";
                 code += "SECTION .text\n";
                 code += "_start:\n";
                 code += "call\tfunc_main\n";

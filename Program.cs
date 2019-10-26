@@ -24,7 +24,7 @@ namespace KayoCompiler
 
             Process ld = new Process();
             ld.StartInfo.FileName = "ld";
-            ld.StartInfo.Arguments = "-o test tmp.o write.o";
+            ld.StartInfo.Arguments = "-o test tmp.o write.o read.o";
             ld.Start();
             ld.WaitForExit();
             ld.Close();
