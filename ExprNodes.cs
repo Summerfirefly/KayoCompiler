@@ -578,7 +578,7 @@ namespace KayoCompiler.Ast
             {
                 if (factorOp == Tag.DL_NOT && type != VarType.TYPE_BOOL)
                     new TypeMismatchError(type, VarType.TYPE_BOOL).PrintErrMsg();
-                else if (!SymbolTable.IsNumType(type))
+                else if ((factorOp == Tag.DL_PLUS || factorOp == Tag.DL_MINUS) && !SymbolTable.IsNumType(type))
                     new TypeMismatchError(type, VarType.TYPE_INT).PrintErrMsg();
             }
 
