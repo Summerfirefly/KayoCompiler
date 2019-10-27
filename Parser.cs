@@ -43,6 +43,7 @@ namespace KayoCompiler
 				{
 					case Tag.KW_VOID:
 					case Tag.KW_INT:
+					case Tag.KW_LONG:
 					case Tag.KW_BOOL:
 						FunctionNode function = new FunctionNode();
 						node.AddChild(function);
@@ -82,6 +83,10 @@ namespace KayoCompiler
 					fun.returnType = VarType.TYPE_INT;
 					DiscardToken();
 					break;
+				case Tag.KW_LONG:
+					fun.returnType = VarType.TYPE_LONG;
+					DiscardToken();
+					break;
 				default:
 					new Error().PrintErrMsg();
 					break;
@@ -104,7 +109,7 @@ namespace KayoCompiler
 			node.body = new BlockNode();
 			Block(node.body);
 
-			fun.localVarCount = ScopeManager.LocalVarCount;
+			fun.localVarSize = ScopeManager.LocalVarSize;
 
 			ScopeManager.ScopeLeave();
 			ScopeManager.FunctionLeave();
@@ -116,6 +121,7 @@ namespace KayoCompiler
 			{
 				case Tag.KW_VOID:
 				case Tag.KW_INT:
+				case Tag.KW_LONG:
 				case Tag.KW_BOOL:
 					Para(fun);
 					if (next.Tag == Tag.DL_COM)
@@ -135,12 +141,16 @@ namespace KayoCompiler
 					DiscardToken();
 					break;
 				case Tag.KW_INT:
+				case Tag.KW_LONG:
 				case Tag.KW_BOOL:
 					VarType paraType = VarType.TYPE_ERROR;
 					switch (next.Tag)
 					{
 						case Tag.KW_INT:
 							paraType = VarType.TYPE_INT;
+							break;
+						case Tag.KW_LONG:
+							paraType = VarType.TYPE_LONG;
 							break;
 						case Tag.KW_BOOL:
 							paraType = VarType.TYPE_BOOL;
@@ -158,7 +168,7 @@ namespace KayoCompiler
 							type = paraType,
 							name = id,
 							scopeId = ScopeManager.CurrentScope,
-							indexInFun = -2 - fun.parasType.Count
+							offsetInFun = -(1 + fun.parasType.Count) * 8
 						});
 
 						if (status == TableAddStatus.SYMBOL_EXIST)
@@ -190,6 +200,7 @@ namespace KayoCompiler
 			switch (next.Tag)
 			{
 				case Tag.KW_INT:
+				case Tag.KW_LONG:
 				case Tag.KW_BOOL:
 					DeclNode decl = new DeclNode();
 					node.AddChild(decl);
@@ -207,6 +218,10 @@ namespace KayoCompiler
 					node.type = VarType.TYPE_INT;
 					DiscardToken();
 					break;
+				case Tag.KW_LONG:
+					node.type = VarType.TYPE_LONG;
+					DiscardToken();
+					break;
 				case Tag.KW_BOOL:
 					node.type = VarType.TYPE_BOOL;
 					DiscardToken();
@@ -217,12 +232,13 @@ namespace KayoCompiler
 
 			if (node.name != null)
 			{
+				ScopeManager.LocalVarSize += SymbolTable.SizeOf(node.type);
 				VarSymbol variable = new VarSymbol
 				{
 					name = node.name,
 					type = node.type,
 					scopeId = ScopeManager.CurrentScope,
-					indexInFun = ScopeManager.LocalVarCount++
+					offsetInFun = ScopeManager.LocalVarSize
 				};
 
 				if (SymbolTable.AddVar(variable) == TableAddStatus.SYMBOL_EXIST)
@@ -238,7 +254,8 @@ namespace KayoCompiler
 				Expr(node.init);
 
 				if (node.init.Type() != node.type)
-					new TypeMismatchError(node.type, node.init.Type()).PrintErrMsg();
+					if (!SymbolTable.IsNumType(node.init.Type()) || !SymbolTable.IsNumType(node.type))
+						new TypeMismatchError(node.type, node.init.Type()).PrintErrMsg();
 			}
 
 			TryMatch(Tag.DL_SEM);

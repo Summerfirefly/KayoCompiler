@@ -25,5 +25,41 @@
                 }
             }
         }
+
+        internal static string CurrentStackTop32
+        {
+            get
+            {
+                switch (StackDepth % 3)
+                {
+                    case 0:
+                        return "r11d";
+                    case 1:
+                        return "eax";
+                    case 2:
+                        return "r10d";
+                    default:
+                        return string.Empty;
+                }
+            }
+        }
+
+        internal static string CurrentStackTop8
+        {
+            get
+            {
+                switch (StackDepth % 3)
+                {
+                    case 0:
+                        return "r11b";
+                    case 1:
+                        return "al";
+                    case 2:
+                        return "r10b";
+                    default:
+                        return string.Empty;
+                }
+            }
+        }
     }
 }

@@ -6,6 +6,7 @@ str_false:	db "false"
 
 SECTION .text
 ; void write(int a)
+; void write(long a)
 ; void write(bool a)
 write:
 push	rbp

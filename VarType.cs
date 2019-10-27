@@ -6,6 +6,7 @@
 
         TYPE_VOID,
         TYPE_INT,
+        TYPE_LONG,
         TYPE_BOOL
     }
 }

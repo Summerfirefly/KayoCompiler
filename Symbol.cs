@@ -7,7 +7,7 @@ namespace KayoCompiler
         internal VarType type;
         internal string name;
         internal int scopeId;
-		internal int indexInFun;
+		internal int offsetInFun;
     }
 
 	class FunSymbol
@@ -15,7 +15,7 @@ namespace KayoCompiler
 		internal VarType returnType;
 		internal string name;
 		internal List<VarType> parasType;
-		internal int localVarCount;
+		internal int localVarSize;
 
 		internal FunSymbol()
 		{

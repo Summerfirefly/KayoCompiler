@@ -61,11 +61,21 @@ namespace KayoCompiler.Ast
         public override string Gen()
         {
             string code = string.Empty;
-            int index = SymbolTable.GetVarIndex(id.name);
-            int offset = -(index + 1) * 8;
+            int offset = -SymbolTable.GetVarOffset(id.name);
             code += expr?.Gen() ?? string.Empty;
 
-            code += $"mov\t[rbp{(offset>0?"+":"")}{offset}], {CodeGenUtils.CurrentStackTop}\n";
+            switch (SymbolTable.FindVar(id.name).type)
+            {
+                case VarType.TYPE_BOOL:
+                    code += $"mov\t[rbp{(offset>0?"+":"")}{offset}], {CodeGenUtils.CurrentStackTop8}\n";
+                    break;
+                case VarType.TYPE_INT:
+                    code += $"mov\t[rbp{(offset>0?"+":"")}{offset}], {CodeGenUtils.CurrentStackTop32}\n";
+                    break;
+                case VarType.TYPE_LONG:
+                    code += $"mov\t[rbp{(offset>0?"+":"")}{offset}], {CodeGenUtils.CurrentStackTop}\n";
+                    break;
+            }
             if (CodeGenUtils.StackDepth > 3)
             {
                 code += $"pop\t{CodeGenUtils.CurrentStackTop}\n";
@@ -167,8 +177,10 @@ namespace KayoCompiler.Ast
             
             if (expr?.Type() == VarType.TYPE_BOOL)
                 code += "push\t0\n";
-            else
+            else if (expr?.Type() == VarType.TYPE_INT)
                 code += "push\t1\n";
+            else if (expr?.Type() == VarType.TYPE_LONG)
+                code += "push\t2\n";
 
             code += "call\twrite\n";
             code += "add\trsp, 16\n";
@@ -189,7 +201,7 @@ namespace KayoCompiler.Ast
             {
                 code += "push\t0\n";
             }
-            else if (id.Type() == VarType.TYPE_INT)
+            else if (SymbolTable.IsNumType(id.Type()))
             {
                 code += "push\t1\n";
             }
@@ -197,10 +209,20 @@ namespace KayoCompiler.Ast
             code += "call\tread\n";
             code += "add\trsp, 8\n";
 
-            int index = SymbolTable.GetVarIndex(id.name);
-            int offset = -(index + 1) * 8;
+            int offset = -SymbolTable.GetVarOffset(id.name);
 
-            code += $"mov\t[rbp{(offset>0?"+":"")}{offset}], rax\n";
+            switch (SymbolTable.FindVar(id.name).type)
+            {
+                case VarType.TYPE_BOOL:
+                    code += $"mov\t[rbp{(offset>0?"+":"")}{offset}], {CodeGenUtils.CurrentStackTop8}\n";
+                    break;
+                case VarType.TYPE_INT:
+                    code += $"mov\t[rbp{(offset>0?"+":"")}{offset}], {CodeGenUtils.CurrentStackTop32}\n";
+                    break;
+                case VarType.TYPE_LONG:
+                    code += $"mov\t[rbp{(offset>0?"+":"")}{offset}], {CodeGenUtils.CurrentStackTop}\n";
+                    break;
+            }
 
             return code;
         }

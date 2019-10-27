@@ -67,7 +67,8 @@ namespace KayoCompiler
 			}
 			else if (node.id.Type() != node.expr.Type())
 			{
-				new TypeMismatchError(node.id.Type(), node.expr.Type()).PrintErrMsg();
+				if (!SymbolTable.IsNumType(node.id.Type()) || !SymbolTable.IsNumType(node.expr.Type()))
+					new TypeMismatchError(node.id.Type(), node.expr.Type()).PrintErrMsg();
 			}
 
 			TryMatch(Tag.DL_SEM);
@@ -205,8 +206,11 @@ namespace KayoCompiler
                 {
                     if (argList[i].Type() != paraList[i])
                     {
-                        new TypeMismatchError(argList[i].Type(), paraList[i]).PrintErrMsg();
-                        break;
+                        if (!SymbolTable.IsNumType(argList[i].Type()) || !SymbolTable.IsNumType(paraList[i]))
+						{
+							new TypeMismatchError(argList[i].Type(), paraList[i]).PrintErrMsg();
+                        	break;
+						}
                     }
                 }
             }
@@ -221,9 +225,13 @@ namespace KayoCompiler
                 node.expr = new ExprNode();
 				Expr(node.expr);
 
-				if (node.expr?.Type() != SymbolTable.FindFun(ScopeManager.CurrentFun).returnType)
+				if (node.expr.Type() != SymbolTable.FindFun(ScopeManager.CurrentFun).returnType)
 				{
-					new Error().PrintErrMsg();
+					if (!SymbolTable.IsNumType(node.expr.Type()) ||
+						!SymbolTable.IsNumType(SymbolTable.FindFun(ScopeManager.CurrentFun).returnType))
+					{
+						new Error().PrintErrMsg();
+					}
 				}
 			}
 

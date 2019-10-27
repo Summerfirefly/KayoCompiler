@@ -13,11 +13,11 @@ namespace KayoCompiler
         static readonly Dictionary<string, List<VarSymbol>> vars = new Dictionary<string, List<VarSymbol>>();
         static readonly Dictionary<string, FunSymbol> funs = new Dictionary<string, FunSymbol>();
     
-        internal static int CurFunVarCount
+        internal static int CurFunVarSize
         {
             get
             {
-                return funs[ScopeManager.CurrentFun].localVarCount;
+                return funs[ScopeManager.CurrentFun].localVarSize;
             }
         }
 
@@ -68,18 +68,38 @@ namespace KayoCompiler
 
         // 仅在代码生成阶段使用，即已经保证程序的正确性
         // 用于生成局部变量/函数参数相对栈基地址的偏移
-        internal static int GetVarIndex(string name)
+        internal static int GetVarOffset(string name)
         {
             if (!vars.ContainsKey(name))
-                return -1;
+                return 0;
             
             foreach (var item in vars[name])
             {
                 if (ScopeManager.IsVisibleNow(item.scopeId))
-                    return item.indexInFun;
+                    return item.offsetInFun;
             }
 
-            return -1;
+            return 0;
+        }
+
+        internal static int SizeOf(VarType type)
+        {
+            switch (type)
+            {
+                case VarType.TYPE_BOOL:
+                    return 1;
+                case VarType.TYPE_INT:
+                    return 4;
+                case VarType.TYPE_LONG:
+                    return 8;
+                default:
+                    return 0;
+            }
+        }
+
+        internal static bool IsNumType(VarType type)
+        {
+            return type == VarType.TYPE_INT || type == VarType.TYPE_LONG;
         }
     }
 }

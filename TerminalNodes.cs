@@ -31,7 +31,7 @@
 
         public override VarType Type()
         {
-            return VarType.TYPE_INT;
+            return VarType.TYPE_LONG;
         }
     }
 
@@ -77,8 +77,7 @@
         public override string Gen()
         {
             string code = string.Empty;
-            int index = SymbolTable.GetVarIndex(name);
-            int offset = -(index + 1) * 8;
+            int offset = -SymbolTable.GetVarOffset(name);
 
             CodeGenUtils.StackDepth++;
             if (CodeGenUtils.StackDepth > 3)
@@ -86,7 +85,20 @@
                 code += $"push\t{CodeGenUtils.CurrentStackTop}\n";
             }
 
-            code += $"mov\t{CodeGenUtils.CurrentStackTop}, [rbp{(offset>0?"+":"")}{offset}]\n";
+            switch (SymbolTable.FindVar(name).type)
+            {
+                case VarType.TYPE_BOOL:
+                    code += $"xor\t{CodeGenUtils.CurrentStackTop}, {CodeGenUtils.CurrentStackTop}\n";
+                    code += $"mov\t{CodeGenUtils.CurrentStackTop8}, [rbp{(offset>0?"+":"")}{offset}]\n";
+                    break;
+                case VarType.TYPE_INT:
+                    code += $"mov\t{CodeGenUtils.CurrentStackTop32}, [rbp{(offset>0?"+":"")}{offset}]\n";
+                    code += "cdqe\n";
+                    break;
+                case VarType.TYPE_LONG:
+                    code += $"mov\t{CodeGenUtils.CurrentStackTop}, [rbp{(offset>0?"+":"")}{offset}]\n";
+                    break;
+            }
 
             return code;
         }

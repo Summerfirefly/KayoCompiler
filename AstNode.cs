@@ -48,7 +48,7 @@ namespace KayoCompiler.Ast
             code += $"func_{name}:\n";
             code += "push\trbp\n";
             code += "mov\trbp, rsp\n";
-            code += $"sub\trsp, {SymbolTable.CurFunVarCount * 8}\n";
+            code += $"sub\trsp, {SymbolTable.CurFunVarSize}\n";
 
             code += body?.Gen();
 
@@ -132,11 +132,21 @@ namespace KayoCompiler.Ast
             }
             
             string code = string.Empty;
-            int index = SymbolTable.GetVarIndex(name);
-            int offset = -(index + 1) * 8;
+            int offset = -SymbolTable.GetVarOffset(name);
 
             code += init.Gen();
-            code += $"mov\t[rbp{(offset>0?"+":"")}{offset}], rax\n";
+            switch (type)
+            {
+                case VarType.TYPE_BOOL:
+                    code += $"mov\t[rbp{(offset>0?"+":"")}{offset}], al\n";
+                    break;
+                case VarType.TYPE_INT:
+                    code += $"mov\t[rbp{(offset>0?"+":"")}{offset}], eax\n";
+                    break;
+                case VarType.TYPE_LONG:
+                    code += $"mov\t[rbp{(offset>0?"+":"")}{offset}], rax\n";
+                    break;
+            }
             CodeGenUtils.StackDepth--;
 
             return code;

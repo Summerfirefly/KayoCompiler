@@ -12,6 +12,7 @@
         KW_FOR,
         KW_IF,
         KW_INT,
+        KW_LONG,
         KW_VOID,
         KW_FUN,
         KW_RETURN,

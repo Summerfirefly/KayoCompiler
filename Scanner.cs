@@ -17,6 +17,7 @@ namespace KayoCompiler
             { "else", Tag.KW_ELSE },
             { "if", Tag.KW_IF },
             { "int", Tag.KW_INT },
+            { "long", Tag.KW_LONG },
             { "void", Tag.KW_VOID },
             { "fun", Tag.KW_FUN },
             { "return", Tag.KW_RETURN},

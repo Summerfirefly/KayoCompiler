@@ -95,7 +95,10 @@ namespace KayoCompiler.Errors
         private string GetTypeStr(VarType type)
         {
             if (type == VarType.TYPE_INT)
-                return "int";
+                return "number";
+
+            if (type == VarType.TYPE_LONG)
+                return "number";
 
             if (type == VarType.TYPE_BOOL)
                 return "bool";
