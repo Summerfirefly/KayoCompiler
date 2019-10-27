@@ -11,6 +11,7 @@
         KW_ELSE,
         KW_FOR,
         KW_IF,
+        KW_CHAR,
         KW_INT,
         KW_LONG,
         KW_VOID,

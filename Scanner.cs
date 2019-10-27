@@ -16,6 +16,7 @@ namespace KayoCompiler
             { "bool", Tag.KW_BOOL },
             { "else", Tag.KW_ELSE },
             { "if", Tag.KW_IF },
+            { "char", Tag.KW_CHAR },
             { "int", Tag.KW_INT },
             { "long", Tag.KW_LONG },
             { "void", Tag.KW_VOID },

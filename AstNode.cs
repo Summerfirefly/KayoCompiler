@@ -135,15 +135,15 @@ namespace KayoCompiler.Ast
             int offset = -SymbolTable.GetVarOffset(name);
 
             code += init.Gen();
-            switch (type)
+            switch (SymbolTable.SizeOf(type))
             {
-                case VarType.TYPE_BOOL:
+                case 1:
                     code += $"mov\t[rbp{(offset>0?"+":"")}{offset}], al\n";
                     break;
-                case VarType.TYPE_INT:
+                case 4:
                     code += $"mov\t[rbp{(offset>0?"+":"")}{offset}], eax\n";
                     break;
-                case VarType.TYPE_LONG:
+                case 8:
                     code += $"mov\t[rbp{(offset>0?"+":"")}{offset}], rax\n";
                     break;
             }

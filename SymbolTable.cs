@@ -87,6 +87,7 @@ namespace KayoCompiler
             switch (type)
             {
                 case VarType.TYPE_BOOL:
+                case VarType.TYPE_CHAR:
                     return 1;
                 case VarType.TYPE_INT:
                     return 4;
@@ -99,7 +100,7 @@ namespace KayoCompiler
 
         internal static bool IsNumType(VarType type)
         {
-            return type == VarType.TYPE_INT || type == VarType.TYPE_LONG;
+            return type == VarType.TYPE_INT || type == VarType.TYPE_LONG || type == VarType.TYPE_CHAR;
         }
     }
 }

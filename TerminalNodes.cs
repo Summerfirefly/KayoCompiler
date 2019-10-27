@@ -85,13 +85,12 @@
                 code += $"push\t{CodeGenUtils.CurrentStackTop}\n";
             }
 
-            switch (SymbolTable.FindVar(name).type)
+            switch (SymbolTable.SizeOf(SymbolTable.FindVar(name).type))
             {
-                case VarType.TYPE_BOOL:
-                    code += $"xor\t{CodeGenUtils.CurrentStackTop}, {CodeGenUtils.CurrentStackTop}\n";
-                    code += $"mov\t{CodeGenUtils.CurrentStackTop8}, [rbp{(offset>0?"+":"")}{offset}]\n";
+                case 1:
+                    code += $"movsx\t{CodeGenUtils.CurrentStackTop}, byte [rbp{(offset>0?"+":"")}{offset}]\n";
                     break;
-                case VarType.TYPE_INT:
+                case 4:
                     code += $"mov\t{CodeGenUtils.CurrentStackTop32}, [rbp{(offset>0?"+":"")}{offset}]\n";
                     if (CodeGenUtils.CurrentStackTop32 == "eax")
                     {
@@ -104,7 +103,7 @@
                         code += $"xchg\trax, {CodeGenUtils.CurrentStackTop}\n";
                     }
                     break;
-                case VarType.TYPE_LONG:
+                case 8:
                     code += $"mov\t{CodeGenUtils.CurrentStackTop}, [rbp{(offset>0?"+":"")}{offset}]\n";
                     break;
             }

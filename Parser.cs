@@ -39,28 +39,18 @@ namespace KayoCompiler
 		{
 			while (next.Tag != Tag.NULL)
 			{
-				switch (next.Tag)
+				if (IsTypeTag(next.Tag, true))
 				{
-					case Tag.KW_VOID:
-					case Tag.KW_INT:
-					case Tag.KW_LONG:
-					case Tag.KW_BOOL:
-						FunctionNode function = new FunctionNode();
-						node.AddChild(function);
+					FunctionNode function = new FunctionNode();
+					node.AddChild(function);
 
-						Function(function);
-						break;
-					default:
-						new UnknownTokenError().PrintErrMsg();
-						DiscardToken();
-						break;
+					Function(function);
 				}
-			}
-
-			if (next.Tag != Tag.NULL)
-			{
-				new UnknownTokenError().PrintErrMsg();
-				DiscardToken();
+				else
+				{
+					new UnknownTokenError().PrintErrMsg();
+					DiscardToken();
+				}
 			}
 		}
 
@@ -69,27 +59,14 @@ namespace KayoCompiler
 			ScopeManager.ScopeEnter();
 			FunSymbol fun = new FunSymbol();
 
-			switch (next.Tag)
+			if (IsTypeTag(next.Tag, true))
 			{
-				case Tag.KW_VOID:
-					fun.returnType = VarType.TYPE_VOID;
-					DiscardToken();
-					break;
-				case Tag.KW_BOOL:
-					fun.returnType = VarType.TYPE_BOOL;
-					DiscardToken();
-					break;
-				case Tag.KW_INT:
-					fun.returnType = VarType.TYPE_INT;
-					DiscardToken();
-					break;
-				case Tag.KW_LONG:
-					fun.returnType = VarType.TYPE_LONG;
-					DiscardToken();
-					break;
-				default:
-					new Error().PrintErrMsg();
-					break;
+				fun.returnType = TagToType(next.Tag);
+				DiscardToken();
+			}
+			else
+			{
+				new Error().PrintErrMsg();
 			}
 
 			string id = TryMatch(Tag.ID);
@@ -117,66 +94,55 @@ namespace KayoCompiler
 
 		private void Paras(FunSymbol fun)
 		{
-			switch (next.Tag)
+			if (IsTypeTag(next.Tag, true))
 			{
-				case Tag.KW_VOID:
-				case Tag.KW_INT:
-				case Tag.KW_LONG:
-				case Tag.KW_BOOL:
-					Para(fun);
-					if (next.Tag == Tag.DL_COM)
-					{
-						DiscardToken();
-						Paras(fun);
-					}
-					break;
+				Para(fun);
+				if (next.Tag == Tag.DL_COM)
+				{
+					DiscardToken();
+					Paras(fun);
+				}
 			}
 		}
 
 		private void Para(FunSymbol fun)
 		{
-			switch (next.Tag)
+			if (IsTypeTag(next.Tag, false))
 			{
-				case Tag.KW_VOID:
-					DiscardToken();
-					break;
-				case Tag.KW_INT:
-				case Tag.KW_LONG:
-				case Tag.KW_BOOL:
-					VarType paraType = VarType.TYPE_ERROR;
-					switch (next.Tag)
+				VarType paraType = TagToType(next.Tag);
+				fun.parasType.Add(paraType);
+				DiscardToken();
+
+				string id = TryMatch(Tag.ID);
+				if (id != null)
+				{
+					var status = SymbolTable.AddVar(new VarSymbol
 					{
-						case Tag.KW_INT:
-							paraType = VarType.TYPE_INT;
-							break;
-						case Tag.KW_LONG:
-							paraType = VarType.TYPE_LONG;
-							break;
-						case Tag.KW_BOOL:
-							paraType = VarType.TYPE_BOOL;
-							break;
-					}
+						type = paraType,
+						name = id,
+						scopeId = ScopeManager.CurrentScope,
+						offsetInFun = -(1 + fun.parasType.Count) * 8
+					});
 
-					fun.parasType.Add(paraType);
-					DiscardToken();
-
-					string id = TryMatch(Tag.ID);
-					if (id != null)
+					if (status == TableAddStatus.SYMBOL_EXIST)
 					{
-						var status = SymbolTable.AddVar(new VarSymbol
-						{
-							type = paraType,
-							name = id,
-							scopeId = ScopeManager.CurrentScope,
-							offsetInFun = -(1 + fun.parasType.Count) * 8
-						});
-
-						if (status == TableAddStatus.SYMBOL_EXIST)
-						{
-							new ConflictingDeclarationError().PrintErrMsg();
-						}
+						new ConflictingDeclarationError().PrintErrMsg();
 					}
-					break;
+				}
+			}
+			else if (next.Tag == Tag.KW_VOID)
+			{
+				if (fun.parasType.Count > 0)
+				{
+					new Error().PrintErrMsg();
+				}
+
+				DiscardToken();
+
+				if (next.Tag == Tag.ID)
+				{
+					DiscardToken();
+				}
 			}
 		}
 
@@ -197,35 +163,21 @@ namespace KayoCompiler
 
 		private void Decls(DeclsNode node)
 		{
-			switch (next.Tag)
+			if (IsTypeTag(next.Tag, false))
 			{
-				case Tag.KW_INT:
-				case Tag.KW_LONG:
-				case Tag.KW_BOOL:
-					DeclNode decl = new DeclNode();
-					node.AddChild(decl);
-					Decl(decl);
-					Decls(node);
-					break;
+				DeclNode decl = new DeclNode();
+				node.AddChild(decl);
+				Decl(decl);
+				Decls(node);
 			}
 		}
 
 		private void Decl(DeclNode node)
 		{
-			switch (next.Tag)
+			if (IsTypeTag(next.Tag, false))
 			{
-				case Tag.KW_INT:
-					node.type = VarType.TYPE_INT;
-					DiscardToken();
-					break;
-				case Tag.KW_LONG:
-					node.type = VarType.TYPE_LONG;
-					DiscardToken();
-					break;
-				case Tag.KW_BOOL:
-					node.type = VarType.TYPE_BOOL;
-					DiscardToken();
-					break;
+				node.type = TagToType(next.Tag);
+				DiscardToken();
 			}
 
 			node.name = TryMatch(Tag.ID);
@@ -372,6 +324,46 @@ namespace KayoCompiler
 			}
 
 			return value;
+		}
+
+		private bool IsTypeTag(Tag tag, bool includeVoid)
+		{
+			Tag[] typeTags =
+			{
+				Tag.KW_BOOL,
+				Tag.KW_CHAR,
+				Tag.KW_INT,
+				Tag.KW_LONG
+			};
+			bool result = false;
+
+			if (includeVoid)
+				result = tag == Tag.KW_VOID;
+			foreach (Tag typeTag in typeTags)
+			{
+				result = result || tag == typeTag;
+			}
+
+			return result;
+		}
+
+		private VarType TagToType(Tag tag)
+		{
+			switch (tag)
+			{
+				case Tag.KW_VOID:
+					return VarType.TYPE_VOID;
+				case Tag.KW_CHAR:
+					return VarType.TYPE_CHAR;
+				case Tag.KW_INT:
+					return VarType.TYPE_INT;
+				case Tag.KW_LONG:
+					return VarType.TYPE_LONG;
+				case Tag.KW_BOOL:
+					return VarType.TYPE_BOOL;
+				default:
+					return VarType.TYPE_ERROR;
+			}
 		}
 	}
 }
