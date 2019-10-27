@@ -17,12 +17,8 @@ namespace KayoCompiler.Ast
 
             code += condition?.Gen() ?? string.Empty;
 
-            code += $"cmp\t{CodeGenUtils.CurrentStackTop}, 0\n";
-            if (CodeGenUtils.StackDepth > 3)
-            {
-                code += $"pop\t{CodeGenUtils.CurrentStackTop}\n";
-            }
-            CodeGenUtils.StackDepth--;
+            code += $"cmp\trax, 0\n";
+            CodeGenUtils.StackDepth = 0;
 
             code += $"je _L{falseLabel}\n";
             code += body?.Gen() ?? string.Empty;
@@ -67,20 +63,16 @@ namespace KayoCompiler.Ast
             switch (SymbolTable.SizeOf(SymbolTable.FindVar(id.name).type))
             {
                 case 1:
-                    code += $"mov\t[rbp{(offset>0?"+":"")}{offset}], {CodeGenUtils.CurrentStackTop8}\n";
+                    code += $"mov\t[rbp{(offset>0?"+":"")}{offset}], al\n";
                     break;
                 case 4:
-                    code += $"mov\t[rbp{(offset>0?"+":"")}{offset}], {CodeGenUtils.CurrentStackTop32}\n";
+                    code += $"mov\t[rbp{(offset>0?"+":"")}{offset}], eax\n";
                     break;
                 case 8:
-                    code += $"mov\t[rbp{(offset>0?"+":"")}{offset}], {CodeGenUtils.CurrentStackTop}\n";
+                    code += $"mov\t[rbp{(offset>0?"+":"")}{offset}], rax\n";
                     break;
             }
-            if (CodeGenUtils.StackDepth > 3)
-            {
-                code += $"pop\t{CodeGenUtils.CurrentStackTop}\n";
-            }
-            CodeGenUtils.StackDepth--;
+            CodeGenUtils.StackDepth = 0;
 
             return code;
         }
@@ -101,12 +93,8 @@ namespace KayoCompiler.Ast
             code += $"_L{startLabel}:\n";
             code += condition?.Gen() ?? string.Empty;
 
-            code += $"cmp\t{CodeGenUtils.CurrentStackTop}, 0\n";
-            if (CodeGenUtils.StackDepth > 3)
-            {
-                code += $"pop\t{CodeGenUtils.CurrentStackTop}\n";
-            }
-            CodeGenUtils.StackDepth--;
+            code += $"cmp\trax, 0\n";
+            CodeGenUtils.StackDepth = 0;
 
             code += $"je _L{endLabel}\n";
             code += body?.Gen() ?? string.Empty;
@@ -136,12 +124,8 @@ namespace KayoCompiler.Ast
             code += $"_L{startLabel}:\n";
             code += condition?.Gen() ?? string.Empty;
 
-            code += $"cmp\t{CodeGenUtils.CurrentStackTop}, 0\n";
-            if (CodeGenUtils.StackDepth > 3)
-            {
-                code += $"pop\t{CodeGenUtils.CurrentStackTop}\n";
-            }
-            CodeGenUtils.StackDepth--;
+            code += $"cmp\trax, 0\n";
+            CodeGenUtils.StackDepth = 0;
 
             code += $"je _L{endLabel}\n";
             code += body?.Gen() ?? string.Empty;
@@ -162,18 +146,8 @@ namespace KayoCompiler.Ast
         {
             string code = string.Empty;
             code += expr?.Gen() ?? string.Empty;
-
-            if (CodeGenUtils.StackDepth > 3)
-            {
-                code += $"mov\trbx, {CodeGenUtils.CurrentStackTop}\n";
-                code += $"pop\t{CodeGenUtils.CurrentStackTop}\n";
-                code += "push\trbx\n";
-            }
-            else
-            {
-                code += $"push\t{CodeGenUtils.CurrentStackTop}\n";
-            }
-            CodeGenUtils.StackDepth--;
+            code += $"push\trax\n";
+            CodeGenUtils.StackDepth = 0;
             
             if (expr?.Type() == VarType.TYPE_BOOL)
                 code += "push\t0\n";
@@ -259,10 +233,10 @@ namespace KayoCompiler.Ast
             foreach (ExprNode arg in args)
             {
                 code += arg?.Gen();
-                code += $"push\t{CodeGenUtils.CurrentStackTop}\n";
+                code += $"push\t{CodeGenUtils.CurrentStackTop64}\n";
                 if (CodeGenUtils.StackDepth > 3)
                 {
-                    code += $"pop\t{CodeGenUtils.CurrentStackTop}\n";
+                    code += $"pop\t{CodeGenUtils.CurrentStackTop64}\n";
                 }
                 CodeGenUtils.StackDepth--;
                 argc++;
@@ -293,8 +267,8 @@ namespace KayoCompiler.Ast
                     code += "pop\tr11\n";
                     code += "pop\tr10\n";
                     code += "pop\trax\n";
-                    code += $"push\t{CodeGenUtils.CurrentStackTop}\n";
-                    code += $"mov\t{CodeGenUtils.CurrentStackTop}, rbx\n";
+                    code += $"push\t{CodeGenUtils.CurrentStackTop64}\n";
+                    code += $"mov\t{CodeGenUtils.CurrentStackTop64}, rbx\n";
                     break;
             }
 
@@ -315,12 +289,8 @@ namespace KayoCompiler.Ast
         {
             string code = string.Empty;
 
-            code += expr?.Gen();
-			if (expr != null)
-			{
-				code += "mov\trbx, rax\n";
-                CodeGenUtils.StackDepth--;
-			}
+            code += expr.Gen();
+            CodeGenUtils.StackDepth = 0;
             code += $"jmp\tfunc_{ScopeManager.CurrentFun}_return\n";
 
             return code;

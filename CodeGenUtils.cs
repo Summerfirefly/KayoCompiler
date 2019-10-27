@@ -8,7 +8,7 @@
         internal static bool HasWrite { get; set; } = false;
         internal static bool HasRead { get; set; } = false;
 
-        internal static string CurrentStackTop
+        internal static string CurrentStackTop64
         {
             get
             {

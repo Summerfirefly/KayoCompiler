@@ -147,7 +147,7 @@ namespace KayoCompiler.Ast
                     code += $"mov\t[rbp{(offset>0?"+":"")}{offset}], rax\n";
                     break;
             }
-            CodeGenUtils.StackDepth--;
+            CodeGenUtils.StackDepth = 0;
 
             return code;
         }

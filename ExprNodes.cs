@@ -58,7 +58,7 @@ namespace KayoCompiler.Ast
                         }
                         if (CodeGenUtils.StackDepth > 3)
                         {
-                            code += $"pop\t{CodeGenUtils.CurrentStackTop}\n";
+                            code += $"pop\t{CodeGenUtils.CurrentStackTop64}\n";
                         }
                         CodeGenUtils.StackDepth--;
                     }
@@ -129,7 +129,7 @@ namespace KayoCompiler.Ast
                         }
                         if (CodeGenUtils.StackDepth > 3)
                         {
-                            code += $"pop\t{CodeGenUtils.CurrentStackTop}\n";
+                            code += $"pop\t{CodeGenUtils.CurrentStackTop64}\n";
                         }
                         CodeGenUtils.StackDepth--;
                     }
@@ -201,7 +201,7 @@ namespace KayoCompiler.Ast
 
                         if (CodeGenUtils.StackDepth > 3)
                         {
-                            code += $"pop\t{CodeGenUtils.CurrentStackTop}\n";
+                            code += $"pop\t{CodeGenUtils.CurrentStackTop64}\n";
                         }
                         CodeGenUtils.StackDepth--;
 
@@ -215,7 +215,7 @@ namespace KayoCompiler.Ast
                                 break;
                         }
 
-                        code += $"movzx\t{CodeGenUtils.CurrentStackTop}, bl\n";
+                        code += $"movzx\t{CodeGenUtils.CurrentStackTop64}, bl\n";
                     }
                 }
             }
@@ -282,7 +282,7 @@ namespace KayoCompiler.Ast
 
                         if (CodeGenUtils.StackDepth > 3)
                         {
-                            code += $"pop\t{CodeGenUtils.CurrentStackTop}\n";
+                            code += $"pop\t{CodeGenUtils.CurrentStackTop64}\n";
                         }
                         CodeGenUtils.StackDepth--;
 
@@ -302,7 +302,7 @@ namespace KayoCompiler.Ast
                                 break;
                         }
 
-                        code += $"movzx\t{CodeGenUtils.CurrentStackTop}, bl\n";
+                        code += $"movzx\t{CodeGenUtils.CurrentStackTop64}, bl\n";
                     }
                 }
             }
@@ -371,7 +371,7 @@ namespace KayoCompiler.Ast
 
                         if (CodeGenUtils.StackDepth > 3)
                         {
-                            code += $"pop\t{CodeGenUtils.CurrentStackTop}\n";
+                            code += $"pop\t{CodeGenUtils.CurrentStackTop64}\n";
                         }
                         CodeGenUtils.StackDepth--;
                     }
@@ -497,7 +497,7 @@ namespace KayoCompiler.Ast
 
                         if (CodeGenUtils.StackDepth > 3)
                         {
-                            code += $"pop\t{CodeGenUtils.CurrentStackTop}\n";
+                            code += $"pop\t{CodeGenUtils.CurrentStackTop64}\n";
                         }
                         CodeGenUtils.StackDepth--;
                     }
@@ -561,12 +561,12 @@ namespace KayoCompiler.Ast
             {
                 if (factorOp == Tag.DL_NOT)
                 {
-                    code += $"xor\t{CodeGenUtils.CurrentStackTop}, 1\n";
+                    code += $"xor\t{CodeGenUtils.CurrentStackTop64}, 1\n";
                 }
                 else if (factorOp == Tag.DL_MINUS)
                 {
-                    code += $"not\t{CodeGenUtils.CurrentStackTop}\n";
-                    code += $"add\t{CodeGenUtils.CurrentStackTop}, 1\n";
+                    code += $"not\t{CodeGenUtils.CurrentStackTop64}\n";
+                    code += $"add\t{CodeGenUtils.CurrentStackTop64}, 1\n";
                 }
             }
 

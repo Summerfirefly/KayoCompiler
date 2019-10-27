@@ -21,10 +21,10 @@
             CodeGenUtils.StackDepth++;
             if (CodeGenUtils.StackDepth > 3)
             {
-                code += $"push\t{CodeGenUtils.CurrentStackTop}\n";
+                code += $"push\t{CodeGenUtils.CurrentStackTop64}\n";
             }
 
-            code += $"mov\t{CodeGenUtils.CurrentStackTop}, {value}\n";
+            code += $"mov\t{CodeGenUtils.CurrentStackTop64}, {value}\n";
 
             return code;
         }
@@ -51,10 +51,10 @@
             CodeGenUtils.StackDepth++;
             if (CodeGenUtils.StackDepth > 3)
             {
-                code += $"push\t{CodeGenUtils.CurrentStackTop}\n";
+                code += $"push\t{CodeGenUtils.CurrentStackTop64}\n";
             }
 
-            code += $"mov\t{CodeGenUtils.CurrentStackTop}, {value}\n";
+            code += $"mov\t{CodeGenUtils.CurrentStackTop64}, {value}\n";
 
             return code;
         }
@@ -82,13 +82,13 @@
             CodeGenUtils.StackDepth++;
             if (CodeGenUtils.StackDepth > 3)
             {
-                code += $"push\t{CodeGenUtils.CurrentStackTop}\n";
+                code += $"push\t{CodeGenUtils.CurrentStackTop64}\n";
             }
 
             switch (SymbolTable.SizeOf(SymbolTable.FindVar(name).type))
             {
                 case 1:
-                    code += $"movsx\t{CodeGenUtils.CurrentStackTop}, byte [rbp{(offset>0?"+":"")}{offset}]\n";
+                    code += $"movsx\t{CodeGenUtils.CurrentStackTop64}, byte [rbp{(offset>0?"+":"")}{offset}]\n";
                     break;
                 case 4:
                     code += $"mov\t{CodeGenUtils.CurrentStackTop32}, [rbp{(offset>0?"+":"")}{offset}]\n";
@@ -98,13 +98,13 @@
                     }
                     else
                     {
-                        code += $"xchg\trax, {CodeGenUtils.CurrentStackTop}\n";
+                        code += $"xchg\trax, {CodeGenUtils.CurrentStackTop64}\n";
                         code += "cdqe\n";
-                        code += $"xchg\trax, {CodeGenUtils.CurrentStackTop}\n";
+                        code += $"xchg\trax, {CodeGenUtils.CurrentStackTop64}\n";
                     }
                     break;
                 case 8:
-                    code += $"mov\t{CodeGenUtils.CurrentStackTop}, [rbp{(offset>0?"+":"")}{offset}]\n";
+                    code += $"mov\t{CodeGenUtils.CurrentStackTop64}, [rbp{(offset>0?"+":"")}{offset}]\n";
                     break;
             }
 
