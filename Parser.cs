@@ -39,7 +39,7 @@ namespace KayoCompiler
 		{
 			while (next.Tag != Tag.NULL)
 			{
-				if (IsTypeTag(next.Tag, true))
+				if (Utils.IsTypeTag(next.Tag, true))
 				{
 					FunctionNode function = new FunctionNode();
 					node.AddChild(function);
@@ -59,9 +59,9 @@ namespace KayoCompiler
 			ScopeManager.ScopeEnter();
 			FunSymbol fun = new FunSymbol();
 
-			if (IsTypeTag(next.Tag, true))
+			if (Utils.IsTypeTag(next.Tag, true))
 			{
-				fun.returnType = TagToType(next.Tag);
+				fun.returnType = Utils.TagToType(next.Tag);
 				DiscardToken();
 			}
 			else
@@ -94,7 +94,7 @@ namespace KayoCompiler
 
 		private void Paras(FunSymbol fun)
 		{
-			if (IsTypeTag(next.Tag, true))
+			if (Utils.IsTypeTag(next.Tag, true))
 			{
 				Para(fun);
 				if (next.Tag == Tag.DL_COM)
@@ -107,9 +107,9 @@ namespace KayoCompiler
 
 		private void Para(FunSymbol fun)
 		{
-			if (IsTypeTag(next.Tag, false))
+			if (Utils.IsTypeTag(next.Tag, false))
 			{
-				VarType paraType = TagToType(next.Tag);
+				VarType paraType = Utils.TagToType(next.Tag);
 				fun.parasType.Add(paraType);
 				DiscardToken();
 
@@ -163,7 +163,7 @@ namespace KayoCompiler
 
 		private void Decls(DeclsNode node)
 		{
-			if (IsTypeTag(next.Tag, false))
+			if (Utils.IsTypeTag(next.Tag, false))
 			{
 				DeclNode decl = new DeclNode();
 				node.AddChild(decl);
@@ -174,9 +174,9 @@ namespace KayoCompiler
 
 		private void Decl(DeclNode node)
 		{
-			if (IsTypeTag(next.Tag, false))
+			if (Utils.IsTypeTag(next.Tag, false))
 			{
-				node.type = TagToType(next.Tag);
+				node.type = Utils.TagToType(next.Tag);
 				DiscardToken();
 			}
 
@@ -184,7 +184,7 @@ namespace KayoCompiler
 
 			if (node.name != null)
 			{
-				ScopeManager.LocalVarSize += SymbolTable.SizeOf(node.type);
+				ScopeManager.LocalVarSize += Utils.SizeOf(node.type);
 				VarSymbol variable = new VarSymbol
 				{
 					name = node.name,
@@ -206,7 +206,7 @@ namespace KayoCompiler
 				Expr(node.init);
 
 				if (node.init.Type() != node.type)
-					if (!SymbolTable.IsNumType(node.init.Type()) || !SymbolTable.IsNumType(node.type))
+					if (!Utils.IsNumType(node.init.Type()) || !Utils.IsNumType(node.type))
 						new TypeMismatchError(node.type, node.init.Type()).PrintErrMsg();
 			}
 
@@ -324,46 +324,6 @@ namespace KayoCompiler
 			}
 
 			return value;
-		}
-
-		private bool IsTypeTag(Tag tag, bool includeVoid)
-		{
-			Tag[] typeTags =
-			{
-				Tag.KW_BOOL,
-				Tag.KW_CHAR,
-				Tag.KW_INT,
-				Tag.KW_LONG
-			};
-			bool result = false;
-
-			if (includeVoid)
-				result = tag == Tag.KW_VOID;
-			foreach (Tag typeTag in typeTags)
-			{
-				result = result || tag == typeTag;
-			}
-
-			return result;
-		}
-
-		private VarType TagToType(Tag tag)
-		{
-			switch (tag)
-			{
-				case Tag.KW_VOID:
-					return VarType.TYPE_VOID;
-				case Tag.KW_CHAR:
-					return VarType.TYPE_CHAR;
-				case Tag.KW_INT:
-					return VarType.TYPE_INT;
-				case Tag.KW_LONG:
-					return VarType.TYPE_LONG;
-				case Tag.KW_BOOL:
-					return VarType.TYPE_BOOL;
-				default:
-					return VarType.TYPE_ERROR;
-			}
 		}
 	}
 }

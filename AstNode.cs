@@ -135,7 +135,7 @@ namespace KayoCompiler.Ast
             int offset = -SymbolTable.GetVarOffset(name);
 
             code += init.Gen();
-            switch (SymbolTable.SizeOf(type))
+            switch (Utils.SizeOf(type))
             {
                 case 1:
                     code += $"mov\t[rbp{(offset>0?"+":"")}{offset}], al\n";

@@ -81,26 +81,5 @@ namespace KayoCompiler
 
             return 0;
         }
-
-        internal static int SizeOf(VarType type)
-        {
-            switch (type)
-            {
-                case VarType.TYPE_BOOL:
-                case VarType.TYPE_CHAR:
-                    return 1;
-                case VarType.TYPE_INT:
-                    return 4;
-                case VarType.TYPE_LONG:
-                    return 8;
-                default:
-                    return 0;
-            }
-        }
-
-        internal static bool IsNumType(VarType type)
-        {
-            return type == VarType.TYPE_INT || type == VarType.TYPE_LONG || type == VarType.TYPE_CHAR;
-        }
     }
 }

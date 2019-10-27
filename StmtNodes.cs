@@ -60,7 +60,7 @@ namespace KayoCompiler.Ast
             int offset = -SymbolTable.GetVarOffset(id.name);
             code += expr?.Gen() ?? string.Empty;
 
-            switch (SymbolTable.SizeOf(SymbolTable.FindVar(id.name).type))
+            switch (Utils.SizeOf(SymbolTable.FindVar(id.name).type))
             {
                 case 1:
                     code += $"mov\t[rbp{(offset>0?"+":"")}{offset}], al\n";
@@ -151,7 +151,7 @@ namespace KayoCompiler.Ast
             
             if (expr?.Type() == VarType.TYPE_BOOL)
                 code += "push\t0\n";
-            else if (SymbolTable.IsNumType(expr.Type()))
+            else if (Utils.IsNumType(expr.Type()))
                 code += "push\t1\n";
 
             code += "call\twrite\n";
@@ -173,7 +173,7 @@ namespace KayoCompiler.Ast
             {
                 code += "push\t0\n";
             }
-            else if (SymbolTable.IsNumType(id.Type()))
+            else if (Utils.IsNumType(id.Type()))
             {
                 code += "push\t1\n";
             }
@@ -183,7 +183,7 @@ namespace KayoCompiler.Ast
 
             int offset = -SymbolTable.GetVarOffset(id.name);
 
-            switch (SymbolTable.SizeOf(SymbolTable.FindVar(id.name).type))
+            switch (Utils.SizeOf(SymbolTable.FindVar(id.name).type))
             {
                 case 1:
                     code += $"mov\t[rbp{(offset>0?"+":"")}{offset}], al\n";

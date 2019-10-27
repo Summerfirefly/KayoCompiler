@@ -67,7 +67,7 @@ namespace KayoCompiler
 			}
 			else if (node.id.Type() != node.expr.Type())
 			{
-				if (!SymbolTable.IsNumType(node.id.Type()) || !SymbolTable.IsNumType(node.expr.Type()))
+				if (!Utils.IsNumType(node.id.Type()) || !Utils.IsNumType(node.expr.Type()))
 					new TypeMismatchError(node.id.Type(), node.expr.Type()).PrintErrMsg();
 			}
 
@@ -206,7 +206,7 @@ namespace KayoCompiler
                 {
                     if (argList[i].Type() != paraList[i])
                     {
-                        if (!SymbolTable.IsNumType(argList[i].Type()) || !SymbolTable.IsNumType(paraList[i]))
+                        if (!Utils.IsNumType(argList[i].Type()) || !Utils.IsNumType(paraList[i]))
 						{
 							new TypeMismatchError(argList[i].Type(), paraList[i]).PrintErrMsg();
                         	break;
@@ -227,8 +227,8 @@ namespace KayoCompiler
 
 				if (node.expr.Type() != SymbolTable.FindFun(ScopeManager.CurrentFun).returnType)
 				{
-					if (!SymbolTable.IsNumType(node.expr.Type()) ||
-						!SymbolTable.IsNumType(SymbolTable.FindFun(ScopeManager.CurrentFun).returnType))
+					if (!Utils.IsNumType(node.expr.Type()) ||
+						!Utils.IsNumType(SymbolTable.FindFun(ScopeManager.CurrentFun).returnType))
 					{
 						new Error().PrintErrMsg();
 					}

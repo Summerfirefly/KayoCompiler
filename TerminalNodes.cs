@@ -85,7 +85,7 @@
                 code += $"push\t{CodeGenUtils.CurrentStackTop64}\n";
             }
 
-            switch (SymbolTable.SizeOf(SymbolTable.FindVar(name).type))
+            switch (Utils.SizeOf(SymbolTable.FindVar(name).type))
             {
                 case 1:
                     code += $"movsx\t{CodeGenUtils.CurrentStackTop64}, byte [rbp{(offset>0?"+":"")}{offset}]\n";
