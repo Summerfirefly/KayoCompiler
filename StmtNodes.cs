@@ -177,10 +177,8 @@ namespace KayoCompiler.Ast
             
             if (expr?.Type() == VarType.TYPE_BOOL)
                 code += "push\t0\n";
-            else if (expr?.Type() == VarType.TYPE_INT)
+            else if (SymbolTable.IsNumType(expr.Type()))
                 code += "push\t1\n";
-            else if (expr?.Type() == VarType.TYPE_LONG)
-                code += "push\t2\n";
 
             code += "call\twrite\n";
             code += "add\trsp, 16\n";
@@ -214,13 +212,13 @@ namespace KayoCompiler.Ast
             switch (SymbolTable.FindVar(id.name).type)
             {
                 case VarType.TYPE_BOOL:
-                    code += $"mov\t[rbp{(offset>0?"+":"")}{offset}], {CodeGenUtils.CurrentStackTop8}\n";
+                    code += $"mov\t[rbp{(offset>0?"+":"")}{offset}], al\n";
                     break;
                 case VarType.TYPE_INT:
-                    code += $"mov\t[rbp{(offset>0?"+":"")}{offset}], {CodeGenUtils.CurrentStackTop32}\n";
+                    code += $"mov\t[rbp{(offset>0?"+":"")}{offset}], eax\n";
                     break;
                 case VarType.TYPE_LONG:
-                    code += $"mov\t[rbp{(offset>0?"+":"")}{offset}], {CodeGenUtils.CurrentStackTop}\n";
+                    code += $"mov\t[rbp{(offset>0?"+":"")}{offset}], rax\n";
                     break;
             }
 

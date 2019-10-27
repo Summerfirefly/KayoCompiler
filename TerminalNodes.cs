@@ -93,7 +93,16 @@
                     break;
                 case VarType.TYPE_INT:
                     code += $"mov\t{CodeGenUtils.CurrentStackTop32}, [rbp{(offset>0?"+":"")}{offset}]\n";
-                    code += "cdqe\n";
+                    if (CodeGenUtils.CurrentStackTop32 == "eax")
+                    {
+                        code += "cdqe\n";
+                    }
+                    else
+                    {
+                        code += $"xchg\trax, {CodeGenUtils.CurrentStackTop}\n";
+                        code += "cdqe\n";
+                        code += $"xchg\trax, {CodeGenUtils.CurrentStackTop}\n";
+                    }
                     break;
                 case VarType.TYPE_LONG:
                     code += $"mov\t{CodeGenUtils.CurrentStackTop}, [rbp{(offset>0?"+":"")}{offset}]\n";

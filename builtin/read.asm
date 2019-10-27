@@ -8,7 +8,6 @@ read:
 push	rbp
 mov	rbp, rsp
 
-xor	rcx, rcx
 mov	rax, qword [rsp+16]
 cmp	rax, 0
 je	read_bool
@@ -30,6 +29,7 @@ cmp	rax, '9'
 jg	find_num_loop
 stop_find:
 
+xor	rcx, rcx
 parse_num:
 sub	rax, '0'
 imul	rcx, 10
