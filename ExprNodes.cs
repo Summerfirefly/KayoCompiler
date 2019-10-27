@@ -240,9 +240,10 @@ namespace KayoCompiler.Ast
                     }
                     else
                     {
-                        type = node.Type() == type ? VarType.TYPE_BOOL : VarType.TYPE_ERROR;
                         if (SymbolTable.IsNumType(node.Type()) && SymbolTable.IsNumType(type))
                             type = VarType.TYPE_BOOL;
+                        else
+                            type = node.Type() == type ? VarType.TYPE_BOOL : VarType.TYPE_ERROR;
                     }
 
                     index++;
@@ -326,9 +327,10 @@ namespace KayoCompiler.Ast
                     }
                     else
                     {
-                        type = node.Type() == type ? VarType.TYPE_BOOL : VarType.TYPE_ERROR;
                         if (SymbolTable.IsNumType(node.Type()) && SymbolTable.IsNumType(type))
                             type = VarType.TYPE_BOOL;
+                        else
+                            type = node.Type() == type ? VarType.TYPE_BOOL : VarType.TYPE_ERROR;
                     }
 
                     index++;
