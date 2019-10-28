@@ -23,7 +23,6 @@ namespace KayoCompiler
 		{
 			this.scanner = scanner;
 			buffer = new Queue<Token>();
-			MoreToken();
 		}
 
 		internal ProgramNode Parse()
@@ -37,7 +36,7 @@ namespace KayoCompiler
 
 		private void Program(ProgramNode node)
 		{
-			while (next.Tag != Tag.NULL)
+			while (!TagIs(Tag.NULL))
 			{
 				if (Utils.IsTypeTag(next.Tag, true))
 				{
@@ -49,7 +48,7 @@ namespace KayoCompiler
 				else
 				{
 					new UnknownTokenError().PrintErrMsg();
-					DiscardToken();
+					Move();
 				}
 			}
 		}
@@ -62,14 +61,14 @@ namespace KayoCompiler
 			if (Utils.IsTypeTag(next.Tag, true))
 			{
 				fun.returnType = Utils.TagToType(next.Tag);
-				DiscardToken();
+				Move();
 			}
 			else
 			{
 				new Error().PrintErrMsg();
 			}
 
-			string id = TryMatch(Tag.ID);
+			string id = RequiredToken(Tag.ID);
 			if (id != null)
 			{
 				fun.name = id;
@@ -77,9 +76,9 @@ namespace KayoCompiler
 				ScopeManager.FunctionEnter(id);
 			}
 
-			TryMatch(Tag.DL_LPAR);
+			RequiredToken(Tag.DL_LPAR);
 			Paras(fun);
-			TryMatch(Tag.DL_RPAR);
+			RequiredToken(Tag.DL_RPAR);
 
 			SymbolTable.AddFun(fun);
 
@@ -97,9 +96,9 @@ namespace KayoCompiler
 			if (Utils.IsTypeTag(next.Tag, true))
 			{
 				Para(fun);
-				if (next.Tag == Tag.DL_COM)
+				if (TagIs(Tag.DL_COM))
 				{
-					DiscardToken();
+					Move();
 					Paras(fun);
 				}
 			}
@@ -111,9 +110,9 @@ namespace KayoCompiler
 			{
 				VarType paraType = Utils.TagToType(next.Tag);
 				fun.parasType.Add(paraType);
-				DiscardToken();
+				Move();
 
-				string id = TryMatch(Tag.ID);
+				string id = RequiredToken(Tag.ID);
 				if (id != null)
 				{
 					var status = SymbolTable.AddVar(new VarSymbol
@@ -130,25 +129,25 @@ namespace KayoCompiler
 					}
 				}
 			}
-			else if (next.Tag == Tag.KW_VOID)
+			else if (TagIs(Tag.KW_VOID))
 			{
 				if (fun.parasType.Count > 0)
 				{
 					new Error().PrintErrMsg();
 				}
 
-				DiscardToken();
+				Move();
 
-				if (next.Tag == Tag.ID)
+				if (TagIs(Tag.ID))
 				{
-					DiscardToken();
+					Move();
 				}
 			}
 		}
 
 		private void Block(BlockNode node)
 		{
-			TryMatch(Tag.DL_LBRACE);
+			RequiredToken(Tag.DL_LBRACE);
 
 			DeclsNode decls = new DeclsNode();
 			node.AddChild(decls);
@@ -158,7 +157,7 @@ namespace KayoCompiler
 			node.AddChild(stmts);
 			Stmts(stmts);
 
-			TryMatch(Tag.DL_RBRACE);
+			RequiredToken(Tag.DL_RBRACE);
 		}
 
 		private void Decls(DeclsNode node)
@@ -177,10 +176,10 @@ namespace KayoCompiler
 			if (Utils.IsTypeTag(next.Tag, false))
 			{
 				node.type = Utils.TagToType(next.Tag);
-				DiscardToken();
+				Move();
 			}
 
-			node.name = TryMatch(Tag.ID);
+			node.name = RequiredToken(Tag.ID);
 
 			if (node.name != null)
 			{
@@ -199,9 +198,9 @@ namespace KayoCompiler
 				}
 			}
 
-			if (next.Tag == Tag.DL_SET)
+			if (TagIs(Tag.DL_SET))
 			{
-				TryMatch(Tag.DL_SET);
+				Move();
 				node.init = new ExprNode();
 				Expr(node.init);
 
@@ -210,7 +209,7 @@ namespace KayoCompiler
 						new TypeMismatchError(node.type, node.init.Type()).PrintErrMsg();
 			}
 
-			TryMatch(Tag.DL_SEM);
+			RequiredToken(Tag.DL_SEM);
 		}
 
 		private void Stmts(StmtsNode node)
@@ -228,7 +227,6 @@ namespace KayoCompiler
 				case Tag.DL_SEM:
 					StmtNode child = new StmtNode();
 					node.AddChild(child);
-
 					Stmt(child);
 					Stmts(node);
 					break;
@@ -281,16 +279,16 @@ namespace KayoCompiler
 					Block(node.stmt as BlockNode);
 					break;
 				case Tag.DL_SEM:
-					DiscardToken();
+					Move();
 					break;
 				default:
 					new UnknownTokenError().PrintErrMsg();
-					DiscardToken();
+					Move();
 					break;
 			}
 		}
 
-		private void DiscardToken()
+		private void Move()
 		{
 			if (buffer.Count > 0)
 				buffer.Dequeue();
@@ -309,14 +307,14 @@ namespace KayoCompiler
 			return token;
 		}
 
-		private string TryMatch(Tag tokenTag)
+		private string RequiredToken(Tag tokenTag)
 		{
 			string value = null;
 
 			if (next.Tag == tokenTag)
 			{
 				value = next.Value;
-				buffer.Dequeue();
+				Move();
 			}
 			else
 			{
@@ -324,6 +322,11 @@ namespace KayoCompiler
 			}
 
 			return value;
+		}
+
+		private bool TagIs(Tag expectTag)
+		{
+			return next.Tag == expectTag;
 		}
 	}
 }

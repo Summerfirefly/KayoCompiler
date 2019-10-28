@@ -9,11 +9,11 @@ namespace KayoCompiler
         {
             var child = node.AddChild(new AndExprNode());
             AndExpr(child);
-            while (next.Tag == Tag.DL_OR)
+            while (TagIs(Tag.DL_OR))
             {
                 child = node.AddChild(new AndExprNode());
                 child.Op = Tag.DL_OR;
-                DiscardToken();
+                Move();
                 AndExpr(child);
             }
         }
@@ -22,11 +22,11 @@ namespace KayoCompiler
         {
             var child = node.AddChild(new EqualExprNode());
             EqualExpr(child);
-            while (next.Tag == Tag.DL_AND)
+            while (TagIs(Tag.DL_AND))
             {
                 child = node.AddChild(new EqualExprNode());
                 child.Op = Tag.DL_AND;
-                DiscardToken();
+                Move();
                 EqualExpr(child);
             }
         }
@@ -35,11 +35,11 @@ namespace KayoCompiler
         {
             var child = node.AddChild(new CmpExprNode());
             CmpExpr(child);
-            while (next.Tag == Tag.DL_EQ || next.Tag == Tag.DL_NEQ)
+            while (TagIs(Tag.DL_EQ) || TagIs(Tag.DL_NEQ))
             {
                 child = node.AddChild(new CmpExprNode());
                 child.Op = next.Tag;
-                DiscardToken();
+                Move();
                 CmpExpr(child);
             }
         }
@@ -49,14 +49,14 @@ namespace KayoCompiler
             var child = node.AddChild(new AddExprNode());
             AddExpr(child);
             while (
-                next.Tag == Tag.DL_LT ||
-                next.Tag == Tag.DL_NLT ||
-                next.Tag == Tag.DL_GT ||
-                next.Tag == Tag.DL_NGT)
+                TagIs(Tag.DL_LT) ||
+                TagIs(Tag.DL_NLT) ||
+                TagIs(Tag.DL_GT) ||
+                TagIs(Tag.DL_NGT))
             {
                 child = node.AddChild(new AddExprNode());
                 child.Op = next.Tag;
-                DiscardToken();
+                Move();
                 AddExpr(child);
             }
         }
@@ -65,11 +65,11 @@ namespace KayoCompiler
         {
             var child = node.AddChild(new MulExprNode());
             MulExpr(child);
-            while (next.Tag == Tag.DL_PLUS || next.Tag == Tag.DL_MINUS)
+            while (TagIs(Tag.DL_PLUS) || TagIs(Tag.DL_MINUS))
             {
                 child = node.AddChild(new MulExprNode());
                 child.Op = next.Tag;
-                DiscardToken();
+                Move();
                 MulExpr(child);
             }
         }
@@ -78,11 +78,11 @@ namespace KayoCompiler
         {
             var child = node.AddChild(new FactorNode());
             Factor(child);
-            while (next.Tag == Tag.DL_MULTI || next.Tag == Tag.DL_OBELUS || next.Tag == Tag.DL_MOD)
+            while (TagIs(Tag.DL_MULTI) || TagIs(Tag.DL_OBELUS) || TagIs(Tag.DL_MOD))
             {
                 child = node.AddChild(new FactorNode());
                 child.Op = next.Tag;
-                DiscardToken();
+                Move();
                 Factor(child);
             }
         }
@@ -101,31 +101,31 @@ namespace KayoCompiler
                     else
                     {
                         node.value = new IdNode(next.Value);
-                        DiscardToken();
+                        Move();
                     }
                     break;
                 case Tag.NUM:
                     node.value = new IntNode(IntParse(next.Value));
-                    DiscardToken();
+                    Move();
                     break;
                 case Tag.DL_PLUS:
                 case Tag.DL_MINUS:
                 case Tag.DL_NOT:
                     node.factorOp = next.Tag;
-                    DiscardToken();
+                    Move();
                     node.factor = new FactorNode();
                     Factor(node.factor);
                     break;
                 case Tag.DL_LPAR:
-                    DiscardToken();
+                    Move();
                     node.expr = new ExprNode();
                     Expr(node.expr);
-                    TryMatch(Tag.DL_RPAR);
+                    RequiredToken(Tag.DL_RPAR);
                     break;
                 case Tag.KW_TRUE:
                 case Tag.KW_FALSE:
                     node.value = new BoolNode(bool.Parse(next.Value));
-                    DiscardToken();
+                    Move();
                     break;
                 default:
                     new Error().PrintErrMsg();

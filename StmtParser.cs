@@ -9,9 +9,9 @@ namespace KayoCompiler
 		{
 			ScopeManager.ScopeEnter();
 			node.body = new StmtNode();
-			DiscardToken();
+			Move();
 
-			TryMatch(Tag.DL_LPAR);
+			RequiredToken(Tag.DL_LPAR);
 
             node.condition = new ExprNode();
 			Expr(node.condition);
@@ -25,12 +25,12 @@ namespace KayoCompiler
 				new TypeMismatchError(VarType.TYPE_BOOL, node.condition.Type()).PrintErrMsg();
 			}
 
-			TryMatch(Tag.DL_RPAR);
+			RequiredToken(Tag.DL_RPAR);
 
 			Stmt(node.body);
 			ScopeManager.ScopeLeave();
 
-			if (next.Tag == Tag.KW_ELSE)
+			if (TagIs(Tag.KW_ELSE))
 			{
 				node.elseStmt = new ElseStmtNode();
 				ElseStmt(node.elseStmt);
@@ -41,7 +41,7 @@ namespace KayoCompiler
 		{
 			ScopeManager.ScopeEnter();
 			node.body = new StmtNode();
-			DiscardToken();
+			Move();
 
 			Stmt(node.body);
 			ScopeManager.ScopeLeave();
@@ -50,9 +50,9 @@ namespace KayoCompiler
 		private void SetStmt(SetStmtNode node)
 		{
 			node.id = new IdNode(next.Value);
-			DiscardToken();
+			Move();
 
-			TryMatch(Tag.DL_SET);
+			RequiredToken(Tag.DL_SET);
 
             node.expr = new ExprNode();
 			Expr(node.expr);
@@ -71,16 +71,16 @@ namespace KayoCompiler
 					new TypeMismatchError(node.id.Type(), node.expr.Type()).PrintErrMsg();
 			}
 
-			TryMatch(Tag.DL_SEM);
+			RequiredToken(Tag.DL_SEM);
 		}
 
 		private void WhileStmt(WhileStmtNode node)
 		{
 			ScopeManager.ScopeEnter();
 			node.body = new StmtNode();
-			DiscardToken();
+			Move();
 
-			TryMatch(Tag.DL_LPAR);
+			RequiredToken(Tag.DL_LPAR);
 
             node.condition = new ExprNode();
 			Expr(node.condition);
@@ -94,7 +94,7 @@ namespace KayoCompiler
 				new TypeMismatchError(VarType.TYPE_BOOL, node.condition.Type()).PrintErrMsg();
 			}
 
-			TryMatch(Tag.DL_RPAR);
+			RequiredToken(Tag.DL_RPAR);
 
 			Stmt(node.body);
 			ScopeManager.ScopeLeave();
@@ -103,9 +103,9 @@ namespace KayoCompiler
 		private void ForStmt(ForStmtNode node)
 		{
 			ScopeManager.ScopeEnter();
-			DiscardToken();
+			Move();
 
-			TryMatch(Tag.DL_LPAR);
+			RequiredToken(Tag.DL_LPAR);
 
 			node.preStmt = new StmtNode();
 			Stmt(node.preStmt);
@@ -122,12 +122,12 @@ namespace KayoCompiler
 				new TypeMismatchError(VarType.TYPE_BOOL, node.condition.Type()).PrintErrMsg();
 			}
 
-			TryMatch(Tag.DL_SEM);
+			RequiredToken(Tag.DL_SEM);
 
 			node.loopStmt = new StmtNode();
 			Stmt(node.loopStmt);
 
-			TryMatch(Tag.DL_RPAR);
+			RequiredToken(Tag.DL_RPAR);
 
 			node.body = new StmtNode();
 			Stmt(node.body);
@@ -137,22 +137,22 @@ namespace KayoCompiler
 		private void WriteStmt(WriteStmtNode node)
 		{
 			CodeGenUtils.HasWrite = true;
-			DiscardToken();
+			Move();
             node.expr = new ExprNode();
 			Expr(node.expr);
 
-			TryMatch(Tag.DL_SEM);
+			RequiredToken(Tag.DL_SEM);
 		}
 
 		private void ReadStmt(ReadStmtNode node)
 		{
 			CodeGenUtils.HasRead = true;
-			DiscardToken();
+			Move();
 
-			if (next.Tag == Tag.ID)
+			if (TagIs(Tag.ID))
 			{
 				node.id = new IdNode(next.Value);
-				DiscardToken();
+				Move();
 
 				if (node.id.Type() == VarType.TYPE_ERROR)
 				{
@@ -164,13 +164,13 @@ namespace KayoCompiler
 				new TokenMissingError(Tag.ID).PrintErrMsg();
 			}
 
-			TryMatch(Tag.DL_SEM);
+			RequiredToken(Tag.DL_SEM);
 		}
 
 		private void FuncCallStmt(FuncCallStmtNode node)
 		{
-			node.name = TryMatch(Tag.ID);
-			TryMatch(Tag.DL_LPAR);
+			node.name = RequiredToken(Tag.ID);
+			RequiredToken(Tag.DL_LPAR);
 
 			switch (next.Tag)
 			{
@@ -183,7 +183,7 @@ namespace KayoCompiler
 					do
 					{
                         if (next.Tag == Tag.DL_COM)
-                            DiscardToken();
+                            Move();
 						var child = new ExprNode();
                         node.args.Add(child);
 						Expr(child);
@@ -192,7 +192,7 @@ namespace KayoCompiler
 					break;
 			}
 
-			TryMatch(Tag.DL_RPAR);
+			RequiredToken(Tag.DL_RPAR);
 
             if (node.args.Count != SymbolTable.FindFun(node.name).parasType.Count)
             {
@@ -218,9 +218,9 @@ namespace KayoCompiler
 
 		private void ReturnStmt(ReturnStmtNode node)
 		{
-			DiscardToken();
+			Move();
 
-			if (next.Tag != Tag.DL_SEM)
+			if (!TagIs(Tag.DL_SEM))
 			{
                 node.expr = new ExprNode();
 				Expr(node.expr);
@@ -235,7 +235,7 @@ namespace KayoCompiler
 				}
 			}
 
-			TryMatch(Tag.DL_SEM);
+			RequiredToken(Tag.DL_SEM);
 		}
 	}
 }
