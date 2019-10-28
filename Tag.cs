@@ -5,7 +5,7 @@
         NULL,
 
         // Keywords:
-        // bool, else, for, if, int, void, fun
+        // bool, else, for, if, char, int, long, void
         // return, read, while, write, true, false
         KW_BOOL,
         KW_ELSE,
@@ -15,7 +15,6 @@
         KW_INT,
         KW_LONG,
         KW_VOID,
-        KW_FUN,
         KW_RETURN,
         KW_READ,
         KW_WHILE,

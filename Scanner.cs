@@ -20,7 +20,6 @@ namespace KayoCompiler
             { "int", Tag.KW_INT },
             { "long", Tag.KW_LONG },
             { "void", Tag.KW_VOID },
-            { "fun", Tag.KW_FUN },
             { "return", Tag.KW_RETURN},
             { "read", Tag.KW_READ },
             { "while", Tag.KW_WHILE },
