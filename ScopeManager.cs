@@ -4,9 +4,6 @@ namespace KayoCompiler
 {
 	static class ScopeManager
 	{
-		// 函数局部变量数量，仅在Parse阶段使用，Generate阶段不使用
-		internal static int LocalVarSize { get; set; } = 0;
-
 		// 当前所在作用域编号
 		internal static int CurrentScope
 		{
@@ -28,21 +25,14 @@ namespace KayoCompiler
 			return scopePath.Contains(scopeId);
 		}
 
-		internal static void LocalVarSizeReset()
-		{
-			LocalVarSize = 0;
-		}
-
 		internal static void FunctionEnter(string funName)
 		{
 			CurrentFun = funName;
-			LocalVarSizeReset();
 		}
 
 		internal static void FunctionLeave()
 		{
 			CurrentFun = string.Empty;
-			LocalVarSizeReset();
 		}
 
 		internal static void ScopeEnter()

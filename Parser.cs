@@ -85,8 +85,6 @@ namespace KayoCompiler
 			node.body = new BlockNode();
 			Block(node.body);
 
-			fun.localVarSize = ScopeManager.LocalVarSize;
-
 			ScopeManager.ScopeLeave();
 			ScopeManager.FunctionLeave();
 		}
@@ -183,13 +181,15 @@ namespace KayoCompiler
 
 			if (node.name != null)
 			{
-				ScopeManager.LocalVarSize += Utils.SizeOf(node.type);
+				FunSymbol function = SymbolTable.FindFun(ScopeManager.CurrentFun);
+				function.localVarSize += Utils.SizeOf(node.type);
+
 				VarSymbol variable = new VarSymbol
 				{
 					name = node.name,
 					type = node.type,
 					scopeId = ScopeManager.CurrentScope,
-					offsetInFun = ScopeManager.LocalVarSize
+					offsetInFun = function.localVarSize
 				};
 
 				if (SymbolTable.AddVar(variable) == TableAddStatus.SYMBOL_EXIST)
