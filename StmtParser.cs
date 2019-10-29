@@ -172,24 +172,16 @@ namespace KayoCompiler
 			node.name = RequiredToken(Tag.ID);
 			RequiredToken(Tag.DL_LPAR);
 
-			switch (next.Tag)
+			if (!TagIs(Tag.DL_RPAR))
 			{
-				case Tag.ID:
-				case Tag.NUM:
-				case Tag.DL_LPAR:
-				case Tag.KW_TRUE:
-				case Tag.KW_FALSE:
-				case Tag.DL_NOT:
-					do
-					{
-                        if (next.Tag == Tag.DL_COM)
-                            Move();
-						var child = new ExprNode();
-                        node.args.Add(child);
-						Expr(child);
-					} while (next.Tag == Tag.DL_COM);
-
-					break;
+				do
+				{
+                    if (next.Tag == Tag.DL_COM)
+                        Move();
+					var child = new ExprNode();
+                    node.args.Add(child);
+					Expr(child);
+				} while (next.Tag == Tag.DL_COM);
 			}
 
 			RequiredToken(Tag.DL_RPAR);
