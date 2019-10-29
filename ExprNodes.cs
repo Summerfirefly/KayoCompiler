@@ -565,8 +565,7 @@ namespace KayoCompiler.Ast
                 }
                 else if (factorOp == Tag.DL_MINUS)
                 {
-                    code += $"not\t{CodeGenUtils.CurrentStackTop64}\n";
-                    code += $"add\t{CodeGenUtils.CurrentStackTop64}, 1\n";
+                    code += $"neg\t{CodeGenUtils.CurrentStackTop64}\n";
                 }
             }
 
