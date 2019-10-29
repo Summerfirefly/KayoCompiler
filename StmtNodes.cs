@@ -15,6 +15,7 @@ namespace KayoCompiler.Ast
             string code = string.Empty;
             ScopeManager.ScopeEnter();
 
+            CodeGenUtils.StackDepth = 0;
             code += condition?.Gen() ?? string.Empty;
 
             code += $"cmp\trax, 0\n";
@@ -61,6 +62,7 @@ namespace KayoCompiler.Ast
             ScopeManager.ScopeEnter();
 
             code += $"_L{startLabel}:\n";
+            CodeGenUtils.StackDepth = 0;
             code += condition?.Gen() ?? string.Empty;
 
             code += $"cmp\trax, 0\n";
@@ -89,9 +91,11 @@ namespace KayoCompiler.Ast
             string code = string.Empty;
             ScopeManager.ScopeEnter();
 
+            CodeGenUtils.StackDepth = 0;
             code += preExpr?.Gen() ?? string.Empty;
             code += $"_L{startLabel}:\n";
             
+            CodeGenUtils.StackDepth = 0;
             code += condition?.Gen() ?? string.Empty;
             if (condition != null)
             {
@@ -100,6 +104,7 @@ namespace KayoCompiler.Ast
             }
 
             code += body?.Gen() ?? string.Empty;
+            CodeGenUtils.StackDepth = 0;
             code += loopExpr?.Gen() ?? string.Empty;
             code += $"jmp _L{startLabel}\n";
             code += $"_L{endLabel}:\n";
@@ -116,6 +121,7 @@ namespace KayoCompiler.Ast
         public override string Gen()
         {
             string code = string.Empty;
+            CodeGenUtils.StackDepth = 0;
             code += expr?.Gen() ?? string.Empty;
             code += $"push\trax\n";
             
@@ -259,6 +265,7 @@ namespace KayoCompiler.Ast
         {
             string code = string.Empty;
 
+            CodeGenUtils.StackDepth = 0;
             code += expr.Gen();
             code += $"jmp\tfunc_{ScopeManager.CurrentFun}_return\n";
 

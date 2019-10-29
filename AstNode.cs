@@ -134,6 +134,7 @@ namespace KayoCompiler.Ast
             string code = string.Empty;
             int offset = -SymbolTable.GetVarOffset(name);
 
+            CodeGenUtils.StackDepth = 0;
             code += init.Gen();
             switch (Utils.SizeOf(type))
             {

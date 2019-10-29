@@ -36,7 +36,6 @@ namespace KayoCompiler.Ast
         public override string Gen()
         {
             string code = string.Empty;
-            CodeGenUtils.StackDepth = 0;
 
             if (children != null)
             {
