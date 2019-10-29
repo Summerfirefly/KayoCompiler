@@ -18,7 +18,6 @@ namespace KayoCompiler.Ast
             code += condition?.Gen() ?? string.Empty;
 
             code += $"cmp\trax, 0\n";
-            CodeGenUtils.StackDepth = 0;
 
             code += $"je _L{falseLabel}\n";
             code += body?.Gen() ?? string.Empty;
@@ -49,35 +48,6 @@ namespace KayoCompiler.Ast
         }
     }
 
-    class SetStmtNode : AstNode
-    {
-        public IdNode id;
-        public ExprNode expr;
-
-        public override string Gen()
-        {
-            string code = string.Empty;
-            int offset = -SymbolTable.GetVarOffset(id.name);
-            code += expr?.Gen() ?? string.Empty;
-
-            switch (Utils.SizeOf(SymbolTable.FindVar(id.name).type))
-            {
-                case 1:
-                    code += $"mov\t[rbp{(offset>0?"+":"")}{offset}], al\n";
-                    break;
-                case 4:
-                    code += $"mov\t[rbp{(offset>0?"+":"")}{offset}], eax\n";
-                    break;
-                case 8:
-                    code += $"mov\t[rbp{(offset>0?"+":"")}{offset}], rax\n";
-                    break;
-            }
-            CodeGenUtils.StackDepth = 0;
-
-            return code;
-        }
-    }
-
     class WhileStmtNode : AstNode
     {
         public ExprNode condition;
@@ -94,7 +64,6 @@ namespace KayoCompiler.Ast
             code += condition?.Gen() ?? string.Empty;
 
             code += $"cmp\trax, 0\n";
-            CodeGenUtils.StackDepth = 0;
 
             code += $"je _L{endLabel}\n";
             code += body?.Gen() ?? string.Empty;
@@ -108,9 +77,9 @@ namespace KayoCompiler.Ast
 
     class ForStmtNode : AstNode
     {
-        internal StmtNode preStmt;
+        internal ExprNode preExpr;
         internal ExprNode condition;
-        internal StmtNode loopStmt;
+        internal ExprNode loopExpr;
         internal StmtNode body;
 
         public override string Gen()
@@ -120,16 +89,18 @@ namespace KayoCompiler.Ast
             string code = string.Empty;
             ScopeManager.ScopeEnter();
 
-            code += preStmt?.Gen() ?? string.Empty;
+            code += preExpr?.Gen() ?? string.Empty;
             code += $"_L{startLabel}:\n";
+            
             code += condition?.Gen() ?? string.Empty;
+            if (condition != null)
+            {
+                code += $"cmp\trax, 0\n";
+                code += $"je _L{endLabel}\n";
+            }
 
-            code += $"cmp\trax, 0\n";
-            CodeGenUtils.StackDepth = 0;
-
-            code += $"je _L{endLabel}\n";
             code += body?.Gen() ?? string.Empty;
-            code += loopStmt?.Gen() ?? string.Empty;
+            code += loopExpr?.Gen() ?? string.Empty;
             code += $"jmp _L{startLabel}\n";
             code += $"_L{endLabel}:\n";
 
@@ -147,7 +118,6 @@ namespace KayoCompiler.Ast
             string code = string.Empty;
             code += expr?.Gen() ?? string.Empty;
             code += $"push\trax\n";
-            CodeGenUtils.StackDepth = 0;
             
             if (expr?.Type() == VarType.TYPE_BOOL)
                 code += "push\t0\n";
@@ -290,7 +260,6 @@ namespace KayoCompiler.Ast
             string code = string.Empty;
 
             code += expr.Gen();
-            CodeGenUtils.StackDepth = 0;
             code += $"jmp\tfunc_{ScopeManager.CurrentFun}_return\n";
 
             return code;

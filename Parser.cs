@@ -7,22 +7,21 @@ namespace KayoCompiler
 	internal partial class Parser
 	{
 		private readonly Scanner scanner = null;
-		private readonly Queue<Token> buffer;
+		private readonly List<Token> buffer;
 		private Token next
 		{
 			get
 			{
 				if (buffer.Count == 0)
-					MoreToken();
-				
-				return buffer.Peek();
+					Lookahead(1);
+				return Peek();
 			}
 		}
 
 		internal Parser(Scanner scanner)
 		{
 			this.scanner = scanner;
-			buffer = new Queue<Token>();
+			buffer = new List<Token>();
 		}
 
 		internal ProgramNode Parse()
@@ -237,18 +236,16 @@ namespace KayoCompiler
 		{
 			switch (next.Tag)
 			{
+				case Tag.KW_TRUE:
+				case Tag.KW_FALSE:
+				case Tag.DL_LPAR:
+				case Tag.DL_PLUS:
+				case Tag.DL_MINUS:
+				case Tag.DL_NOT:
 				case Tag.ID:
-					var moreToken = MoreToken();
-					if (moreToken.Tag == Tag.DL_SET)
-					{
-						node.stmt = new SetStmtNode();
-						SetStmt(node.stmt as SetStmtNode);
-					}
-					else if (moreToken.Tag == Tag.DL_LPAR)
-					{
-						node.stmt = new FuncCallStmtNode();
-						FuncCallStmt(node.stmt as FuncCallStmtNode);
-					}
+				case Tag.NUM:
+					node.stmt = new ExprNode();
+					Expr(node.stmt as ExprNode);
 					break;
 				case Tag.KW_IF:
 					node.stmt = new IfStmtNode();
@@ -291,20 +288,39 @@ namespace KayoCompiler
 		private void Move()
 		{
 			if (buffer.Count > 0)
-				buffer.Dequeue();
+				Dequeue();
 		}
 
-		private Token MoreToken()
+		private Token Lookahead(int k)
 		{
-			Token token = scanner.NextToken();
-
-			while (token.Tag == Tag.COMMENT)
+			while (buffer.Count < k)
 			{
-				token = scanner.NextToken();
+				Token token = scanner.NextToken();
+
+				while (token.Tag == Tag.COMMENT)
+				{
+					token = scanner.NextToken();
+				}
+
+				Enqueue(token);
 			}
 
-			buffer.Enqueue(token);
-			return token;
+			return buffer[k - 1];
+		}
+
+		private void Enqueue(Token token)
+		{
+			buffer.Add(token);
+		}
+
+		private void Dequeue()
+		{
+			buffer.RemoveAt(0);
+		}
+
+		private Token Peek()
+		{
+			return buffer[0];
 		}
 
 		private string RequiredToken(Tag tokenTag)

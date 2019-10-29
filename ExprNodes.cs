@@ -31,9 +31,12 @@ namespace KayoCompiler.Ast
 
     class ExprNode : ExprBaseNode<AndExprNode>
     {
+        public AssignmentExprNode assignment;
+
         public override string Gen()
         {
             string code = string.Empty;
+            CodeGenUtils.StackDepth = 0;
 
             if (children != null)
             {
@@ -63,6 +66,10 @@ namespace KayoCompiler.Ast
                         CodeGenUtils.StackDepth--;
                     }
                 }
+            }
+            else if (assignment != null)
+            {
+                code += assignment.Gen();
             }
 
             return code;
@@ -97,8 +104,40 @@ namespace KayoCompiler.Ast
                     index++;
                 }
             }
+            else if (assignment != null)
+            {
+                type = assignment.expr.Type();
+            }
 
             return type;
+        }
+    }
+
+    class AssignmentExprNode : AstNode
+    {
+        public IdNode id;
+        public ExprNode expr;
+
+        public override string Gen()
+        {
+            string code = string.Empty;
+            int offset = -SymbolTable.GetVarOffset(id.name);
+            code += expr?.Gen() ?? string.Empty;
+
+            switch (Utils.SizeOf(SymbolTable.FindVar(id.name).type))
+            {
+                case 1:
+                    code += $"mov\t[rbp{(offset>0?"+":"")}{offset}], al\n";
+                    break;
+                case 4:
+                    code += $"mov\t[rbp{(offset>0?"+":"")}{offset}], eax\n";
+                    break;
+                case 8:
+                    code += $"mov\t[rbp{(offset>0?"+":"")}{offset}], rax\n";
+                    break;
+            }
+
+            return code;
         }
     }
 

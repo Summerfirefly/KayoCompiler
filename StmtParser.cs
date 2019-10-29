@@ -47,33 +47,6 @@ namespace KayoCompiler
 			ScopeManager.ScopeLeave();
 		}
 
-		private void SetStmt(SetStmtNode node)
-		{
-			node.id = new IdNode(next.Value);
-			Move();
-
-			RequiredToken(Tag.DL_SET);
-
-            node.expr = new ExprNode();
-			Expr(node.expr);
-
-			if (node.expr == null)
-			{
-				new Error().PrintErrMsg();
-			}
-			else if (node.id.Type() == VarType.TYPE_ERROR)
-			{
-				new Error().PrintErrMsg();
-			}
-			else if (node.id.Type() != node.expr.Type())
-			{
-				if (!Utils.IsNumType(node.id.Type()) || !Utils.IsNumType(node.expr.Type()))
-					new TypeMismatchError(node.id.Type(), node.expr.Type()).PrintErrMsg();
-			}
-
-			RequiredToken(Tag.DL_SEM);
-		}
-
 		private void WhileStmt(WhileStmtNode node)
 		{
 			ScopeManager.ScopeEnter();
@@ -107,25 +80,30 @@ namespace KayoCompiler
 
 			RequiredToken(Tag.DL_LPAR);
 
-			node.preStmt = new StmtNode();
-			Stmt(node.preStmt);
-
-            node.condition = new ExprNode();
-			Expr(node.condition);
-
-			if (node.condition == null)
+			if (!TagIs(Tag.DL_SEM))
 			{
-				new Error().PrintErrMsg();
+				node.preExpr = new ExprNode();
+				Expr(node.preExpr);
 			}
-			else if (node.condition.Type() != VarType.TYPE_BOOL)
+			RequiredToken(Tag.DL_SEM);
+
+			if (!TagIs(Tag.DL_SEM))
+			{
+				node.condition = new ExprNode();
+				Expr(node.condition);
+			}
+			RequiredToken(Tag.DL_SEM);
+
+			if (node.condition != null && node.condition.Type() != VarType.TYPE_BOOL)
 			{
 				new TypeMismatchError(VarType.TYPE_BOOL, node.condition.Type()).PrintErrMsg();
 			}
 
-			RequiredToken(Tag.DL_SEM);
-
-			node.loopStmt = new StmtNode();
-			Stmt(node.loopStmt);
+			if (!TagIs(Tag.DL_RPAR))
+			{
+				node.loopExpr = new ExprNode();
+				Expr(node.loopExpr);
+			}
 
 			RequiredToken(Tag.DL_RPAR);
 

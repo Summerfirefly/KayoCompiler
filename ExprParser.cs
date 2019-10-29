@@ -7,16 +7,49 @@ namespace KayoCompiler
     {
         private void Expr(ExprNode node)
         {
-            var child = node.AddChild(new AndExprNode());
-            AndExpr(child);
-            while (TagIs(Tag.DL_OR))
+            if (TagIs(Tag.ID) && Lookahead(2).Tag == Tag.DL_SET)
             {
-                child = node.AddChild(new AndExprNode());
-                child.Op = Tag.DL_OR;
-                Move();
+                node.assignment = new AssignmentExprNode();
+                AssignmentExpr(node.assignment);
+            }
+            else
+            {
+                var child = node.AddChild(new AndExprNode());
                 AndExpr(child);
+                while (TagIs(Tag.DL_OR))
+                {
+                    child = node.AddChild(new AndExprNode());
+                    child.Op = Tag.DL_OR;
+                    Move();
+                    AndExpr(child);
+                }
             }
         }
+        
+		private void AssignmentExpr(AssignmentExprNode node)
+		{
+			node.id = new IdNode(next.Value);
+			Move();
+
+			RequiredToken(Tag.DL_SET);
+
+            node.expr = new ExprNode();
+			Expr(node.expr);
+
+			if (node.expr == null)
+			{
+				new Error().PrintErrMsg();
+			}
+			else if (node.id.Type() == VarType.TYPE_ERROR)
+			{
+				new Error().PrintErrMsg();
+			}
+			else if (node.id.Type() != node.expr.Type())
+			{
+				if (!Utils.IsNumType(node.id.Type()) || !Utils.IsNumType(node.expr.Type()))
+					new TypeMismatchError(node.id.Type(), node.expr.Type()).PrintErrMsg();
+			}
+		}
 
         private void AndExpr(AndExprNode node)
         {
@@ -92,8 +125,7 @@ namespace KayoCompiler
             switch (next.Tag)
             {
                 case Tag.ID:
-                    var moreToken = MoreToken();
-                    if (moreToken.Tag == Tag.DL_LPAR)
+                    if (Lookahead(2).Tag == Tag.DL_LPAR)
                     {
                         node.func = new FuncCallStmtNode();
                         FuncCallStmt(node.func);
