@@ -1,6 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
+using KayoCompiler.Errors;
 
 namespace KayoCompiler
 {
@@ -129,6 +129,7 @@ namespace KayoCompiler
                         case '/':
                             if (next == '*')
                             {
+                                value = "/**/";
                                 while (next > -1)
                                 {
                                     NextChar();
@@ -141,14 +142,16 @@ namespace KayoCompiler
 
                                         if (next == '/')
                                         {
-                                            value = "/**/";
-                                            NextChar();
                                             break;
                                         }
                                     }
                                 }
 
-                                // TODO: 未正常结束注释的错误处理
+                                if (next == -1)
+                                {
+                                    new Error().PrintErrMsg();
+                                }
+                                NextChar();
                             }
                             break;
                         default:
