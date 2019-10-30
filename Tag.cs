@@ -41,6 +41,8 @@
         DL_SEM,         // ;
         DL_LPAR,        // (
         DL_RPAR,        // )
+        DL_LSQU,        // [
+        DL_RSQU,        // ]
         DL_LBRACE,      // {
         DL_RBRACE,      // }
         DL_COL,         // :

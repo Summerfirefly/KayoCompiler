@@ -9,7 +9,7 @@ namespace KayoCompiler.Errors
 
         public Error()
         {
-            lineNum = Scanner.LineNum;
+            lineNum = Parser.LineNum;
             CodeGenUtils.ErrorNum++;
         }
 
@@ -98,6 +98,8 @@ namespace KayoCompiler.Errors
                 return "number";
             if (type == VarType.TYPE_BOOL)
                 return "bool";
+            if (type == VarType.TYPE_PTR)
+                return "pointer";
 
             return "unknown";
         }

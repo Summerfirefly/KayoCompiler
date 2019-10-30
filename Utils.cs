@@ -38,6 +38,7 @@ namespace KayoCompiler
                 case VarType.TYPE_INT:
                     return 4;
                 case VarType.TYPE_LONG:
+				case VarType.TYPE_PTR:
                     return 8;
                 default:
                     return 0;

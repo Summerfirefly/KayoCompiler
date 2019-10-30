@@ -40,7 +40,8 @@ namespace KayoCompiler
             { "=", Tag.DL_SET },    { "||", Tag.DL_OR },
             { "&&", Tag.DL_AND },   { "!", Tag.DL_NOT },
             { ";", Tag.DL_SEM },    { "(", Tag.DL_LPAR },
-            { ")", Tag.DL_RPAR },   { "{", Tag.DL_LBRACE },
+            { ")", Tag.DL_RPAR },   { "[", Tag.DL_LSQU },
+            { "]", Tag.DL_RSQU },   { "{", Tag.DL_LBRACE },
             { "}", Tag.DL_RBRACE }, { ":", Tag.DL_COL },
             { ",", Tag.DL_COM },    { "/**/", Tag.COMMENT }
         };
@@ -49,8 +50,8 @@ namespace KayoCompiler
         {
             '+', '-', '*', '/', '>',
             '<', '=', '!', '|', '&',
-            ';', '(', ')', '{', '}',
-            ':', ',', '%'
+            ';', '(', ')', '[', ']',
+            '{', '}', ':', ',', '%'
         };
 
         public Scanner(string path)
@@ -61,7 +62,7 @@ namespace KayoCompiler
 
         public Token NextToken()
         {
-            Token token = new Token { Tag = Tag.NULL, Value = string.Empty };
+            Token token = new Token { Tag = Tag.NULL, Value = string.Empty, LineNum = LineNum };
 
             if (next > -1)
             {
@@ -73,6 +74,7 @@ namespace KayoCompiler
                     NextChar();
                 }
 
+                token.LineNum = LineNum;
                 // 自动机入口分支
                 if (IsDigit(next)) // 数字
                 {
@@ -82,7 +84,7 @@ namespace KayoCompiler
                         NextChar();
                     }
 
-                    token = new Token { Tag = Tag.NUM, Value = value };
+                    token = new Token { Tag = Tag.NUM, Value = value, LineNum = LineNum };
                 }
                 else if (IsLetter(next)) // 关键字或标识符
                 {
@@ -172,7 +174,7 @@ namespace KayoCompiler
                 {
                     value += (char)next;
                     NextChar();
-                    token = new Token { Tag = Tag.ERROR, Value = value };
+                    token = new Token { Tag = Tag.ERROR, Value = value, LineNum = LineNum };
                 }
             }
 
@@ -184,7 +186,8 @@ namespace KayoCompiler
             return new Token
             {
                 Tag = delimiter.ContainsKey(value) ? delimiter[value] : Tag.ERROR,
-                Value = value
+                Value = value,
+                LineNum = LineNum
             };
         }
 
@@ -193,7 +196,8 @@ namespace KayoCompiler
             return new Token
             {
                 Tag = keywords.ContainsKey(value) ? keywords[value] : Tag.ID,
-                Value = value
+                Value = value,
+                LineNum = LineNum
             };
         }
 

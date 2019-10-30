@@ -6,22 +6,33 @@ namespace KayoCompiler
 {
 	internal partial class Parser
 	{
-		private readonly Scanner scanner = null;
-		private readonly List<Token> buffer;
-		private Token next
+		public static int LineNum
 		{
 			get
 			{
-				if (buffer.Count == 0)
-					Lookahead(1);
-				return Peek();
+				return next.LineNum;
+			}
+		}
+
+		private static readonly List<Token> buffer = new List<Token>();
+		private static int index = 0;
+		private static Token next
+		{
+			get
+			{
+				return Lookahead(1);
 			}
 		}
 
 		internal Parser(Scanner scanner)
 		{
-			this.scanner = scanner;
-			buffer = new List<Token>();
+			var token = scanner.NextToken();
+			do
+			{
+				buffer.Add(token);
+				token = scanner.NextToken();
+			} while (token.Tag != Tag.NULL);
+			buffer.Add(scanner.NextToken());
 		}
 
 		internal ProgramNode Parse()
@@ -246,6 +257,7 @@ namespace KayoCompiler
 				case Tag.NUM:
 					node.stmt = new ExprNode();
 					Expr(node.stmt as ExprNode);
+					RequiredToken(Tag.DL_SEM);
 					break;
 				case Tag.KW_IF:
 					node.stmt = new IfStmtNode();
@@ -287,40 +299,18 @@ namespace KayoCompiler
 
 		private void Move()
 		{
-			if (buffer.Count > 0)
-				Dequeue();
+			if (buffer.Count > index)
+				index++;
 		}
 
-		private Token Lookahead(int k)
+		private static Token Lookahead(int k)
 		{
-			while (buffer.Count < k)
+			if (buffer.Count <= index + k)
 			{
-				Token token = scanner.NextToken();
-
-				while (token.Tag == Tag.COMMENT)
-				{
-					token = scanner.NextToken();
-				}
-
-				Enqueue(token);
+				return buffer[buffer.Count - 1];
 			}
 
-			return buffer[k - 1];
-		}
-
-		private void Enqueue(Token token)
-		{
-			buffer.Add(token);
-		}
-
-		private void Dequeue()
-		{
-			buffer.RemoveAt(0);
-		}
-
-		private Token Peek()
-		{
-			return buffer[0];
+			return buffer[index + k - 1];
 		}
 
 		private string RequiredToken(Tag tokenTag)
