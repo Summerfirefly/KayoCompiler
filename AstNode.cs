@@ -165,6 +165,7 @@ namespace KayoCompiler.Ast
 
             foreach (var child in children)
             {
+                CodeGenUtils.StackDepth = 0;
                 code += child?.Gen() ?? string.Empty;
             }
 
