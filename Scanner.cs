@@ -153,6 +153,14 @@ namespace KayoCompiler
                                 }
                                 NextChar();
                             }
+                            else if (next == '/')
+                            {
+                                value = "/**/";
+                                while (next != '\n' && next != '\n')
+                                {
+                                    NextChar();
+                                }
+                            }
                             break;
                         default:
                             break;

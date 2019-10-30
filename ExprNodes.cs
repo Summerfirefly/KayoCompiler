@@ -126,13 +126,13 @@ namespace KayoCompiler.Ast
             switch (Utils.SizeOf(SymbolTable.FindVar(id.name).type))
             {
                 case 1:
-                    code += $"mov\t[rbp{(offset>0?"+":"")}{offset}], al\n";
+                    code += $"mov\t[rbp{(offset>0?"+":"")}{offset}], {CodeGenUtils.CurrentStackTop8}\n";
                     break;
                 case 4:
-                    code += $"mov\t[rbp{(offset>0?"+":"")}{offset}], eax\n";
+                    code += $"mov\t[rbp{(offset>0?"+":"")}{offset}], {CodeGenUtils.CurrentStackTop32}\n";
                     break;
                 case 8:
-                    code += $"mov\t[rbp{(offset>0?"+":"")}{offset}], rax\n";
+                    code += $"mov\t[rbp{(offset>0?"+":"")}{offset}], {CodeGenUtils.CurrentStackTop64}\n";
                     break;
             }
 

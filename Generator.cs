@@ -14,7 +14,7 @@ namespace KayoCompiler
             this.tmpFilePath = tmpFilePath;
         }
 
-        internal void Generate()
+        internal bool Generate()
         {
             var program = parser.Parse();
 
@@ -40,12 +40,14 @@ namespace KayoCompiler
                 sw.Write(code);
                 sw.Flush();
                 sw.Close();
+                return true;
             }
             else
             {
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine($"{CodeGenUtils.ErrorNum} errors, stop");
                 Console.ResetColor();
+                return false;
             }
         }
     }

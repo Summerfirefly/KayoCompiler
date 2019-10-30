@@ -1,4 +1,6 @@
-﻿namespace KayoCompiler.Ast
+﻿using KayoCompiler.Errors;
+
+namespace KayoCompiler.Ast
 {
     abstract class TerminalNode : AstNode
     {
@@ -72,6 +74,10 @@
         public IdNode(string name)
         {
             this.name = name;
+            if (SymbolTable.FindVar(name) == null)
+            {
+                new Error().PrintErrMsg();
+            }
         }
 
         public override string Gen()
