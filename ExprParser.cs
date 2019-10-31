@@ -36,11 +36,7 @@ namespace KayoCompiler
             node.expr = new ExprNode();
 			Expr(node.expr);
 
-			if (node.expr == null)
-			{
-				new Error().PrintErrMsg();
-			}
-			else if (node.id.Type() == VarType.TYPE_ERROR)
+			if (node.id.Type() == VarType.TYPE_ERROR)
 			{
 				new Error().PrintErrMsg();
 			}

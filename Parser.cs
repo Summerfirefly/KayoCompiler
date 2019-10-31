@@ -29,7 +29,8 @@ namespace KayoCompiler
 			var token = scanner.NextToken();
 			do
 			{
-				buffer.Add(token);
+				if (token.Tag != Tag.COMMENT)
+					buffer.Add(token);
 				token = scanner.NextToken();
 			} while (token.Tag != Tag.NULL);
 			buffer.Add(scanner.NextToken());
@@ -227,6 +228,13 @@ namespace KayoCompiler
 			switch (next.Tag)
 			{
 				case Tag.ID:
+				case Tag.KW_TRUE:
+				case Tag.KW_FALSE:
+				case Tag.NUM:
+				case Tag.DL_LPAR:
+				case Tag.DL_PLUS:
+				case Tag.DL_MINUS:
+				case Tag.DL_NOT:
 				case Tag.KW_IF:
 				case Tag.KW_WHILE:
 				case Tag.KW_FOR:
