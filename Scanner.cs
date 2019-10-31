@@ -96,6 +96,74 @@ namespace KayoCompiler
 
                     token = GetIdToken(value);
                 }
+                else if (next == '\'') // 字符常量
+                {
+                    NextChar();
+                    if (next == '\\')
+                    {
+                        NextChar();
+                        switch (next)
+                        {
+                            case 'a':
+                                value = ((int)'\a').ToString();
+                                break;
+                            case 'b':
+                                value = ((int)'\b').ToString();
+                                break;
+                            case 'f':
+                                value = ((int)'\f').ToString();
+                                break;
+                            case 'n':
+                                value = ((int)'\n').ToString();
+                                break;
+                            case 'r':
+                                value = ((int)'\r').ToString();
+                                break;
+                            case 't':
+                                value = ((int)'\t').ToString();
+                                break;
+                            case 'v':
+                                value = ((int)'\v').ToString();
+                                break;
+                            case '0':
+                                value = ((int)'\0').ToString();
+                                break;
+                            case '\'':
+                                value = ((int)'\'').ToString();
+                                break;
+                            case '\\':
+                                value = ((int)'\\').ToString();
+                                break;
+                            default:
+                                new Error().PrintErrMsg();
+                                break;
+                        }
+                    }
+                    else if (next == '\'')
+                    {
+                        new Error().PrintErrMsg();
+                    }
+                    else
+                    {
+                        value = next.ToString();
+                    }
+
+                    NextChar();
+                    if (next != '\'')
+                    {
+                        new Error().PrintErrMsg();
+                        while (next != '\'' || next != '\n')
+                        {
+                            NextChar();
+                        }
+                    }
+                    else
+                    {
+                        NextChar();
+                    }
+
+                    token = new Token { Tag = Tag.NUM, Value = value, LineNum = LineNum };
+                }
                 else if (IsDelimiter(next)) // 操作符与注释
                 {
                     value += (char)next;
