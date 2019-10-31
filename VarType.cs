@@ -2,6 +2,7 @@
 {
     enum VarType
     {
+        TYPE_NULL,
         TYPE_ERROR,
 
         TYPE_VOID,

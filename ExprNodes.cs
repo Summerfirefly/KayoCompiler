@@ -88,31 +88,14 @@ namespace KayoCompiler.Ast
 
         public override VarType Type()
         {
-            VarType type = VarType.TYPE_ERROR;
-            int index = 0;
+            VarType type = VarType.TYPE_NULL;
 
             if (children != null)
             {
                 foreach (var node in children)
                 {
                     if (node == null) continue;
-
-                    if (index == 0)
-                    {
-                        type = node.Type();
-                    }
-                    else
-                    {
-                        if (type != VarType.TYPE_BOOL)
-                        {
-                            type = VarType.TYPE_ERROR;
-                            break;
-                        }
-                        else
-                            type = node.Type() == VarType.TYPE_BOOL ? VarType.TYPE_BOOL : VarType.TYPE_ERROR;
-                    }
-
-                    index++;
+                    type = Utils.TypeCalc(type, node.Type(), true);
                 }
             }
             else if (assignment != null)
@@ -120,7 +103,7 @@ namespace KayoCompiler.Ast
                 type = assignment.Type();
             }
 
-            return type;
+            return type == VarType.TYPE_NULL ? VarType.TYPE_ERROR : type;
         }
 
         public override bool IsConstant()
@@ -245,35 +228,18 @@ namespace KayoCompiler.Ast
 
         public override VarType Type()
         {
-            VarType type = VarType.TYPE_ERROR;
-            int index = 0;
+            VarType type = VarType.TYPE_NULL;
 
             if (children != null)
             {
                 foreach (var node in children)
                 {
                     if (node == null) continue;
-
-                    if (index == 0)
-                    {
-                        type = node.Type();
-                    }
-                    else
-                    {
-                        if (type != VarType.TYPE_BOOL)
-                        {
-                            type = VarType.TYPE_ERROR;
-                            break;
-                        }
-                        else
-                            type = node.Type() == VarType.TYPE_BOOL ? VarType.TYPE_BOOL : VarType.TYPE_ERROR;
-                    }
-
-                    index++;
+                    type = Utils.TypeCalc(type, node.Type(), true);
                 }
             }
 
-            return type;
+            return type == VarType.TYPE_NULL ? VarType.TYPE_ERROR : type;
         }
 
         public override bool IsConstant()
@@ -361,32 +327,18 @@ namespace KayoCompiler.Ast
 
         public override VarType Type()
         {
-            VarType type = VarType.TYPE_ERROR;
-            int index = 0;
+            VarType type = VarType.TYPE_NULL;
 
             if (children != null)
             {
                 foreach (var node in children)
                 {
                     if (node == null) continue;
-
-                    if (index == 0)
-                    {
-                        type = node.Type();
-                    }
-                    else
-                    {
-                        if (Utils.IsNumType(node.Type()) && Utils.IsNumType(type))
-                            type = VarType.TYPE_BOOL;
-                        else
-                            type = node.Type() == type ? VarType.TYPE_BOOL : VarType.TYPE_ERROR;
-                    }
-
-                    index++;
+                    type = Utils.TypeCmp(type, node.Type(), true);
                 }
             }
 
-            return type;
+            return type == VarType.TYPE_NULL ? VarType.TYPE_ERROR : type;
         }
 
         public override bool IsConstant()
@@ -493,32 +445,18 @@ namespace KayoCompiler.Ast
 
         public override VarType Type()
         {
-            VarType type = VarType.TYPE_ERROR;
-            int index = 0;
+            VarType type = VarType.TYPE_NULL;
 
             if (children != null)
             {
                 foreach (var node in children)
                 {
                     if (node == null) continue;
-
-                    if (index == 0)
-                    {
-                        type = node.Type();
-                    }
-                    else
-                    {
-                        if (Utils.IsNumType(node.Type()) && Utils.IsNumType(type))
-                            type = VarType.TYPE_BOOL;
-                        else
-                            type = VarType.TYPE_ERROR;
-                    }
-
-                    index++;
+                    type = Utils.TypeCmp(type, node.Type(), false);
                 }
             }
 
-            return type;
+            return type == VarType.TYPE_NULL ? VarType.TYPE_ERROR : type;
         }
 
         public override bool IsConstant()
@@ -615,35 +553,18 @@ namespace KayoCompiler.Ast
 
         public override VarType Type()
         {
-            VarType type = VarType.TYPE_ERROR;
-            int index = 0;
+            VarType type = VarType.TYPE_NULL;
 
             if (children != null)
             {
                 foreach (var node in children)
                 {
                     if (node == null) continue;
-
-                    if (index == 0)
-                    {
-                        type = node.Type();
-                    }
-                    else
-                    {
-                        if (!Utils.IsNumType(type))
-                        {
-                            type = VarType.TYPE_ERROR;
-                            break;
-                        }
-                        else
-                            type = Utils.IsNumType(node.Type()) ? VarType.TYPE_LONG : VarType.TYPE_ERROR;
-                    }
-
-                    index++;
+                    type = Utils.TypeCalc(type, node.Type(), false);
                 }
             }
 
-            return type;
+            return type == VarType.TYPE_NULL ? VarType.TYPE_ERROR : type;
         }
 
         public override bool IsConstant()
@@ -782,35 +703,18 @@ namespace KayoCompiler.Ast
 
         public override VarType Type()
         {
-            VarType type = VarType.TYPE_ERROR;
-            int index = 0;
+            VarType type = VarType.TYPE_NULL;
 
             if (children != null)
             {
                 foreach (var node in children)
                 {
                     if (node == null) continue;
-
-                    if (index == 0)
-                    {
-                        type = node.Type();
-                    }
-                    else
-                    {
-                        if (!Utils.IsNumType(type))
-                        {
-                            type = VarType.TYPE_ERROR;
-                            break;
-                        }
-                        else
-                            type = Utils.IsNumType(node.Type()) ? VarType.TYPE_LONG : VarType.TYPE_ERROR;
-                    }
-
-                    index++;
+                    type = Utils.TypeCalc(type, node.Type(), false);
                 }
             }
 
-            return type;
+            return type == VarType.TYPE_NULL ? VarType.TYPE_ERROR : type;
         }
 
         public override bool IsConstant()

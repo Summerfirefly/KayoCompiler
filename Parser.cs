@@ -265,6 +265,10 @@ namespace KayoCompiler
 				case Tag.NUM:
 					node.stmt = new ExprNode();
 					Expr(node.stmt as ExprNode);
+            		if ((node.stmt as ExprNode).Type() == VarType.TYPE_ERROR)
+            		{
+                		new Error().PrintErrMsg();
+            		}
 					RequiredToken(Tag.DL_SEM);
 					break;
 				case Tag.KW_IF:

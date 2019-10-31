@@ -63,5 +63,43 @@ namespace KayoCompiler
 					return VarType.TYPE_ERROR;
 			}
 		}
+
+		internal static VarType TypeCalc(VarType typeA, VarType typeB, bool logicOp)
+		{
+			if (typeA == VarType.TYPE_NULL)
+				return typeB;
+			if (typeB == VarType.TYPE_NULL)
+				return typeA;
+
+			if (typeA == VarType.TYPE_VOID || typeB == VarType.TYPE_VOID)
+				return VarType.TYPE_ERROR;
+
+			if (typeA == VarType.TYPE_BOOL && typeB == VarType.TYPE_BOOL && logicOp)
+				return VarType.TYPE_BOOL;
+
+			if (IsNumType(typeA) && IsNumType(typeB) && !logicOp)
+				return typeA > typeB ? typeA : typeB;
+
+			return VarType.TYPE_ERROR;
+		}
+
+		internal static VarType TypeCmp(VarType typeA, VarType typeB, bool equalOp)
+		{
+			if (typeA == VarType.TYPE_NULL)
+				return typeB;
+			if (typeB == VarType.TYPE_NULL)
+				return typeA;
+
+			if (typeA == VarType.TYPE_VOID || typeB == VarType.TYPE_VOID)
+				return VarType.TYPE_ERROR;
+
+			if (typeA == typeB && equalOp)
+				return VarType.TYPE_BOOL;
+
+			if (IsNumType(typeA) && IsNumType(typeB))
+				return VarType.TYPE_BOOL;
+
+			return VarType.TYPE_ERROR;
+		}
 	}
 }
