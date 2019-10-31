@@ -27,6 +27,16 @@ namespace KayoCompiler.Ast
         {
             throw new NotImplementedException();
         }
+
+        public virtual bool IsConstant()
+        {
+            throw new NotImplementedException();
+        }
+
+        public virtual TerminalNode Val()
+        {
+            throw new NotImplementedException();
+        }
     }
 
     class ExprNode : ExprBaseNode<AndExprNode>
@@ -35,6 +45,8 @@ namespace KayoCompiler.Ast
 
         public override string Gen()
         {
+            if (this.IsConstant() && assignment == null)
+                return this.Val().Gen();
             string code = string.Empty;
 
             if (children != null)
@@ -105,14 +117,48 @@ namespace KayoCompiler.Ast
             }
             else if (assignment != null)
             {
-                type = assignment.expr.Type();
+                type = assignment.Type();
             }
 
             return type;
         }
+
+        public override bool IsConstant()
+        {
+            if (children == null)
+                return false;
+            if (assignment != null)
+                return assignment.IsConstant();
+            foreach (var child in children)
+            {
+                if (!child.IsConstant())
+                    return false;
+            }
+            return true;
+        }
+
+        public override TerminalNode Val()
+        {
+            if (!this.IsConstant()) return null;
+            if (assignment != null)
+                return assignment.Val();
+            TerminalNode result = new BoolNode(false);
+            foreach (var node in children)
+            {
+                if (node.Op != Tag.NULL)
+                {
+                    result = new BoolNode(((result as BoolNode).value | (node.Val() as BoolNode).value) == 1);
+                }
+                else
+                {
+                    result = node.Val();
+                }
+            }
+            return result;
+        }
     }
 
-    class AssignmentExprNode : AstNode
+    class AssignmentExprNode : ExprBaseNode<AstNode>
     {
         public IdNode id;
         public ExprNode expr;
@@ -121,7 +167,10 @@ namespace KayoCompiler.Ast
         {
             string code = string.Empty;
             int offset = -SymbolTable.GetVarOffset(id.name);
-            code += expr?.Gen() ?? string.Empty;
+            if (this.IsConstant())
+                code += this.Val().Gen();
+            else
+                code += expr?.Gen() ?? string.Empty;
 
             switch (Utils.SizeOf(SymbolTable.FindVar(id.name).type))
             {
@@ -138,12 +187,29 @@ namespace KayoCompiler.Ast
 
             return code;
         }
+
+        public override VarType Type()
+        {
+            return expr.Type();
+        }
+
+        public override bool IsConstant()
+        {
+            return expr.IsConstant();
+        }
+
+        public override TerminalNode Val()
+        {
+            return expr.Val();
+        }
     }
 
     class AndExprNode : ExprBaseNode<EqualExprNode>
     {
         public override string Gen()
         {
+            if (this.IsConstant())
+                return this.Val().Gen();
             string code = string.Empty;
 
             if (children != null)
@@ -209,12 +275,44 @@ namespace KayoCompiler.Ast
 
             return type;
         }
+
+        public override bool IsConstant()
+        {
+            if (children == null)
+                return false;
+            foreach (var child in children)
+            {
+                if (!child.IsConstant())
+                    return false;
+            }
+            return true;
+        }
+
+        public override TerminalNode Val()
+        {
+            if (!this.IsConstant()) return null;
+            TerminalNode result = new BoolNode(false);
+            foreach (var node in children)
+            {
+                if (node.Op != Tag.NULL)
+                {
+                    result = new BoolNode(((result as BoolNode).value & (node.Val() as BoolNode).value) == 1);
+                }
+                else
+                {
+                    result = node.Val();
+                }
+            }
+            return result;
+        }
     }
 
     class EqualExprNode : ExprBaseNode<CmpExprNode>
     {
         public override string Gen()
         {
+            if (this.IsConstant())
+                return this.Val().Gen();
             string code = string.Empty;
 
             if (children != null)
@@ -290,12 +388,57 @@ namespace KayoCompiler.Ast
 
             return type;
         }
+
+        public override bool IsConstant()
+        {
+            if (children == null)
+                return false;
+            foreach (var child in children)
+            {
+                if (!child.IsConstant())
+                    return false;
+            }
+            return true;
+        }
+
+        public override TerminalNode Val()
+        {
+            if (!this.IsConstant()) return null;
+            TerminalNode result = new BoolNode(false);
+            foreach (var node in children)
+            {
+                if (node.Op != Tag.NULL)
+                {
+                    if (node.Op == Tag.DL_EQ)
+                    {
+                        if (node.Type() == VarType.TYPE_BOOL)
+                            result = new BoolNode(((result as BoolNode).value == (node.Val() as BoolNode).value));
+                        else
+                            result = new BoolNode(((result as IntNode).value == (node.Val() as IntNode).value));
+                    }
+                    else if (node.Op == Tag.DL_NEQ)
+                    {
+                        if (node.Type() == VarType.TYPE_BOOL)
+                            result = new BoolNode(((result as BoolNode).value != (node.Val() as BoolNode).value));
+                        else
+                            result = new BoolNode(((result as IntNode).value != (node.Val() as IntNode).value));
+                    }
+                }
+                else
+                {
+                    result = node.Val();
+                }
+            }
+            return result;
+        }
     }
 
     class CmpExprNode : ExprBaseNode<AddExprNode>
     {
         public override string Gen()
         {
+            if (this.IsConstant())
+                return this.Val().Gen();
             string code = string.Empty;
 
             if (children != null)
@@ -368,7 +511,7 @@ namespace KayoCompiler.Ast
                         if (Utils.IsNumType(node.Type()) && Utils.IsNumType(type))
                             type = VarType.TYPE_BOOL;
                         else
-                            type = node.Type() == type ? VarType.TYPE_BOOL : VarType.TYPE_ERROR;
+                            type = VarType.TYPE_ERROR;
                     }
 
                     index++;
@@ -377,12 +520,63 @@ namespace KayoCompiler.Ast
 
             return type;
         }
+
+        public override bool IsConstant()
+        {
+            if (children == null)
+                return false;
+            foreach (var child in children)
+            {
+                if (!child.IsConstant())
+                    return false;
+            }
+            return true;
+        }
+
+        public override TerminalNode Val()
+        {
+            if (!this.IsConstant()) return null;
+            TerminalNode result = new BoolNode(false);
+            foreach (var node in children)
+            {
+                if (node.Op != Tag.NULL)
+                {
+                    if (node.Op == Tag.DL_LT)
+                    {
+                        if (Utils.IsNumType(node.Type()))
+                            result = new BoolNode(((result as IntNode).value < (node.Val() as IntNode).value));
+                    }
+                    else if (node.Op == Tag.DL_NLT)
+                    {
+                        if (Utils.IsNumType(node.Type()))
+                            result = new BoolNode(((result as IntNode).value >= (node.Val() as IntNode).value));
+                    }
+                    else if (node.Op == Tag.DL_GT)
+                    {
+                        if (Utils.IsNumType(node.Type()))
+                            result = new BoolNode(((result as IntNode).value > (node.Val() as IntNode).value));
+                    }
+                    else if (node.Op == Tag.DL_NGT)
+                    {
+                        if (Utils.IsNumType(node.Type()))
+                            result = new BoolNode(((result as IntNode).value <= (node.Val() as IntNode).value));
+                    }
+                }
+                else
+                {
+                    result = node.Val();
+                }
+            }
+            return result;
+        }
     }
 
     class AddExprNode : ExprBaseNode<MulExprNode>
     {
         public override string Gen()
         {
+            if (this.IsConstant())
+                return this.Val().Gen();
             string code = string.Empty;
 
             if (children != null)
@@ -451,12 +645,53 @@ namespace KayoCompiler.Ast
 
             return type;
         }
+
+        public override bool IsConstant()
+        {
+            if (children == null)
+                return false;
+            foreach (var child in children)
+            {
+                if (!child.IsConstant())
+                    return false;
+            }
+            return true;
+        }
+
+        public override TerminalNode Val()
+        {
+            if (!this.IsConstant()) return null;
+            TerminalNode result = new BoolNode(false);
+            foreach (var node in children)
+            {
+                if (node.Op != Tag.NULL)
+                {
+                    if (node.Op == Tag.DL_PLUS)
+                    {
+                        if (Utils.IsNumType(node.Type()))
+                            result = new IntNode(((result as IntNode).value + (node.Val() as IntNode).value));
+                    }
+                    else if (node.Op == Tag.DL_MINUS)
+                    {
+                        if (Utils.IsNumType(node.Type()))
+                            result = new IntNode(((result as IntNode).value - (node.Val() as IntNode).value));
+                    }
+                }
+                else
+                {
+                    result = node.Val();
+                }
+            }
+            return result;
+        }
     }
 
     class MulExprNode : ExprBaseNode<UnaryNode>
     {
         public override string Gen()
         {
+            if (this.IsConstant())
+                return this.Val().Gen();
             string code = string.Empty;
 
             if (children != null)
@@ -577,6 +812,45 @@ namespace KayoCompiler.Ast
 
             return type;
         }
+
+        public override bool IsConstant()
+        {
+            if (children == null)
+                return false;
+            foreach (var child in children)
+            {
+                if (!child.IsConstant())
+                    return false;
+            }
+            return true;
+        }
+
+        public override TerminalNode Val()
+        {
+            if (!this.IsConstant()) return null;
+            TerminalNode result = new BoolNode(false);
+            foreach (var node in children)
+            {
+                if (node.Op != Tag.NULL)
+                {
+                    if (node.Op == Tag.DL_MULTI)
+                    {
+                        if (Utils.IsNumType(node.Type()))
+                            result = new IntNode(((result as IntNode).value * (node.Val() as IntNode).value));
+                    }
+                    else if (node.Op == Tag.DL_OBELUS)
+                    {
+                        if (Utils.IsNumType(node.Type()))
+                            result = new IntNode(((result as IntNode).value / (node.Val() as IntNode).value));
+                    }
+                }
+                else
+                {
+                    result = node.Val();
+                }
+            }
+            return result;
+        }
     }
 
     class UnaryNode : ExprBaseNode<FactorNode>
@@ -586,6 +860,8 @@ namespace KayoCompiler.Ast
 
         public override string Gen()
         {
+            if (this.IsConstant())
+                return this.Val().Gen();
             string code = string.Empty;
             Tag op = unaryOp.Count > 0 ? unaryOp[0] : Tag.NULL;
 
@@ -621,6 +897,43 @@ namespace KayoCompiler.Ast
         {
             return factor.Type();
         }
+
+        public override bool IsConstant()
+        {
+            return factor.IsConstant();
+        }
+
+        public override TerminalNode Val()
+        {
+            if (!this.IsConstant()) return null;
+            TerminalNode result = factor.Val();
+            Tag op = unaryOp.Count > 0 ? unaryOp[0] : Tag.NULL;
+            if (op == Tag.DL_NOT)
+            {
+                if (unaryOp.Count % 2 != 0)
+                {
+                    result = new BoolNode(!((result as BoolNode).value == 1));
+                }
+            }
+            else if (op == Tag.DL_MINUS || op == Tag.DL_PLUS)
+            {
+                op = Tag.DL_PLUS;
+                foreach (var item in unaryOp)
+                {
+                    if (item == Tag.DL_MINUS)
+                    {
+                        op = op == Tag.DL_MINUS ? Tag.DL_PLUS : Tag.DL_MINUS;
+                    }
+                }
+
+                if (op == Tag.DL_MINUS)
+                {
+                    result = new IntNode(-(result as IntNode).value);
+                }
+            }
+
+            return result;
+        }
     }
 
     class FactorNode : ExprBaseNode<AstNode>
@@ -631,6 +944,8 @@ namespace KayoCompiler.Ast
 
         public override string Gen()
         {
+            if (this.IsConstant())
+                return this.Val().Gen();
             string code = string.Empty;
             code += value?.Gen() ?? string.Empty;
             code += expr?.Gen() ?? string.Empty;
@@ -643,6 +958,17 @@ namespace KayoCompiler.Ast
         {
             VarType type = value?.Type() ?? expr?.Type() ?? func?.Type() ?? VarType.TYPE_ERROR;
             return type;
+        }
+
+        public override bool IsConstant()
+        {
+            return value?.IsConstant() ?? expr?.IsConstant() ?? false;
+        }
+
+        public override TerminalNode Val()
+        {
+            if (!this.IsConstant()) return null;
+            return value == null ? expr?.Val() ?? null : value;
         }
     }
 }

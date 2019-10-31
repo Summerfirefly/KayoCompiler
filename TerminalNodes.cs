@@ -5,6 +5,7 @@ namespace KayoCompiler.Ast
     abstract class TerminalNode : AstNode
     {
         public abstract VarType Type();
+        public abstract bool IsConstant();
     }
 
     class IntNode : TerminalNode
@@ -35,6 +36,11 @@ namespace KayoCompiler.Ast
         {
             return VarType.TYPE_LONG;
         }
+
+        public override bool IsConstant()
+        {
+            return true;
+        }
     }
 
     class BoolNode : TerminalNode
@@ -64,6 +70,11 @@ namespace KayoCompiler.Ast
         public override VarType Type()
         {
             return VarType.TYPE_BOOL;
+        }
+
+        public override bool IsConstant()
+        {
+            return true;
         }
     }
 
@@ -121,6 +132,11 @@ namespace KayoCompiler.Ast
         {
             VarSymbol item = SymbolTable.FindVar(name);
             return item?.type ?? VarType.TYPE_ERROR;
+        }
+
+        public override bool IsConstant()
+        {
+            return false;
         }
     }
 }
