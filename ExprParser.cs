@@ -25,7 +25,7 @@ namespace KayoCompiler
                 }
             }
         }
-        
+
 		private void AssignmentExpr(AssignmentExprNode node)
 		{
 			node.id = new IdNode(next.Value);
@@ -109,14 +109,49 @@ namespace KayoCompiler
 
         private void MulExpr(MulExprNode node)
         {
-            var child = node.AddChild(new FactorNode());
-            Factor(child);
+            var child = node.AddChild(new UnaryNode());
+            Unary(child);
             while (TagIs(Tag.DL_MULTI) || TagIs(Tag.DL_OBELUS) || TagIs(Tag.DL_MOD))
             {
-                child = node.AddChild(new FactorNode());
+                child = node.AddChild(new UnaryNode());
                 child.Op = next.Tag;
                 Move();
-                Factor(child);
+                Unary(child);
+            }
+        }
+
+        private void Unary(UnaryNode node)
+        {
+            while (TagIs(Tag.DL_PLUS) || TagIs(Tag.DL_MINUS) || TagIs(Tag.DL_NOT))
+            {
+                node.unaryOp.Add(next.Tag);
+                Move();
+            }
+
+            node.factor = new FactorNode();
+            Factor(node.factor);
+
+            if (node.factor.Type() == VarType.TYPE_BOOL)
+            {
+                foreach (var op in node.unaryOp)
+                {
+                    if (op != Tag.DL_NOT)
+                    {
+                        new Error().PrintErrMsg();
+                        break;
+                    }
+                }
+            }
+            else if (Utils.IsNumType(node.factor.Type()))
+            {
+                foreach (var op in node.unaryOp)
+                {
+                    if (op != Tag.DL_PLUS && op != Tag.DL_MINUS)
+                    {
+                        new Error().PrintErrMsg();
+                        break;
+                    }
+                }
             }
         }
 
@@ -139,14 +174,6 @@ namespace KayoCompiler
                 case Tag.NUM:
                     node.value = new IntNode(IntParse(next.Value));
                     Move();
-                    break;
-                case Tag.DL_PLUS:
-                case Tag.DL_MINUS:
-                case Tag.DL_NOT:
-                    node.factorOp = next.Tag;
-                    Move();
-                    node.factor = new FactorNode();
-                    Factor(node.factor);
                     break;
                 case Tag.DL_LPAR:
                     Move();

@@ -453,7 +453,7 @@ namespace KayoCompiler.Ast
         }
     }
 
-    class MulExprNode : ExprBaseNode<FactorNode>
+    class MulExprNode : ExprBaseNode<UnaryNode>
     {
         public override string Gen()
         {
@@ -579,29 +579,36 @@ namespace KayoCompiler.Ast
         }
     }
 
-    class FactorNode : ExprBaseNode<AstNode>
+    class UnaryNode : ExprBaseNode<FactorNode>
     {
-        public Tag factorOp;
-        public TerminalNode value;
-        public ExprNode expr;
+        public List<Tag> unaryOp = new List<Tag>();
         public FactorNode factor;
-        public FuncCallStmtNode func;
 
         public override string Gen()
         {
             string code = string.Empty;
-            code += value?.Gen() ?? string.Empty;
-            code += expr?.Gen() ?? string.Empty;
-            code += factor?.Gen() ?? string.Empty;
-            code += func?.Gen() ?? string.Empty;
+            Tag op = unaryOp.Count > 0 ? unaryOp[0] : Tag.NULL;
 
-            if (factor != null)
+            code += factor.Gen();
+            if (op == Tag.DL_NOT)
             {
-                if (factorOp == Tag.DL_NOT)
+                if (unaryOp.Count % 2 != 0)
                 {
                     code += $"xor\t{CodeGenUtils.CurrentStackTop64}, 1\n";
                 }
-                else if (factorOp == Tag.DL_MINUS)
+            }
+            else if (op == Tag.DL_MINUS || op == Tag.DL_PLUS)
+            {
+                op = Tag.DL_PLUS;
+                foreach (var item in unaryOp)
+                {
+                    if (item == Tag.DL_MINUS)
+                    {
+                        op = op == Tag.DL_MINUS ? Tag.DL_PLUS : Tag.DL_MINUS;
+                    }
+                }
+
+                if (op == Tag.DL_MINUS)
                 {
                     code += $"neg\t{CodeGenUtils.CurrentStackTop64}\n";
                 }
@@ -612,15 +619,29 @@ namespace KayoCompiler.Ast
 
         public override VarType Type()
         {
-            VarType type = value?.Type() ?? expr?.Type() ?? factor?.Type() ?? func?.Type() ?? VarType.TYPE_ERROR;
-            if (factor != null)
-            {
-                if (factorOp == Tag.DL_NOT && type != VarType.TYPE_BOOL)
-                    new TypeMismatchError(type, VarType.TYPE_BOOL).PrintErrMsg();
-                else if ((factorOp == Tag.DL_PLUS || factorOp == Tag.DL_MINUS) && !Utils.IsNumType(type))
-                    new TypeMismatchError(type, VarType.TYPE_INT).PrintErrMsg();
-            }
+            return factor.Type();
+        }
+    }
 
+    class FactorNode : ExprBaseNode<AstNode>
+    {
+        public TerminalNode value;
+        public ExprNode expr;
+        public FuncCallStmtNode func;
+
+        public override string Gen()
+        {
+            string code = string.Empty;
+            code += value?.Gen() ?? string.Empty;
+            code += expr?.Gen() ?? string.Empty;
+            code += func?.Gen() ?? string.Empty;
+
+            return code;
+        }
+
+        public override VarType Type()
+        {
+            VarType type = value?.Type() ?? expr?.Type() ?? func?.Type() ?? VarType.TYPE_ERROR;
             return type;
         }
     }
