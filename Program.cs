@@ -13,11 +13,12 @@ namespace KayoCompiler
                 return;
             }
 
-            if (new Generator(new Parser(new Scanner(args[0]))).Generate())
+            string tmpFilename = args[0].Substring(0, args[0].LastIndexOf('.')) + ".asm";
+            if (new Generator(new Parser(new Scanner(args[0])), tmpFilename).Generate())
             {
                 Process nasm = new Process();
                 nasm.StartInfo.FileName = "nasm";
-                nasm.StartInfo.Arguments = "-felf64 tmp.asm";
+                nasm.StartInfo.Arguments = $"-felf64 {tmpFilename}";
                 nasm.Start();
                 nasm.WaitForExit();
                 nasm.Close();

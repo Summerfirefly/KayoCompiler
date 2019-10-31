@@ -22,26 +22,36 @@ namespace KayoCompiler
             {
                 StreamWriter sw = new StreamWriter(new FileStream(tmpFilePath, FileMode.Create));
                 string code = string.Empty;
+                bool hasMain = false;
 
                 code += "GLOBAL _start\n";
                 foreach (string name in SymbolTable.GetGlobalFun())
                 {
                     code += $"GLOBAL func_{name}\n";
+                    if (name == "main")
+                        hasMain = true;
                 }
                 if (CodeGenUtils.HasWrite)
-                    code += "EXTERN write\n";
+                {
+                    code += "EXTERN func_WriteNum\n";
+                    code += "EXTERN func_WriteBool\n";
+                }
                 if (CodeGenUtils.HasRead)
                     code += "EXTERN read\n";
                 foreach (string name in SymbolTable.GetExternFun())
                 {
                     code += $"EXTERN func_{name}\n";
                 }
+
                 code += "SECTION .text\n";
-                code += "_start:\n";
-                code += "call\tfunc_main\n";
-                code += "mov\trax, 60\n";
-                code += "mov\trdi, 0\n";
-                code += "syscall\n";
+                if (hasMain)
+                {
+                    code += "_start:\n";
+                    code += "call\tfunc_main\n";
+                    code += "mov\trax, 60\n";
+                    code += "mov\trdi, 0\n";
+                    code += "syscall\n";
+                }
 
                 code += program.Gen();
 

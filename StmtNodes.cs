@@ -24,7 +24,7 @@ namespace KayoCompiler.Ast
             code += body?.Gen() ?? string.Empty;
             code += $"jmp _L{endIf}\n";
             code += $"_L{falseLabel}:\n";
-            
+
             ScopeManager.ScopeLeave();
 
             code += elseStmt?.Gen() ?? string.Empty;
@@ -94,7 +94,7 @@ namespace KayoCompiler.Ast
             CodeGenUtils.StackDepth = 0;
             code += preExpr?.Gen() ?? string.Empty;
             code += $"_L{startLabel}:\n";
-            
+
             CodeGenUtils.StackDepth = 0;
             code += condition?.Gen() ?? string.Empty;
             if (condition != null)
@@ -124,14 +124,13 @@ namespace KayoCompiler.Ast
             CodeGenUtils.StackDepth = 0;
             code += expr?.Gen() ?? string.Empty;
             code += $"push\trax\n";
-            
-            if (expr?.Type() == VarType.TYPE_BOOL)
-                code += "push\t0\n";
-            else if (Utils.IsNumType(expr.Type()))
-                code += "push\t1\n";
 
-            code += "call\twrite\n";
-            code += "add\trsp, 16\n";
+            if (expr?.Type() == VarType.TYPE_BOOL)
+                code += "call\tfunc_WriteBool\n";
+            else if (Utils.IsNumType(expr.Type()))
+                code += "call\tfunc_WriteNum\n";
+
+            code += "add\trsp, 8\n";
 
             return code;
         }
