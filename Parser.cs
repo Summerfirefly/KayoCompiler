@@ -66,7 +66,6 @@ namespace KayoCompiler
 
 		private void Function(FunctionNode node)
 		{
-			ScopeManager.ScopeEnter();
 			FunSymbol fun = new FunSymbol();
 
 			if (Utils.IsTypeTag(next.Tag, true))
@@ -87,14 +86,67 @@ namespace KayoCompiler
 				ScopeManager.FunctionEnter(id);
 			}
 
+			ScopeManager.ScopeEnter();
+
 			RequiredToken(Tag.DL_LPAR);
 			Paras(fun);
 			RequiredToken(Tag.DL_RPAR);
 
-			SymbolTable.AddFun(fun);
+			// 查看符号表中是否有同名函数
+			FunSymbol tmp = SymbolTable.FindFun(fun.name);
+			bool sameFunExist = false;
+			if (tmp != null)
+			{
+				// 若存在同名函数则检查函数签名
+				if (tmp.parasType.Count == fun.parasType.Count)
+				{
+					int i = 0;
+					for (i = 0; i < tmp.parasType.Count; i++)
+					{
+						if (tmp.parasType[i] != fun.parasType[i])
+							break;
+					}
 
-			node.body = new BlockNode();
-			Block(node.body);
+					sameFunExist = i == tmp.parasType.Count && tmp.returnType == fun.returnType;
+				}
+			}
+
+			if (TagIs(Tag.DL_LBRACE))
+			{
+				// 函数定义
+				fun.isExtern = false;
+				if (sameFunExist)
+				{
+					if (tmp.isExtern)
+						tmp.isExtern = false; // 存在函数定义，符号表中已有的函数不再是extern
+					else
+						new Error().PrintErrMsg(); // 存在重复定义
+				}
+			}
+			else if (TagIs(Tag.DL_SEM))
+			{
+				// 函数声明
+				fun.isExtern = true;
+			}
+
+			if (!sameFunExist)
+			{
+				if (SymbolTable.AddFun(fun) == TableAddStatus.SYMBOL_EXIST)
+				{
+					// 不同签名的函数名冲突
+					new Error().PrintErrMsg();
+				}
+			}
+
+			if (TagIs(Tag.DL_SEM))
+			{
+				Move();
+			}
+			else
+			{
+				node.body = new BlockNode();
+				Block(node.body);
+			}
 
 			ScopeManager.ScopeLeave();
 			ScopeManager.FunctionLeave();
@@ -121,9 +173,10 @@ namespace KayoCompiler
 				fun.parasType.Add(paraType);
 				Move();
 
-				string id = RequiredToken(Tag.ID);
+				string id = next.Tag == Tag.ID ? next.Value : null;
 				if (id != null)
 				{
+					Move();
 					var status = SymbolTable.AddVar(new VarSymbol
 					{
 						type = paraType,

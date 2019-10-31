@@ -12,7 +12,7 @@ namespace KayoCompiler
     {
         static readonly Dictionary<string, List<VarSymbol>> vars = new Dictionary<string, List<VarSymbol>>();
         static readonly Dictionary<string, FunSymbol> funs = new Dictionary<string, FunSymbol>();
-    
+
         internal static int CurFunVarSize
         {
             get
@@ -21,12 +21,12 @@ namespace KayoCompiler
             }
         }
 
-        internal static TableAddStatus AddFun(FunSymbol varItem)
+        internal static TableAddStatus AddFun(FunSymbol funItem)
         {
-            if (FindFun(varItem.name) != null)
+            if (FindFun(funItem.name) != null)
                 return TableAddStatus.SYMBOL_EXIST;
-            
-            funs.Add(varItem.name, varItem);
+
+            funs.Add(funItem.name, funItem);
             return TableAddStatus.SUCCEED;
         }
 
@@ -37,7 +37,7 @@ namespace KayoCompiler
 
             if (!vars.ContainsKey(varItem.name))
                 vars.Add(varItem.name, new List<VarSymbol>());
-            
+
             vars[varItem.name].Add(varItem);
             vars[varItem.name].Sort((x, y) => y.scopeId - x.scopeId );
 
@@ -56,7 +56,7 @@ namespace KayoCompiler
         {
             if (!vars.ContainsKey(name))
                 return null;
-            
+
             foreach (var item in vars[name])
             {
                 if (ScopeManager.IsVisibleNow(item.scopeId))
@@ -72,7 +72,7 @@ namespace KayoCompiler
         {
             if (!vars.ContainsKey(name))
                 return 0;
-            
+
             foreach (var item in vars[name])
             {
                 if (ScopeManager.IsVisibleNow(item.scopeId))
@@ -80,6 +80,34 @@ namespace KayoCompiler
             }
 
             return 0;
+        }
+
+        internal static List<string> GetGlobalFun()
+        {
+            List<string> list = new List<string>();
+            foreach (var fun in funs)
+            {
+                if (!fun.Value.isExtern)
+                {
+                    list.Add(fun.Key);
+                }
+            }
+
+            return list;
+        }
+
+        internal static List<string> GetExternFun()
+        {
+            List<string> list = new List<string>();
+            foreach (var fun in funs)
+            {
+                if (fun.Value.isExtern)
+                {
+                    list.Add(fun.Key);
+                }
+            }
+
+            return list;
         }
     }
 }

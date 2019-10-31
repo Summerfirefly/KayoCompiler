@@ -12,6 +12,7 @@ namespace KayoCompiler
 
 	class FunSymbol
 	{
+		internal bool isExtern;
 		internal VarType returnType;
 		internal string name;
 		internal List<VarType> parasType;

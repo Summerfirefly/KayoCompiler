@@ -45,17 +45,20 @@ namespace KayoCompiler.Ast
             ScopeManager.FunctionEnter(name);
             ScopeManager.ScopeEnter();
 
-            code += $"func_{name}:\n";
-            code += "push\trbp\n";
-            code += "mov\trbp, rsp\n";
-            code += $"sub\trsp, {SymbolTable.CurFunVarSize}\n";
+            if (body != null)
+            {
+                code += $"func_{name}:\n";
+                code += "push\trbp\n";
+                code += "mov\trbp, rsp\n";
+                code += $"sub\trsp, {SymbolTable.CurFunVarSize}\n";
 
-            code += body?.Gen();
+                code += body.Gen();
 
-            code += $"func_{name}_return:\n";
-            code += "mov\trsp, rbp\n";
-            code += "pop\trbp\n";
-            code += "ret\n";
+                code += $"func_{name}_return:\n";
+                code += "mov\trsp, rbp\n";
+                code += "pop\trbp\n";
+                code += "ret\n";
+            }
 
             ScopeManager.ScopeLeave();
             ScopeManager.FunctionLeave();
@@ -130,7 +133,7 @@ namespace KayoCompiler.Ast
             {
                 return string.Empty;
             }
-            
+
             string code = string.Empty;
             int offset = -SymbolTable.GetVarOffset(name);
 
