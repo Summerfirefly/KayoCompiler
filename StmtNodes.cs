@@ -126,9 +126,9 @@ namespace KayoCompiler.Ast
             code += $"push\trax\n";
 
             if (expr?.Type() == VarType.TYPE_BOOL)
-                code += "call\tfunc_WriteBool\n";
+                code += "call\tfunc_write_bool\n";
             else if (Utils.IsNumType(expr.Type()))
-                code += "call\tfunc_WriteNum\n";
+                code += "call\tfunc_write_num\n";
 
             code += "add\trsp, 8\n";
 

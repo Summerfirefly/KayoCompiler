@@ -86,9 +86,9 @@ namespace KayoCompiler
 
                     token = new Token { Tag = Tag.NUM, Value = value, LineNum = LineNum };
                 }
-                else if (IsLetter(next)) // 关键字或标识符
+                else if (IsLetter(next) || next == '_') // 关键字或标识符
                 {
-                    while (IsLetter(next) || IsDigit(next))
+                    while (IsLetter(next) || IsDigit(next) || next == '_')
                     {
                         value += (char)next;
                         NextChar();

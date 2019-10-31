@@ -1,6 +1,6 @@
 void putc(char ch);
 
-void WriteBool(bool data)
+void write_bool(bool data)
 {
 	if (data)
 	{
@@ -21,7 +21,7 @@ void WriteBool(bool data)
 	putc('\n');
 }
 
-void WriteNum(long num)
+void write_num(long num)
 {
 	long tmp = 1;
 

@@ -33,8 +33,8 @@ namespace KayoCompiler
                 }
                 if (CodeGenUtils.HasWrite)
                 {
-                    code += "EXTERN func_WriteNum\n";
-                    code += "EXTERN func_WriteBool\n";
+                    code += "EXTERN func_write_num\n";
+                    code += "EXTERN func_write_bool\n";
                 }
                 if (CodeGenUtils.HasRead)
                     code += "EXTERN read\n";
