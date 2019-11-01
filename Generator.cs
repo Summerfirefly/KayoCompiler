@@ -37,7 +37,10 @@ namespace KayoCompiler
                     code += "EXTERN func_write_bool\n";
                 }
                 if (CodeGenUtils.HasRead)
-                    code += "EXTERN read\n";
+                {
+                    code += "EXTERN func_read_num\n";
+                    code += "EXTERN func_read_bool\n";
+                }
                 foreach (string name in SymbolTable.GetExternFun())
                 {
                     code += $"EXTERN func_{name}\n";

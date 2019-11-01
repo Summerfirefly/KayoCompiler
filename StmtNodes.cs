@@ -146,15 +146,12 @@ namespace KayoCompiler.Ast
 
             if (id.Type() == VarType.TYPE_BOOL)
             {
-                code += "push\t0\n";
+                code += "call\tfunc_read_bool\n";
             }
             else if (Utils.IsNumType(id.Type()))
             {
-                code += "push\t1\n";
+                code += "call\tfunc_read_num\n";
             }
-
-            code += "call\tread\n";
-            code += "add\trsp, 8\n";
 
             int offset = -SymbolTable.GetVarOffset(id.name);
 

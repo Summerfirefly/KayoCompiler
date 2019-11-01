@@ -1,0 +1,46 @@
+int getc(void);
+
+bool read_bool(void)
+{
+	int ch = getc();
+	bool result = false;
+
+	if (ch == 't' || ch == 'T')
+		result = true;
+
+	while (ch != -1 && ch != '\n')
+		ch = getc();
+
+	return result;
+}
+
+long read_num(void)
+{
+	bool negative = false;
+	int tmp = 0;
+	int ch = 0;
+	long result = 0;
+
+	while ((ch < '0' || ch > '9') && ch != -1 && ch != '\n')
+	{
+		tmp = ch;
+		ch = getc();
+	}
+
+	if (ch == -1 || ch == '\n')
+		return 0;
+
+	while (ch >= '0' && ch <= '9')
+	{
+		result = result * 10 + ch - '0';
+		ch = getc();
+	}
+
+	if (tmp == '-')
+		result = -result;
+
+	while (ch != -1 && ch != '\n')
+		ch = getc();
+
+	return result;
+}
