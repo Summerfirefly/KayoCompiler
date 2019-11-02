@@ -49,7 +49,7 @@ namespace KayoCompiler
 		{
 			while (!TagIs(Tag.NULL))
 			{
-				if (Utils.IsTypeTag(next.Tag, true))
+				if (Utils.IsTypeTag(next.Tag))
 				{
 					FunctionNode function = new FunctionNode();
 					node.AddChild(function);
@@ -67,16 +67,8 @@ namespace KayoCompiler
 		private void Function(FunctionNode node)
 		{
 			FunSymbol fun = new FunSymbol();
-
-			if (Utils.IsTypeTag(next.Tag, true))
-			{
-				fun.returnType = Utils.TagToType(next.Tag);
-				Move();
-			}
-			else
-			{
-				new Error().PrintErrMsg();
-			}
+			fun.returnType = Utils.TagToType(next.Tag);
+			Move();
 
 			string id = RequiredToken(Tag.ID);
 			if (id != null)
@@ -90,6 +82,8 @@ namespace KayoCompiler
 
 			RequiredToken(Tag.DL_LPAR);
 			Paras(fun);
+			if (fun.parasType.Count > 1 && fun.parasType.Contains(VarType.TYPE_VOID))
+				new Error().PrintErrMsg();
 			RequiredToken(Tag.DL_RPAR);
 
 			// 查看符号表中是否有同名函数
@@ -154,7 +148,7 @@ namespace KayoCompiler
 
 		private void Paras(FunSymbol fun)
 		{
-			if (Utils.IsTypeTag(next.Tag, true))
+			if (Utils.IsTypeTag(next.Tag))
 			{
 				Para(fun);
 				if (TagIs(Tag.DL_COM))
@@ -167,16 +161,16 @@ namespace KayoCompiler
 
 		private void Para(FunSymbol fun)
 		{
-			if (Utils.IsTypeTag(next.Tag, false))
-			{
-				VarType paraType = Utils.TagToType(next.Tag);
-				fun.parasType.Add(paraType);
-				Move();
+			VarType paraType = Utils.TagToType(next.Tag);
+			fun.parasType.Add(paraType);
+			Move();
 
-				string id = next.Tag == Tag.ID ? next.Value : null;
-				if (id != null)
+			string id = next.Tag == Tag.ID ? next.Value : null;
+			if (id != null)
+			{
+				Move();
+				if (paraType != VarType.TYPE_VOID)
 				{
-					Move();
 					var status = SymbolTable.AddVar(new VarSymbol
 					{
 						type = paraType,
@@ -186,23 +180,7 @@ namespace KayoCompiler
 					});
 
 					if (status == TableAddStatus.SYMBOL_EXIST)
-					{
 						new ConflictingDeclarationError().PrintErrMsg();
-					}
-				}
-			}
-			else if (TagIs(Tag.KW_VOID))
-			{
-				if (fun.parasType.Count > 0)
-				{
-					new Error().PrintErrMsg();
-				}
-
-				Move();
-
-				if (TagIs(Tag.ID))
-				{
-					Move();
 				}
 			}
 		}
@@ -213,7 +191,7 @@ namespace KayoCompiler
 
 			while (!TagIs(Tag.DL_RBRACE) && !TagIs(Tag.NULL))
 			{
-				if (Utils.IsTypeTag(next.Tag, false))
+				if (Utils.IsTypeTag(next.Tag))
 				{
 					DeclNode decl = new DeclNode();
 					node.AddChild(decl);
@@ -232,11 +210,11 @@ namespace KayoCompiler
 
 		private void Decl(DeclNode node)
 		{
-			if (Utils.IsTypeTag(next.Tag, false))
-			{
-				node.type = Utils.TagToType(next.Tag);
-				Move();
-			}
+			node.type = Utils.TagToType(next.Tag);
+			Move();
+
+			if (node.type == VarType.TYPE_VOID)
+				new Error().PrintErrMsg();
 
 			node.name = RequiredToken(Tag.ID);
 

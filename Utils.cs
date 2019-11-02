@@ -7,25 +7,24 @@ namespace KayoCompiler
             return type == VarType.TYPE_INT || type == VarType.TYPE_LONG || type == VarType.TYPE_CHAR;
         }
 
-		internal static bool IsTypeTag(Tag tag, bool includeVoid)
+		internal static bool IsTypeTag(Tag tag)
 		{
 			Tag[] typeTags =
 			{
+				Tag.KW_VOID,
 				Tag.KW_BOOL,
 				Tag.KW_CHAR,
 				Tag.KW_INT,
 				Tag.KW_LONG
 			};
-			bool result = false;
 
-			if (includeVoid)
-				result = tag == Tag.KW_VOID;
 			foreach (Tag typeTag in typeTags)
 			{
-				result = result || tag == typeTag;
+				if (tag == typeTag)
+					return true;
 			}
 
-			return result;
+			return false;
 		}
 
 		internal static int SizeOf(VarType type)
