@@ -94,33 +94,6 @@ namespace KayoCompiler.Ast
         }
     }
 
-    class DeclsNode : AstNode
-    {
-        internal List<DeclNode> decls;
-
-        public override string Gen()
-        {
-            if (decls == null) return string.Empty;
-
-            string code = string.Empty;
-
-            foreach (var child in decls)
-            {
-                code += child?.Gen() ?? string.Empty;
-            }
-
-            return code;
-        }
-
-        public void AddChild(DeclNode decl)
-        {
-            if (decls == null)
-                decls = new List<DeclNode>();
-
-            decls.Add(decl);
-        }
-    }
-
     class DeclNode : AstNode
     {
         public VarType type;
@@ -153,34 +126,6 @@ namespace KayoCompiler.Ast
             }
 
             return code;
-        }
-    }
-
-    class StmtsNode : AstNode
-    {
-        internal List<AstNode> children;
-
-        public override string Gen()
-        {
-            if (children == null) return string.Empty;
-
-            string code = string.Empty;
-
-            foreach (var child in children)
-            {
-                CodeGenUtils.StackDepth = 0;
-                code += child?.Gen() ?? string.Empty;
-            }
-
-            return code;
-        }
-
-        public void AddChild(AstNode child)
-        {
-            if (children == null)
-                children = new List<AstNode>();
-
-            children.Add(child);
         }
     }
 

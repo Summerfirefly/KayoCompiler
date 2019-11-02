@@ -211,26 +211,23 @@ namespace KayoCompiler
 		{
 			RequiredToken(Tag.DL_LBRACE);
 
-			DeclsNode decls = new DeclsNode();
-			node.AddChild(decls);
-			Decls(decls);
-
-			StmtsNode stmts = new StmtsNode();
-			node.AddChild(stmts);
-			Stmts(stmts);
+			while (!TagIs(Tag.DL_RBRACE) && !TagIs(Tag.NULL))
+			{
+				if (Utils.IsTypeTag(next.Tag, false))
+				{
+					DeclNode decl = new DeclNode();
+					node.AddChild(decl);
+					Decl(decl);
+				}
+				else
+				{
+					StmtNode stmt = new StmtNode();
+					node.AddChild(stmt);
+					Stmt(stmt);
+				}
+			}
 
 			RequiredToken(Tag.DL_RBRACE);
-		}
-
-		private void Decls(DeclsNode node)
-		{
-			if (Utils.IsTypeTag(next.Tag, false))
-			{
-				DeclNode decl = new DeclNode();
-				node.AddChild(decl);
-				Decl(decl);
-				Decls(node);
-			}
 		}
 
 		private void Decl(DeclNode node)
@@ -274,34 +271,6 @@ namespace KayoCompiler
 			}
 
 			RequiredToken(Tag.DL_SEM);
-		}
-
-		private void Stmts(StmtsNode node)
-		{
-			switch (next.Tag)
-			{
-				case Tag.ID:
-				case Tag.KW_TRUE:
-				case Tag.KW_FALSE:
-				case Tag.NUM:
-				case Tag.DL_LPAR:
-				case Tag.DL_PLUS:
-				case Tag.DL_MINUS:
-				case Tag.DL_NOT:
-				case Tag.KW_IF:
-				case Tag.KW_WHILE:
-				case Tag.KW_FOR:
-				case Tag.KW_WRITE:
-				case Tag.KW_READ:
-				case Tag.KW_RETURN:
-				case Tag.DL_LBRACE:
-				case Tag.DL_SEM:
-					StmtNode child = new StmtNode();
-					node.AddChild(child);
-					Stmt(child);
-					Stmts(node);
-					break;
-			}
 		}
 
 		private void Stmt(StmtNode node)
