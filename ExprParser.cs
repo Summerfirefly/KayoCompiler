@@ -7,13 +7,17 @@ namespace KayoCompiler
     {
         private void Expr(ExprNode node)
         {
-            if (TagIs(Tag.ID) && Lookahead(2).Tag == Tag.DL_SET)
+            int tmp = index;
+            Unary(new UnaryNode());
+            if (TagIs(Tag.DL_SET))
             {
+                index = tmp;
                 node.assignment = new AssignmentExprNode();
                 AssignmentExpr(node.assignment);
             }
             else
             {
+                index = tmp;
                 var child = node.AddChild(new AndExprNode());
                 AndExpr(child);
                 while (TagIs(Tag.DL_OR))
@@ -28,22 +32,27 @@ namespace KayoCompiler
 
 		private void AssignmentExpr(AssignmentExprNode node)
 		{
-			node.id = new IdNode(next.Value);
-			Move();
+			node.leftV = new UnaryNode();
+			Unary(node.leftV);
+
+            if (!Utils.IsValidLeftValue(node.leftV))
+            {
+                new Error().PrintErrMsg();
+            }
 
 			RequiredToken(Tag.DL_SET);
 
             node.expr = new ExprNode();
 			Expr(node.expr);
 
-			if (node.id.Type() == VarType.TYPE_ERROR)
+			if (node.leftV.Type() == VarType.TYPE_ERROR)
 			{
 				new Error().PrintErrMsg();
 			}
-			else if (node.id.Type() != node.expr.Type())
+			else if (node.leftV.Type() != node.expr.Type())
 			{
-				if (!Utils.IsNumType(node.id.Type()) || !Utils.IsNumType(node.expr.Type()))
-					new TypeMismatchError(node.id.Type(), node.expr.Type()).PrintErrMsg();
+				if (!Utils.IsNumType(node.leftV.Type()) || !Utils.IsNumType(node.expr.Type()))
+					new TypeMismatchError(node.leftV.Type(), node.expr.Type()).PrintErrMsg();
 			}
 		}
 

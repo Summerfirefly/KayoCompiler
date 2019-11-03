@@ -140,6 +140,7 @@ namespace KayoCompiler.Ast
 
         public override string Gen()
         {
+            CodeGenUtils.StackDepth = 0;
             return stmt?.Gen() ?? string.Empty;
         }
     }

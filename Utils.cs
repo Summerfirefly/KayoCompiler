@@ -1,3 +1,5 @@
+using KayoCompiler.Ast;
+
 namespace KayoCompiler
 {
 	internal static class Utils
@@ -99,6 +101,11 @@ namespace KayoCompiler
 				return VarType.TYPE_BOOL;
 
 			return VarType.TYPE_ERROR;
+		}
+
+		internal static bool IsValidLeftValue(UnaryNode unary)
+		{
+			return unary.factor.value is IdNode && unary.unaryOp.Count == 0;
 		}
 	}
 }

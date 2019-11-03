@@ -143,22 +143,21 @@ namespace KayoCompiler.Ast
 
     class AssignmentExprNode : ExprBaseNode<AstNode>
     {
-        public IdNode id;
+        public UnaryNode leftV;
         public ExprNode expr;
-        public ExprNode indexer;
 
         public override string Gen()
         {
             string code = string.Empty;
-            int offset = -SymbolTable.GetVarOffset(id.name);
+            int offset = -SymbolTable.GetVarOffset((leftV.factor.value as IdNode).name);
             if (this.IsConstant())
                 code += this.Val().Gen();
             else
                 code += expr?.Gen() ?? string.Empty;
 
-            if (indexer == null)
+            if (leftV.factor.indexer == null)
             {
-                switch (Utils.SizeOf(SymbolTable.FindVar(id.name).type))
+                switch (Utils.SizeOf(leftV.Type()))
                 {
                     case 1:
                         code += $"mov\t[rbp{(offset>0?"+":"")}{offset}], {CodeGenUtils.CurrentStackTop8}\n";
@@ -173,8 +172,8 @@ namespace KayoCompiler.Ast
             }
             else
             {
-                int eleSize = SymbolTable.FindVar(id.name).eleSize;
-                code += indexer.Gen();
+                int eleSize = SymbolTable.FindVar((leftV.factor.value as IdNode).name).eleSize;
+                code += leftV.factor.indexer.Gen();
                 code += $"mov\trbx, [rbp{(offset>0?"+":"")}{offset}]\n";
                 code += $"lea\trbx, [rbx+{CodeGenUtils.CurrentStackTop64}*{eleSize}]\n";
                 if (CodeGenUtils.StackDepth > 3)
@@ -182,16 +181,16 @@ namespace KayoCompiler.Ast
                     code += $"pop\t{CodeGenUtils.CurrentStackTop64}\n";
                 }
                 CodeGenUtils.StackDepth--;
-                switch (SymbolTable.FindVar(id.name).eleSize)
+                switch (eleSize)
                 {
                     case 1:
-                        code += $"mov\t[{CodeGenUtils.CurrentStackTop64}], {CodeGenUtils.CurrentStackTop8}\n";
+                        code += $"mov\t[rbx], {CodeGenUtils.CurrentStackTop8}\n";
                         break;
                     case 4:
-                        code += $"mov\t[{CodeGenUtils.CurrentStackTop64}], {CodeGenUtils.CurrentStackTop32}\n";
+                        code += $"mov\t[rbx], {CodeGenUtils.CurrentStackTop32}\n";
                         break;
                     case 8:
-                        code += $"mov\t[{CodeGenUtils.CurrentStackTop64}], {CodeGenUtils.CurrentStackTop64}\n";
+                        code += $"mov\t[rbx], {CodeGenUtils.CurrentStackTop64}\n";
                         break;
                 }
             }
@@ -892,7 +891,28 @@ namespace KayoCompiler.Ast
                 code += indexer.Gen();
                 code += $"mov\trbx, [rbp{(-arr.offsetInFun>0?"+":"")}{-arr.offsetInFun}]\n";
                 code += $"lea\t{CodeGenUtils.CurrentStackTop64}, [rbx+{CodeGenUtils.CurrentStackTop64}*{arr.eleSize}]\n";
-                code += $"mov\t{CodeGenUtils.CurrentStackTop64}, [{CodeGenUtils.CurrentStackTop64}]\n";
+                switch (arr.eleSize)
+                {
+                    case 1:
+                        code += $"movsx\t{CodeGenUtils.CurrentStackTop64}, byte [{CodeGenUtils.CurrentStackTop64}]\n";
+                        break;
+                    case 4:
+                        code += $"mov\t{CodeGenUtils.CurrentStackTop32}, [{CodeGenUtils.CurrentStackTop64}]\n";
+                        if (CodeGenUtils.CurrentStackTop32 == "eax")
+                        {
+                            code += "cdqe\n";
+                        }
+                        else
+                        {
+                            code += $"xchg\trax, {CodeGenUtils.CurrentStackTop64}\n";
+                            code += "cdqe\n";
+                            code += $"xchg\trax, {CodeGenUtils.CurrentStackTop64}\n";
+                        }
+                        break;
+                    case 8:
+                        code += $"mov\t{CodeGenUtils.CurrentStackTop64}, [{CodeGenUtils.CurrentStackTop64}]\n";
+                        break;
+                }
             }
 
             return code;
