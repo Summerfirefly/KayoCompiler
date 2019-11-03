@@ -58,11 +58,17 @@ namespace KayoCompiler.Errors
                 case Tag.DL_RPAR:
                     missingToken = ")";
                     break;
+                case Tag.DL_RSQU:
+                    missingToken = "]";
+                    break;
                 case Tag.DL_RBRACE:
                     missingToken = "}";
                     break;
                 case Tag.DL_LPAR:
                     missingToken = "(";
+                    break;
+                case Tag.DL_LSQU:
+                    missingToken = "[";
                     break;
                 case Tag.DL_LBRACE:
                     missingToken = "{";

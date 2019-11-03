@@ -210,6 +210,8 @@ namespace KayoCompiler
 
 		private void Decl(DeclNode node)
 		{
+			FunSymbol function = SymbolTable.FindFun(ScopeManager.CurrentFun);
+			VarSymbol variable = new VarSymbol();
 			node.type = Utils.TagToType(next.Tag);
 			Move();
 
@@ -217,25 +219,6 @@ namespace KayoCompiler
 				new Error().PrintErrMsg();
 
 			node.name = RequiredToken(Tag.ID);
-
-			if (node.name != null)
-			{
-				FunSymbol function = SymbolTable.FindFun(ScopeManager.CurrentFun);
-				function.localVarSize += Utils.SizeOf(node.type);
-
-				VarSymbol variable = new VarSymbol
-				{
-					name = node.name,
-					type = node.type,
-					scopeId = ScopeManager.CurrentScope,
-					offsetInFun = function.localVarSize
-				};
-
-				if (SymbolTable.AddVar(variable) == TableAddStatus.SYMBOL_EXIST)
-				{
-					new ConflictingDeclarationError().PrintErrMsg();
-				}
-			}
 
 			if (TagIs(Tag.DL_SET))
 			{
@@ -246,6 +229,41 @@ namespace KayoCompiler
 				if (node.init.Type() != node.type)
 					if (!Utils.IsNumType(node.init.Type()) || !Utils.IsNumType(node.type))
 						new TypeMismatchError(node.type, node.init.Type()).PrintErrMsg();
+			}
+			else if (TagIs(Tag.DL_LSQU))
+			{
+				Move();
+				variable.eleSize = Utils.SizeOf(node.type);
+				variable.eleType = node.type;
+				node.type = VarType.TYPE_PTR;
+				node.size = new ExprNode();
+				Expr(node.size);
+
+				if (!Utils.IsNumType(node.size.Type()) || !node.size.IsConstant())
+				{
+					new Error().PrintErrMsg();
+				}
+				else
+				{
+					function.localVarSize += (int)(node.size.Val() as IntNode).value;
+				}
+
+				RequiredToken(Tag.DL_RSQU);
+			}
+
+			if (node.name != null)
+			{
+				function.localVarSize += Utils.SizeOf(node.type);
+
+				variable.name = node.name;
+				variable.type = node.type;
+				variable.scopeId = ScopeManager.CurrentScope;
+				variable.offsetInFun = function.localVarSize;
+
+				if (SymbolTable.AddVar(variable) == TableAddStatus.SYMBOL_EXIST)
+				{
+					new ConflictingDeclarationError().PrintErrMsg();
+				}
 			}
 
 			RequiredToken(Tag.DL_SEM);

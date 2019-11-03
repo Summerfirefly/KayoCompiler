@@ -161,6 +161,15 @@ namespace KayoCompiler
                         node.func = new FuncCallStmtNode();
                         FuncCallStmt(node.func);
                     }
+                    else if (Lookahead(2).Tag == Tag.DL_LSQU)
+                    {
+                        node.value = new IdNode(next.Value);
+                        Move();
+                        Move();
+                        node.indexer = new ExprNode();
+                        Expr(node.indexer);
+                        RequiredToken(Tag.DL_RSQU);
+                    }
                     else
                     {
                         node.value = new IdNode(next.Value);

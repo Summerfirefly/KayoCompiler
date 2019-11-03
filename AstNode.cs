@@ -99,30 +99,35 @@ namespace KayoCompiler.Ast
         public VarType type;
         public string name;
         public ExprNode init;
+        public ExprNode size;
 
         public override string Gen()
         {
-            if (init == null)
-            {
-                return string.Empty;
-            }
-
             string code = string.Empty;
             int offset = -SymbolTable.GetVarOffset(name);
 
             CodeGenUtils.StackDepth = 0;
-            code += init.Gen();
-            switch (Utils.SizeOf(type))
+            if (init != null)
             {
-                case 1:
-                    code += $"mov\t[rbp{(offset>0?"+":"")}{offset}], al\n";
-                    break;
-                case 4:
-                    code += $"mov\t[rbp{(offset>0?"+":"")}{offset}], eax\n";
-                    break;
-                case 8:
-                    code += $"mov\t[rbp{(offset>0?"+":"")}{offset}], rax\n";
-                    break;
+                code += init.Gen();
+                switch (Utils.SizeOf(type))
+                {
+                    case 1:
+                        code += $"mov\t[rbp{(offset>0?"+":"")}{offset}], al\n";
+                        break;
+                    case 4:
+                        code += $"mov\t[rbp{(offset>0?"+":"")}{offset}], eax\n";
+                        break;
+                    case 8:
+                        code += $"mov\t[rbp{(offset>0?"+":"")}{offset}], rax\n";
+                        break;
+                }
+            }
+            else if (size != null)
+            {
+                int ptrSize = Utils.SizeOf(VarType.TYPE_PTR);
+                code += $"lea\trbx, [rbp{(offset+ptrSize>0?"+":"")}{offset+ptrSize}]\n";
+                code += $"mov\t[rbp{(offset>0?"+":"")}{offset}], rbx\n";
             }
 
             return code;

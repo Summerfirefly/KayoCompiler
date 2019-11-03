@@ -145,6 +145,7 @@ namespace KayoCompiler.Ast
     {
         public IdNode id;
         public ExprNode expr;
+        public ExprNode indexer;
 
         public override string Gen()
         {
@@ -155,17 +156,44 @@ namespace KayoCompiler.Ast
             else
                 code += expr?.Gen() ?? string.Empty;
 
-            switch (Utils.SizeOf(SymbolTable.FindVar(id.name).type))
+            if (indexer == null)
             {
-                case 1:
-                    code += $"mov\t[rbp{(offset>0?"+":"")}{offset}], {CodeGenUtils.CurrentStackTop8}\n";
-                    break;
-                case 4:
-                    code += $"mov\t[rbp{(offset>0?"+":"")}{offset}], {CodeGenUtils.CurrentStackTop32}\n";
-                    break;
-                case 8:
-                    code += $"mov\t[rbp{(offset>0?"+":"")}{offset}], {CodeGenUtils.CurrentStackTop64}\n";
-                    break;
+                switch (Utils.SizeOf(SymbolTable.FindVar(id.name).type))
+                {
+                    case 1:
+                        code += $"mov\t[rbp{(offset>0?"+":"")}{offset}], {CodeGenUtils.CurrentStackTop8}\n";
+                        break;
+                    case 4:
+                        code += $"mov\t[rbp{(offset>0?"+":"")}{offset}], {CodeGenUtils.CurrentStackTop32}\n";
+                        break;
+                    case 8:
+                        code += $"mov\t[rbp{(offset>0?"+":"")}{offset}], {CodeGenUtils.CurrentStackTop64}\n";
+                        break;
+                }
+            }
+            else
+            {
+                int eleSize = SymbolTable.FindVar(id.name).eleSize;
+                code += indexer.Gen();
+                code += $"mov\trbx, [rbp{(offset>0?"+":"")}{offset}]\n";
+                code += $"lea\trbx, [rbx+{CodeGenUtils.CurrentStackTop64}*{eleSize}]\n";
+                if (CodeGenUtils.StackDepth > 3)
+                {
+                    code += $"pop\t{CodeGenUtils.CurrentStackTop64}\n";
+                }
+                CodeGenUtils.StackDepth--;
+                switch (SymbolTable.FindVar(id.name).eleSize)
+                {
+                    case 1:
+                        code += $"mov\t[{CodeGenUtils.CurrentStackTop64}], {CodeGenUtils.CurrentStackTop8}\n";
+                        break;
+                    case 4:
+                        code += $"mov\t[{CodeGenUtils.CurrentStackTop64}], {CodeGenUtils.CurrentStackTop32}\n";
+                        break;
+                    case 8:
+                        code += $"mov\t[{CodeGenUtils.CurrentStackTop64}], {CodeGenUtils.CurrentStackTop64}\n";
+                        break;
+                }
             }
 
             return code;
@@ -844,6 +872,7 @@ namespace KayoCompiler.Ast
     {
         public TerminalNode value;
         public ExprNode expr;
+        public ExprNode indexer;
         public FuncCallStmtNode func;
 
         public override string Gen()
@@ -851,9 +880,20 @@ namespace KayoCompiler.Ast
             if (this.IsConstant())
                 return this.Val().Gen();
             string code = string.Empty;
-            code += value?.Gen() ?? string.Empty;
-            code += expr?.Gen() ?? string.Empty;
-            code += func?.Gen() ?? string.Empty;
+            if (indexer == null)
+            {
+                code += value?.Gen() ?? string.Empty;
+                code += expr?.Gen() ?? string.Empty;
+                code += func?.Gen() ?? string.Empty;
+            }
+            else
+            {
+                VarSymbol arr = SymbolTable.FindVar((value as IdNode).name);
+                code += indexer.Gen();
+                code += $"mov\trbx, [rbp{(-arr.offsetInFun>0?"+":"")}{-arr.offsetInFun}]\n";
+                code += $"lea\t{CodeGenUtils.CurrentStackTop64}, [rbx+{CodeGenUtils.CurrentStackTop64}*{arr.eleSize}]\n";
+                code += $"mov\t{CodeGenUtils.CurrentStackTop64}, [{CodeGenUtils.CurrentStackTop64}]\n";
+            }
 
             return code;
         }
@@ -861,6 +901,8 @@ namespace KayoCompiler.Ast
         public override VarType Type()
         {
             VarType type = value?.Type() ?? expr?.Type() ?? func?.Type() ?? VarType.TYPE_ERROR;
+            if (indexer != null)
+                type = SymbolTable.FindVar((value as IdNode).name).eleType;
             return type;
         }
 
