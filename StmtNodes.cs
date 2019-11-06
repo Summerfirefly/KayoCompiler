@@ -126,9 +126,9 @@ namespace KayoCompiler.Ast
             code += $"push\trax\n";
 
             if (expr?.Type() == VarType.TYPE_BOOL)
-                code += "call\tfunc_write_bool\n";
+                code += "call\t$write_bool\n";
             else if (Utils.IsNumType(expr.Type()))
-                code += "call\tfunc_write_num\n";
+                code += "call\t$write_num\n";
 
             code += "add\trsp, 8\n";
 
@@ -146,11 +146,11 @@ namespace KayoCompiler.Ast
 
             if (id.Type() == VarType.TYPE_BOOL)
             {
-                code += "call\tfunc_read_bool\n";
+                code += "call\t$read_bool\n";
             }
             else if (Utils.IsNumType(id.Type()))
             {
-                code += "call\tfunc_read_num\n";
+                code += "call\t$read_num\n";
             }
 
             int offset = -SymbolTable.GetVarOffset(id.name);
@@ -214,7 +214,7 @@ namespace KayoCompiler.Ast
                 argc++;
             }
 
-            code += $"call\tfunc_{name}\n";
+            code += $"call\t${name}\n";
             if (argc > 0)
             {
                 code += $"add\trsp, {argc * 8}\n";
@@ -263,7 +263,7 @@ namespace KayoCompiler.Ast
 
             CodeGenUtils.StackDepth = 0;
             code += expr.Gen();
-            code += $"jmp\tfunc_{ScopeManager.CurrentFun}_return\n";
+            code += $"jmp\t{ScopeManager.CurrentFun}_rtn\n";
 
             return code;
         }

@@ -84,6 +84,8 @@ namespace KayoCompiler
 			Paras(fun);
 			if (fun.parasType.Count > 1 && fun.parasType.Contains(VarType.TYPE_VOID))
 				new Error().PrintErrMsg();
+			else if (fun.parasType.Contains(VarType.TYPE_VOID))
+				fun.parasType = new List<VarType>();
 			RequiredToken(Tag.DL_RPAR);
 
 			// 查看符号表中是否有同名函数

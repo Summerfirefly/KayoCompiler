@@ -47,16 +47,15 @@ namespace KayoCompiler.Ast
 
             if (body != null)
             {
-                code += $"func_{name}:\n";
+                code += $"${name}:\n";
                 code += "push\trbp\n";
                 code += "mov\trbp, rsp\n";
                 code += $"sub\trsp, {SymbolTable.CurFunVarSize}\n";
 
                 code += body.Gen();
 
-                code += $"func_{name}_return:\n";
-                code += "mov\trsp, rbp\n";
-                code += "pop\trbp\n";
+                code += $"{name}_rtn:\n";
+                code += "leave\n";
                 code += "ret\n";
             }
 

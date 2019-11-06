@@ -1,8 +1,8 @@
-GLOBAL func_putc
-GLOBAL func_getc
+GLOBAL putc
+GLOBAL getc
 SECTION .text
 ; void putc(char ch)
-func_putc:
+$putc:
 push	rbp
 mov	rbp, rsp
 
@@ -17,7 +17,7 @@ pop	rbp
 ret
 
 ; int getc(void)
-func_getc:
+$getc:
 push	rbp
 mov	rbp, rsp
 sub	rsp, 1
@@ -31,11 +31,11 @@ syscall
 cmp	rax, 0
 je	eof
 movzx	rax, byte [rbp-1]
-jmp	getc_return
+jmp	getc_rtn
 eof:
 mov	rax, -1
 
-getc_return:
+getc_rtn:
 mov	rsp, rbp
 pop	rbp
 ret

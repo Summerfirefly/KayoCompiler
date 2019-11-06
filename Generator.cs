@@ -24,33 +24,35 @@ namespace KayoCompiler
                 string code = string.Empty;
                 bool hasMain = false;
 
-                code += "GLOBAL _start\n";
                 foreach (string name in SymbolTable.GetGlobalFun())
                 {
-                    code += $"GLOBAL func_{name}\n";
+                    code += $"GLOBAL {name}\n";
                     if (name == "main")
+                    {
                         hasMain = true;
+                        code += "GLOBAL _start\n";
+                    }
                 }
                 if (CodeGenUtils.HasWrite)
                 {
-                    code += "EXTERN func_write_num\n";
-                    code += "EXTERN func_write_bool\n";
+                    code += "EXTERN write_num\n";
+                    code += "EXTERN write_bool\n";
                 }
                 if (CodeGenUtils.HasRead)
                 {
-                    code += "EXTERN func_read_num\n";
-                    code += "EXTERN func_read_bool\n";
+                    code += "EXTERN read_num\n";
+                    code += "EXTERN read_bool\n";
                 }
                 foreach (string name in SymbolTable.GetExternFun())
                 {
-                    code += $"EXTERN func_{name}\n";
+                    code += $"EXTERN {name}\n";
                 }
 
                 code += "SECTION .text\n";
                 if (hasMain)
                 {
                     code += "_start:\n";
-                    code += "call\tfunc_main\n";
+                    code += "call\t$main\n";
                     code += "mov\trax, 60\n";
                     code += "mov\trdi, 0\n";
                     code += "syscall\n";
