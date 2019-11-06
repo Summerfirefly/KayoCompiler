@@ -16,11 +16,7 @@ namespace KayoCompiler
             node.condition = new ExprNode();
 			Expr(node.condition);
 
-			if (node.condition == null)
-			{
-				new Error().PrintErrMsg();
-			}
-			else if (node.condition.Type() != VarType.TYPE_BOOL)
+			if (node.condition.Type() != VarType.TYPE_BOOL)
 			{
 				new TypeMismatchError(VarType.TYPE_BOOL, node.condition.Type()).PrintErrMsg();
 			}
@@ -58,11 +54,7 @@ namespace KayoCompiler
             node.condition = new ExprNode();
 			Expr(node.condition);
 
-			if (node.condition == null)
-			{
-				new Error().PrintErrMsg();
-			}
-			else if (node.condition.Type() != VarType.TYPE_BOOL)
+			if (node.condition.Type() != VarType.TYPE_BOOL)
 			{
 				new TypeMismatchError(VarType.TYPE_BOOL, node.condition.Type()).PrintErrMsg();
 			}

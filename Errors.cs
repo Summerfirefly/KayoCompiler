@@ -34,6 +34,14 @@ namespace KayoCompiler.Errors
         }
     }
 
+    class InvalidLeftValueError : Error
+    {
+        public override void PrintErrMsg()
+        {
+            PrintErrMsg($"error: invalid lvalue at line {lineNum}");
+        }
+    }
+
     class TokenMissingError : Error
     {
         readonly Tag missingTokenTag;

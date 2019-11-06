@@ -37,7 +37,7 @@ namespace KayoCompiler
 
             if (!Utils.IsValidLeftValue(node.leftV))
             {
-                new Error().PrintErrMsg();
+                new InvalidLeftValueError().PrintErrMsg();
             }
 
 			RequiredToken(Tag.DL_SET);
@@ -201,7 +201,7 @@ namespace KayoCompiler
                     Move();
                     break;
                 default:
-                    new Error().PrintErrMsg();
+                    new UnknownTokenError().PrintErrMsg();
                     break;
             }
         }
