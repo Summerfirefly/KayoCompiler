@@ -163,28 +163,40 @@ namespace KayoCompiler
 
 		private void Para(FunSymbol fun)
 		{
+			VarSymbol para = new VarSymbol();
 			VarType paraType = Utils.TagToType(next.Tag);
-			fun.parasType.Add(paraType);
 			Move();
 
-			string id = next.Tag == Tag.ID ? next.Value : null;
+			string id = TagIs(Tag.ID) ? next.Value : null;
 			if (id != null)
 			{
 				Move();
-				if (paraType != VarType.TYPE_VOID)
-				{
-					var status = SymbolTable.AddVar(new VarSymbol
-					{
-						type = paraType,
-						name = id,
-						scopeId = ScopeManager.CurrentScope,
-						offsetInFun = -(1 + fun.parasType.Count) * 8
-					});
+			}
 
-					if (status == TableAddStatus.SYMBOL_EXIST)
-						new ConflictingDeclarationError().PrintErrMsg();
+			if (paraType != VarType.TYPE_VOID)
+			{
+				para.type = paraType;
+				para.scopeId = ScopeManager.CurrentScope;
+				para.offsetInFun = -(2 + fun.parasType.Count) * 8;
+
+				if (TagIs(Tag.DL_LSQU))
+				{
+					para.eleType = para.type;
+					para.eleSize = Utils.SizeOf(para.eleType);
+					para.type = VarType.TYPE_PTR;
+					Move();
+					RequiredToken(Tag.DL_RSQU);
 				}
 			}
+
+			if (id != null)
+			{
+				para.name = id;
+				if (SymbolTable.AddVar(para) == TableAddStatus.SYMBOL_EXIST)
+					new ConflictingDeclarationError().PrintErrMsg();
+			}
+
+			fun.parasType.Add(para.type);
 		}
 
 		private void Block(BlockNode node)
