@@ -138,7 +138,7 @@ namespace KayoCompiler.Ast
 
     class ReadStmtNode : AstNode
     {
-        public IdNode id;
+        public UnaryNode id;
 
         public override string Gen()
         {
@@ -153,19 +153,42 @@ namespace KayoCompiler.Ast
                 code += "call\t$read_num\n";
             }
 
-            int offset = -SymbolTable.GetVarOffset(id.name);
+            int offset = -SymbolTable.GetVarOffset((id.factor.value as IdNode).name);
 
-            switch (Utils.SizeOf(SymbolTable.FindVar(id.name).type))
+            if (id.factor.indexer == null)
             {
-                case 1:
-                    code += $"mov\t[rbp{(offset>0?"+":"")}{offset}], al\n";
-                    break;
-                case 4:
-                    code += $"mov\t[rbp{(offset>0?"+":"")}{offset}], eax\n";
-                    break;
-                case 8:
-                    code += $"mov\t[rbp{(offset>0?"+":"")}{offset}], rax\n";
-                    break;
+                switch (Utils.SizeOf(id.Type()))
+                {
+                    case 1:
+                        code += $"mov\t[rbp{(offset>0?"+":"")}{offset}], al\n";
+                        break;
+                    case 4:
+                        code += $"mov\t[rbp{(offset>0?"+":"")}{offset}], eax\n";
+                        break;
+                    case 8:
+                        code += $"mov\t[rbp{(offset>0?"+":"")}{offset}], rax\n";
+                        break;
+                }
+            }
+            else
+            {
+                int eleSize = SymbolTable.FindVar((id.factor.value as IdNode).name).eleSize;
+                code += "mov\trcx, rax\n";
+                code += id.factor.indexer.Gen();
+                code += $"mov\trbx, [rbp{(offset>0?"+":"")}{offset}]\n";
+                code += $"lea\trbx, [rbx+rax*{eleSize}]\n";
+                switch (eleSize)
+                {
+                    case 1:
+                        code += $"mov\t[rbx], cl\n";
+                        break;
+                    case 4:
+                        code += $"mov\t[rbx], ecx\n";
+                        break;
+                    case 8:
+                        code += $"mov\t[rbx], rcx\n";
+                        break;
+                }
             }
 
             return code;

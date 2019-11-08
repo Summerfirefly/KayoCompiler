@@ -121,12 +121,16 @@ namespace KayoCompiler
 
 			if (TagIs(Tag.ID))
 			{
-				node.id = new IdNode(next.Value);
-				Move();
+				node.id = new UnaryNode();
+				Unary(node.id);
 
 				if (node.id.Type() == VarType.TYPE_ERROR)
 				{
 					new Error().PrintErrMsg();
+				}
+				else if (!Utils.IsValidLeftValue(node.id))
+				{
+					new InvalidLeftValueError().PrintErrMsg();
 				}
 			}
 			else
