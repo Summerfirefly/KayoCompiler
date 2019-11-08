@@ -8,6 +8,7 @@ namespace KayoCompiler
         internal string name;
         internal int scopeId;
 		internal int offsetInFun;
+		internal bool isConst;
 		internal int eleSize;
 		internal VarType eleType;
     }

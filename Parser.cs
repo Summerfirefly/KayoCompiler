@@ -205,7 +205,7 @@ namespace KayoCompiler
 
 			while (!TagIs(Tag.DL_RBRACE) && !TagIs(Tag.NULL))
 			{
-				if (Utils.IsTypeTag(next.Tag))
+				if (Utils.IsTypeTag(next.Tag) || TagIs(Tag.KW_CONST))
 				{
 					DeclNode decl = new DeclNode();
 					node.AddChild(decl);
@@ -226,6 +226,13 @@ namespace KayoCompiler
 		{
 			FunSymbol function = SymbolTable.FindFun(ScopeManager.CurrentFun);
 			VarSymbol variable = new VarSymbol();
+
+			if (TagIs(Tag.KW_CONST))
+			{
+				variable.isConst = true;
+				Move();
+			}
+
 			node.type = Utils.TagToType(next.Tag);
 			Move();
 
@@ -249,6 +256,7 @@ namespace KayoCompiler
 				Move();
 				variable.eleSize = Utils.SizeOf(node.type);
 				variable.eleType = node.type;
+				variable.isConst = true;
 				node.type = VarType.TYPE_PTR;
 				node.size = new ExprNode();
 				Expr(node.size);
@@ -259,7 +267,7 @@ namespace KayoCompiler
 				}
 				else
 				{
-					function.localVarSize += (int)(node.size.Val() as IntNode).value;
+					function.localVarSize += (int)(node.size.Val() as IntNode).value * variable.eleSize;
 				}
 
 				RequiredToken(Tag.DL_RSQU);

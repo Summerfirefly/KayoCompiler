@@ -105,7 +105,13 @@ namespace KayoCompiler
 
 		internal static bool IsValidLeftValue(UnaryNode unary)
 		{
-			return unary.factor.value is IdNode && unary.unaryOp.Count == 0;
+			if (unary.unaryOp.Count > 0)
+				return false;
+			if (!(unary.factor.value is IdNode))
+				return false;
+			if (SymbolTable.FindVar((unary.factor.value as IdNode).name).isConst)
+				return false;
+			return true;
 		}
 	}
 }

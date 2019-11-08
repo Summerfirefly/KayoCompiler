@@ -26,7 +26,8 @@ namespace KayoCompiler
             { "for", Tag.KW_FOR },
             { "write", Tag.KW_WRITE },
             { "true", Tag.KW_TRUE },
-            { "false", Tag.KW_FALSE }
+            { "false", Tag.KW_FALSE },
+            { "const", Tag.KW_CONST }
         };
 
         private readonly Dictionary<string, Tag> delimiter = new Dictionary<string, Tag>

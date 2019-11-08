@@ -6,7 +6,7 @@
 
         // Keywords:
         // bool, else, for, if, char, int, long, void
-        // return, read, while, write, true, false
+        // return, read, while, write, true, false, const
         KW_BOOL,
         KW_ELSE,
         KW_FOR,
@@ -21,6 +21,7 @@
         KW_WRITE,
         KW_TRUE,
         KW_FALSE,
+        KW_CONST,
 
         // Delimiter
         DL_PLUS,        // +
