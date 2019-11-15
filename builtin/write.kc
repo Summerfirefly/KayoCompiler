@@ -38,7 +38,7 @@ void write_num(long num)
 	num = num % tmp;
 	tmp = tmp / 10;
 
-	while (num != 0)
+	while (tmp != 0)
 	{
 		putc(num / tmp + '0');
 		num = num % tmp;

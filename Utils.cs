@@ -109,7 +109,7 @@ namespace KayoCompiler
 				return false;
 			if (!(unary.factor.value is IdNode))
 				return false;
-			if (SymbolTable.FindVar((unary.factor.value as IdNode).name).isConst)
+			if (SymbolTable.FindVar((unary.factor.value as IdNode).name).isConst && unary.factor.indexer == null)
 				return false;
 			return true;
 		}

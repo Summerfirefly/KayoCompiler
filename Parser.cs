@@ -164,7 +164,7 @@ namespace KayoCompiler
 		private void Para(FunSymbol fun)
 		{
 			VarSymbol para = new VarSymbol();
-			VarType paraType = Utils.TagToType(next.Tag);
+			para.type = Utils.TagToType(next.Tag);
 			Move();
 
 			string id = TagIs(Tag.ID) ? next.Value : null;
@@ -173,9 +173,8 @@ namespace KayoCompiler
 				Move();
 			}
 
-			if (paraType != VarType.TYPE_VOID)
+			if (para.type != VarType.TYPE_VOID)
 			{
-				para.type = paraType;
 				para.scopeId = ScopeManager.CurrentScope;
 				para.offsetInFun = -(2 + fun.parasType.Count) * 8;
 
